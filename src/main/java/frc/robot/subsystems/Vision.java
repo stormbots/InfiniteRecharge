@@ -7,14 +7,17 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
+  private Gyro gyro;
+
   /**
    * Creates a new Vision.
    */
-  public Vision() {
-
+  public Vision(Gyro gyro) {
+    this.gyro = gyro;
   }
 
   @Override

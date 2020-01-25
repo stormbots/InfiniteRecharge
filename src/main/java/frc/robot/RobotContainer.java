@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import com.analog.adis16448.frc.ADIS16448_IMU;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -33,13 +35,15 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 
+  private final ADIS16448_IMU gyro = new ADIS16448_IMU();
+
   private final Chassis chassis = new Chassis();
   private final Climber climber = new Climber();
   private final Intake intake = new Intake();
   private final Passthrough passthrough = new Passthrough();
   private final Shooter shooter = new Shooter();
   private final Spinner spinner = new Spinner();
-  private final Vision vision = new Vision();
+  private final Vision vision = new Vision(gyro);
 
   private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
 
