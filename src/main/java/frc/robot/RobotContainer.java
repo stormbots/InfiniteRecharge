@@ -11,9 +11,11 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.RunShooter;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -45,6 +47,7 @@ public class RobotContainer {
 
   //Inputs
   Joystick driver = new Joystick(0);
+  Button shooterButton = new JoystickButton(driver, 1);
 
 
   /**
@@ -65,6 +68,7 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    shooterButton.whileHeld(new RunShooter(2000,shooter));
   }
 
   /** 
