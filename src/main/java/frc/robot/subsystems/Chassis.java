@@ -13,7 +13,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Chassis extends SubsystemBase {
   private CANSparkMax left = new CANSparkMax(1,MotorType.kBrushless);
@@ -23,18 +25,30 @@ public class Chassis extends SubsystemBase {
   // private CANSparkMax rightA = new CANSparkMax(5,MotorType.kBrushless);
   // private CANSparkMax rightB = new CANSparkMax(6,MotorType.kBrushless);
 
-  public DifferentialDrive drive = new DifferentialDrive(left, right);
-
+  public DifferentialDrive drive;
   /**
    * Creates a new Chassis.
    */
   public Chassis() {
-    //Configure the motors
+    //Invert master motors to ensure Positive motor values move forward, CW
+    switch(Constants.botName){
+      case TABI:
+        left.setInverted(true);//TABI correction
+        right.setInverted(true);//TABI correction
+        //NOTE: We also want to invert the right encoder, but it's illegal, 
+        // so we'll have to sort that out manually I guess.
+      break;
+      default:
+    }
+    drive = new DifferentialDrive(left, right);
+
+    //Set up the follower motors
     // leftA.follow(left);
     // leftB.follow(left);
     // rightA.follow(right);
     // rightB.follow(right);
-    //TODO Configure the stall currents and limits
+
+    //Configure the stall currents and limits
     int stallCurrent = 150/6;
     int freeCurrent = 240/6;
     int stallRPM = 5700/8;
@@ -45,6 +59,12 @@ public class Chassis extends SubsystemBase {
     // rightA.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
     // rightB.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
 
+    //Reset the encoders
+    left.getEncoder().setPosition(0);
+    right.getEncoder().setPosition(0);
+    //Minimize motor timer overruns
+    left.set(0);
+    right.set(0);
   }
 
   @Override
