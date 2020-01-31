@@ -49,10 +49,10 @@ public class ChassisVisionTargeting extends CommandBase {
     //directly off limelight
     //double output = pid.getOutput(x, 0);
     //driver.arcadeDrive(0, output);
-    
-    vision.lightsOn();
-    //TODO switch to "VeryWorkingTargeting" pipeline
 
+    vision.targetPipeline();
+    vision.lightsOn();
+    
     double outputTurn = pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
     chassis.drive.arcadeDrive(0, outputTurn); 
     //TODO Chassis inversion thing! Arcade drive backwards! 
@@ -62,8 +62,8 @@ public class ChassisVisionTargeting extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    vision.driverPipeline();
     vision.lightsOff();
-    //TODO switch to regular camera pipeline
   }
 
   // Returns true when the command should end.

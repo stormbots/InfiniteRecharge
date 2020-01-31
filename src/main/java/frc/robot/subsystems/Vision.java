@@ -62,13 +62,13 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    double distance = ((46.5-8.5)/(Math.tan(Math.toRadians(50+y)))); // target
-    // height - mount height / tan(mounting angle in radians + error y)
+    double distance = ((46.5-8.25)/(Math.tan(Math.toRadians(30+y)))); 
+    // target height - mount height / tan(mounting angle in radians + error y)
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("LimelightX", x);
     SmartDashboard.putNumber("LimelightY", y);
-    // SmartDashboard.putNumber("Distance to Target", distance);
+    SmartDashboard.putNumber("Distance to Target", distance);
     SmartDashboard.putNumber("Gyro Current", gyro.getAngle());
     SmartDashboard.putNumber("Gyro Target", targetHeading);
   }
@@ -87,5 +87,13 @@ public class Vision extends SubsystemBase {
 
   public void lightsOff(){
     table.getEntry("ledMode").setNumber(1);
+  }
+
+  public void targetPipeline(){
+    table.getEntry("pipeline").setNumber(0);
+  }
+
+  public void driverPipeline(){
+    table.getEntry("pipeline").setNumber(1);
   }
 }
