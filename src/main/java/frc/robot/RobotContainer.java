@@ -7,12 +7,18 @@
 
 package frc.robot;
 
+import com.stormbots.Lerp;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
+import frc.robot.commands.ClimberSetHookRotation;
+import frc.robot.commands.ClimberSetPosition;
+import frc.robot.commands.ClimberSetTranslation;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
@@ -45,8 +51,13 @@ public class RobotContainer {
 
   //Inputs
   Joystick driver = new Joystick(0);
-
-
+  Button armMoveUp = new JoystickButton(driver, 6);
+  Button rotateArmForward = new JoystickButton(driver, 7);
+  Button translationMoveForwards = new JoystickButton(driver, 8);
+  Button rotateArmBackwards = new JoystickButton(driver,9);
+  Button translationMoveBackwards = new JoystickButton(driver, 10);
+  Button armMoveDown = new JoystickButton(driver, 11);
+  
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
@@ -65,6 +76,11 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    rotateArmForward.whenPressed(new ClimberSetHookRotation(()->0,climber));
+    rotateArmBackwards.whenPressed(new ClimberSetHookRotation(()->180,climber));
+    translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
+    translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
+
   }
 
   /** 
@@ -76,8 +92,12 @@ public class RobotContainer {
     chassis.setDefaultCommand(
       new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(4),chassis)
       );
+      //TODO! We want this on a button when held
+      //TODO This should also only activate near end of a match eventually
+    climber.setDefaultCommand(
+      new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
+    );
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
