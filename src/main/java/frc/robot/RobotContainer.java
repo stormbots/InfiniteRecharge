@@ -52,9 +52,9 @@ public class RobotContainer {
   //Inputs
   Joystick driver = new Joystick(0);
   Button armMoveUp = new JoystickButton(driver, 6);
-  Button rotateArmForward = new JoystickButton(driver, 7);
+  Button climbHookReseat = new JoystickButton(driver, 7);
   Button translationMoveForwards = new JoystickButton(driver, 8);
-  Button rotateArmBackwards = new JoystickButton(driver,9);
+  Button climbHookGrab = new JoystickButton(driver,9);
   Button translationMoveBackwards = new JoystickButton(driver, 10);
   Button armMoveDown = new JoystickButton(driver, 11);
   
@@ -76,8 +76,8 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    rotateArmForward.whenPressed(new ClimberSetHookRotation(()->0,climber));
-    rotateArmBackwards.whenPressed(new ClimberSetHookRotation(()->180,climber));
+    climbHookReseat.whenPressed(new ClimberSetHookRotation(()->0,climber));
+    climbHookGrab.whenPressed(new ClimberSetHookRotation(()->180,climber));
     translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
     translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
 
