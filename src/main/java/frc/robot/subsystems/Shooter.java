@@ -21,6 +21,7 @@ public class Shooter extends SubsystemBase {
    * Creates a new ExampleSubsystem.
    */
   private final CANSparkMax shooterMotor = new CANSparkMax(1 ,MotorType.kBrushless);
+  private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
   MiniPID feedForwardPID = new MiniPID(0,0,0,1/5700.0);
@@ -29,6 +30,7 @@ public class Shooter extends SubsystemBase {
   double targetRPM = 0;
 
   public Shooter() {
+    feederMotor.setInverted(true);
     shooterMotor.setIdleMode(IdleMode.kCoast);
     feedForwardPID.setSetpointRange(2000/2.0);
     errorPID.setOutputLimits(0.0, 0.5);
@@ -50,14 +52,14 @@ public class Shooter extends SubsystemBase {
     if (encoder.getVelocity() < targetRPM*.5) {
       errorOutput = 0.0;
     }
-    
 
     shooterMotor.set(feedForwardOutput + errorOutput);
+    feederMotor.set(feedForwardOutput);
   }
 
-  public void setMotorSpeed(double speed) {
-    shooterMotor.set(speed);
-  }
+  //public void setMotorSpeed(double speed) {
+  //  shooterMotor.set(speed);
+  //}
 
 
   @Override
