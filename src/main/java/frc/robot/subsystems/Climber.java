@@ -43,6 +43,7 @@ public class Climber extends SubsystemBase {
 
   
   public Climber() {
+    armMotor.setInverted(true);
     armEncoder.setPositionConversionFactor(1);//TODO: Make encoder return arm angle
     hookEncoder.setPositionConversionFactor(1);//TODO: Make encoder return arm angle
   }
