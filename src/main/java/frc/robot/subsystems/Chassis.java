@@ -30,7 +30,7 @@ public class Chassis extends SubsystemBase {
 
   public DifferentialDrive drive;
 
-  public Solenoid shifter = new Solenoid(2);
+  // public Solenoid shifter = new Solenoid(2);
   // public Solenoid shifterInverse = new Solenoid(5);
 
 
@@ -61,9 +61,20 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);//TABI correction
         //NOTE: We also want to invert the right encoder, but it's illegal, 
         // so we'll have to sort that out manually I guess.
-        left.getEncoder().setPositionConversionFactor(Math.PI*0.105*72/14/60);
-        right.getEncoder().setPositionConversionFactor(Math.PI*0.105*72/14/60);
+        //convert to Meters and Meters/second
+        left.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
+        right.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
+        // left.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
+        // right.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
       break;
+
+      case PRACTICE:
+        left.setInverted(true);
+        right.setInverted(true);
+        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+      break;
+
       default:
     }
     drive = new DifferentialDrive(left, right);
@@ -95,7 +106,7 @@ public class Chassis extends SubsystemBase {
 
   
   public void shift(Gear gear){
-    shifter.set(gear.bool());
+    // shifter.set(gear.bool());
     // shifterInverse.set(!gear.bool());
   }
 
@@ -103,6 +114,7 @@ public class Chassis extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    System.out.println(getAverageDistance());
     
   }
 
@@ -110,7 +122,12 @@ public class Chassis extends SubsystemBase {
     return left.getEncoder();
   }
 
-  // public AHRS getGyro() {
-  //   return navX;
-  // }
+  public CANEncoder getRightEncoder() {
+    return right.getEncoder();
+  }
+
+  public double getAverageDistance() {
+    return (left.getEncoder().getPosition() - right.getEncoder().getPosition())/2.0;
+  }
+
 }

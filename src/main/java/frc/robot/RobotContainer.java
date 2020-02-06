@@ -59,7 +59,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
 
-    autoCommand = new ChassisDriveToHeadingOld(0, 90, navX, chassis);
+    autoCommand = new ChassisDriveToHeadingOld(1, 0, navX, chassis);
 
     configureDefaultCommands();
 

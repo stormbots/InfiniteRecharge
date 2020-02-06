@@ -20,5 +20,5 @@ public class Constants {
     public static BotName botName = BotName.COMP;
 
     /** Convert Inches to Meter */
-    public static double INCHES=0.0254;
+    public static double METERS_TO_INCHES=0.0254;
 }
