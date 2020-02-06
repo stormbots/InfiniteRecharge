@@ -79,7 +79,7 @@ public class RobotContainer {
     //alternate toggle version
     //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1)));    
 
-    shooterButton.whileHeld(new RunShooter(2000,shooter));
+    shooterButton.whileHeld(new RunShooter(()->2000,shooter));
   }
 
   /** 

@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -25,9 +27,9 @@ public class RunShooter extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-   double targetRPM = 0.0;
+   DoubleSupplier targetRPM ;
 
-  public RunShooter(double targetRPM, Shooter shooter) {
+  public RunShooter(DoubleSupplier targetRPM, Shooter shooter) {
     this.shooter = shooter;
     this.targetRPM = targetRPM;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -43,7 +45,7 @@ public class RunShooter extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.setRPM(targetRPM);
+    shooter.setRPM(targetRPM.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
