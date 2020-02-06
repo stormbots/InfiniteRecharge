@@ -7,17 +7,19 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
-  private Gyro gyro;
+  private AHRS gyro;
 
   /**
    * Creates a new Vision.
    */
-  public Vision(Gyro gyro) {
+  public Vision(AHRS gyro) {
     this.gyro = gyro;
+    gyro.reset();
   }
 
   @Override

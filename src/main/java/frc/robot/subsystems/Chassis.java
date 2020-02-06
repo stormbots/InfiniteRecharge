@@ -7,17 +7,20 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.BotName;
 
 public class Chassis extends SubsystemBase {
+
+  // private AHRS navX = new AHRS(SPI.Port.kMXP);
+
   private CANSparkMax left = new CANSparkMax(1,MotorType.kBrushless);
   // private CANSparkMax leftA = new CANSparkMax(2,MotorType.kBrushless);
   // private CANSparkMax leftB = new CANSparkMax(3,MotorType.kBrushless);
@@ -26,6 +29,27 @@ public class Chassis extends SubsystemBase {
   // private CANSparkMax rightB = new CANSparkMax(6,MotorType.kBrushless);
 
   public DifferentialDrive drive;
+
+  public Solenoid shifter = new Solenoid(2);
+  // public Solenoid shifterInverse = new Solenoid(5);
+
+
+
+  // Use an Enum to define pnuematic truth values, so that you get good named values 
+  // backed by type checking everywhere.
+  public enum Gear{
+    HIGH(true,true),
+    LOW(false,false);
+    private boolean compbot,practicebot;
+    Gear(boolean compbot, boolean practicebot){
+      this.compbot = compbot;
+      this.practicebot = practicebot;
+    }
+    public boolean bool(){return Constants.botName == BotName.COMP ? this.compbot : this.practicebot;};
+  }
+
+
+
   /**
    * Creates a new Chassis.
    */
@@ -37,6 +61,8 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);//TABI correction
         //NOTE: We also want to invert the right encoder, but it's illegal, 
         // so we'll have to sort that out manually I guess.
+        left.getEncoder().setPositionConversionFactor(Math.PI*0.105*72/14/60);
+        right.getEncoder().setPositionConversionFactor(Math.PI*0.105*72/14/60);
       break;
       default:
     }
@@ -67,8 +93,24 @@ public class Chassis extends SubsystemBase {
     right.set(0);
   }
 
+  
+  public void shift(Gear gear){
+    shifter.set(gear.bool());
+    // shifterInverse.set(!gear.bool());
+  }
+
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    
   }
+
+  public CANEncoder getLeftEncoder() {
+    return left.getEncoder();
+  }
+
+  // public AHRS getGyro() {
+  //   return navX;
+  // }
 }

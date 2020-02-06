@@ -7,15 +7,15 @@
 
 package frc.robot;
 
-import com.analog.adis16448.frc.ADIS16448_IMU;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ChassisDriveToHeadingOld;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -35,7 +35,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 
-  private final ADIS16448_IMU gyro = new ADIS16448_IMU();
+  // private final ADIS16448_IMU gyro = new ADIS16448_IMU();
+  private final AHRS navX = new AHRS(SPI.Port.kMXP);
 
   private final Chassis chassis = new Chassis();
   private final Climber climber = new Climber();
@@ -43,9 +44,11 @@ public class RobotContainer {
   private final Passthrough passthrough = new Passthrough();
   private final Shooter shooter = new Shooter();
   private final Spinner spinner = new Spinner();
-  private final Vision vision = new Vision(gyro);
+  private final Vision vision = new Vision(navX);
 
-  private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
+  // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
+  private final ChassisDriveToHeadingOld autoCommand;
+
 
   //Inputs
   Joystick driver = new Joystick(0);
@@ -55,6 +58,8 @@ public class RobotContainer {
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+
+    autoCommand = new ChassisDriveToHeadingOld(0, 90, navX, chassis);
 
     configureDefaultCommands();
 
@@ -78,7 +83,7 @@ public class RobotContainer {
 
     //Do any joystick math in the command itself, not here. 
     chassis.setDefaultCommand(
-      new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(4),chassis)
+      new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(2), chassis)
       );
   }
 

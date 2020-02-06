@@ -18,4 +18,7 @@ package frc.robot;
 public class Constants {
     public enum BotName {COMP,PRACTICE,TABI};
     public static BotName botName = BotName.COMP;
+
+    /** Convert Inches to Meter */
+    public static double INCHES=0.0254;
 }
