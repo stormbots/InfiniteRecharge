@@ -19,6 +19,7 @@ import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.RunShooter;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -53,6 +54,7 @@ public class RobotContainer {
   //Inputs
   Joystick driver = new Joystick(0);
   Button intakeButton = new JoystickButton(driver, 1);
+  Button shooterButton = new JoystickButton(driver, 2);
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -76,6 +78,8 @@ public class RobotContainer {
     intakeButton.whileHeld(new EngageIntake(intake).andThen(new DisengageIntake(intake).withTimeout(0.1)));
     //alternate toggle version
     //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1)));    
+
+    shooterButton.whileHeld(new RunShooter(2000,shooter));
   }
 
   /** 
