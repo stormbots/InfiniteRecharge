@@ -7,15 +7,13 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
+import static frc.robot.Constants.METERS_TO_INCHES;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.stormbots.closedloop.MiniPID;
 import com.stormbots.interp.SinCurve;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Chassis;
-import static frc.robot.Constants.*;
 
 public class ChassisDriveToHeadingOld extends CommandBase {
   private final Chassis chassis;
@@ -26,12 +24,7 @@ public class ChassisDriveToHeadingOld extends CommandBase {
   private double initialBearing;
   private double accelDistance = 6*METERS_TO_INCHES; //Dan likes inches -> conversion in constants
   // private Lerp angleToPower = new Lerp(-180, 180, -1, 1);
-  private MiniPID pid = new MiniPID(0.2/30, 0, 0.0)
-  .setI(0.05/200.0)
-  .setOutputLimits(0.2)
-  .setMaxIOutput(0.15)
-  .setSetpointRange(30)
-  ;
+
 
   /**
    * Creates a new ChassisDriveManual.
@@ -53,7 +46,7 @@ public class ChassisDriveToHeadingOld extends CommandBase {
     forwardDistance += initialPosition;
     gyro.reset();
     initialBearing = gyro.getAngle();
-    pid.setSetpoint(initialBearing + targetBearing);
+    chassis.getPID().setSetpoint(initialBearing + targetBearing);
 
   }
 
@@ -63,7 +56,7 @@ public class ChassisDriveToHeadingOld extends CommandBase {
 
     double currentAngle =  gyro.getAngle();
     //Uses PID to create a motion controlled turn value
-    double turn = pid.getOutput(currentAngle);
+    double turn = chassis.getPID().getOutput(currentAngle);
     
     // double distance = Math.hypot(gyro.getDisplacementX(), gyro.getDisplacementY());
     double distance = chassis.getAverageDistance();

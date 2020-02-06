@@ -10,8 +10,8 @@ package frc.robot.subsystems;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.stormbots.closedloop.MiniPID;
 
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -20,6 +20,8 @@ import frc.robot.Constants.BotName;
 public class Chassis extends SubsystemBase {
 
   // private AHRS navX = new AHRS(SPI.Port.kMXP);
+
+  private MiniPID pid;
 
   private CANSparkMax left = new CANSparkMax(1,MotorType.kBrushless);
   // private CANSparkMax leftA = new CANSparkMax(2,MotorType.kBrushless);
@@ -66,6 +68,13 @@ public class Chassis extends SubsystemBase {
         right.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
         // left.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
         // right.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
+
+        pid = new MiniPID(0.2/30, 0, 0.0)
+        .setI(0.05/200.0)
+        .setOutputLimits(0.2)
+        .setMaxIOutput(0.15)
+        .setSetpointRange(30)
+        ;
       break;
 
       case PRACTICE:
@@ -73,9 +82,31 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);
         left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
         right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+
+        pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
+        .setI(0.05/200.0)
+        .setOutputLimits(0.2)
+        .setMaxIOutput(0.15)
+        .setSetpointRange(30)
+        ;
+      break;
+
+      case COMP: // THESE ARE CURRENTLY STORMX VALUES
+        left.setInverted(true);
+        right.setInverted(true);
+        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+
+        pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
+        .setI(0.05/200.0)
+        .setOutputLimits(0.2)
+        .setMaxIOutput(0.15)
+        .setSetpointRange(30)
+        ;
       break;
 
       default:
+
     }
     drive = new DifferentialDrive(left, right);
 
@@ -128,6 +159,10 @@ public class Chassis extends SubsystemBase {
 
   public double getAverageDistance() {
     return (left.getEncoder().getPosition() - right.getEncoder().getPosition())/2.0;
+  }
+
+  public MiniPID getPID() {
+    return pid;
   }
 
 }
