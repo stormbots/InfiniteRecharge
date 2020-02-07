@@ -90,12 +90,13 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   @Override
   public void end(final boolean interrupted) {
     chassis.drive.arcadeDrive(0,0);
+    System.out.println("That's all folks!");
 
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;//(encoder.getAsDouble() >= initialPosition+forwardDistance);
+    return (Math.abs(gyro.getAngle() - targetBearing) < 1) && (Math.abs(chassis.getAverageDistance() - forwardDistance) < 0.008);
   }
 }

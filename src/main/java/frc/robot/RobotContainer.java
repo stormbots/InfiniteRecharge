@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.subsystems.Chassis;
@@ -36,7 +37,7 @@ public class RobotContainer {
   private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 
   // private final ADIS16448_IMU gyro = new ADIS16448_IMU();
-  private final AHRS navX = new AHRS(SPI.Port.kMXP);
+  public final AHRS navX = new AHRS(SPI.Port.kMXP);
 
   private final Chassis chassis = new Chassis();
   private final Climber climber = new Climber();
@@ -47,7 +48,7 @@ public class RobotContainer {
   private final Vision vision = new Vision(navX);
 
   // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
-  private final ChassisDriveToHeadingBasic autoCommand;
+  private Command autoCommand;
 
 
   //Inputs
@@ -58,8 +59,6 @@ public class RobotContainer {
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
-    autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
 
     configureDefaultCommands();
 
@@ -94,7 +93,34 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+
+    // autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
+
+    Command turnToShoot = new SequentialCommandGroup(
+      //vision.visionStuff();
+      turn(-45)
+    );
+    
+    Command turnAwayFromShooting = new SequentialCommandGroup(
+      turn(Constants.INITIAL_COMPASS_HEADING),
+      driveForward(-3) // WE REALLY NEED TO VARIFY WHAT NEGATIVE DOES
+    );
+
+    autoCommand = new SequentialCommandGroup(
+      turnToShoot,
+      turnAwayFromShooting
+    );
+
+
     // An ExampleCommand will run in autonomous
     return autoCommand;
+  }
+
+  public Command turn(double targetAngle) {
+    return new ChassisDriveToHeadingBasic(0, targetAngle, navX, chassis);
+  }
+
+  public Command driveForward(double driveDistance) {
+    return new ChassisDriveToHeadingBasic(driveDistance, 0, navX, chassis);
   }
 }

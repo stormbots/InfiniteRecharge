@@ -21,4 +21,6 @@ public class Constants {
 
     /** Convert Inches to Meter */
     public static double INCHES_TO_METERS = 0.0254;
+
+    public static double INITIAL_COMPASS_HEADING = 0;
 }

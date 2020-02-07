@@ -83,6 +83,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    
+    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
+
     autonomousCommand = robot.getAutonomousCommand();
 
     // schedule the autonomous command (example)
