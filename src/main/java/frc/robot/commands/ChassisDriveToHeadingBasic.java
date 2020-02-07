@@ -7,46 +7,53 @@
 
 package frc.robot.commands;
 
-import static frc.robot.Constants.METERS_TO_INCHES;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.stormbots.closedloop.FB;
 import com.stormbots.interp.SinCurve;
 
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Chassis;
 
-public class ChassisDriveToHeadingOld extends CommandBase {
+public class ChassisDriveToHeadingBasic extends CommandBase {
   private final Chassis chassis;
   private AHRS gyro;
   private double forwardDistance;
   private double targetBearing;
-  private double initialPosition;
   private double initialBearing;
-  private double accelDistance = 6*METERS_TO_INCHES; //Dan likes inches -> conversion in constants
-  // private Lerp angleToPower = new Lerp(-180, 180, -1, 1);
+
+
+  
+  SlewRateLimiter speedslew;
 
 
   /**
    * Creates a new ChassisDriveManual.
    * All distance units should be in Meters
    */
-  public ChassisDriveToHeadingOld(double targetDistance, double targetBearing, AHRS gyro, Chassis chassis) {
+  public ChassisDriveToHeadingBasic(double targetDistance, double targetBearing, AHRS gyro, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.chassis = chassis;
     this.gyro = gyro;
     this.forwardDistance = targetDistance;
     this.targetBearing = targetBearing;
     addRequirements(chassis);
+
+    speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    initialPosition = chassis.getAverageDistance();
-    forwardDistance += initialPosition;
+    chassis.getLeftEncoder().setPosition(0);
+    chassis.getRightEncoder().setPosition(0);
+
     gyro.reset();
+    
     initialBearing = gyro.getAngle();
     chassis.getPID().setSetpoint(initialBearing + targetBearing);
+
 
   }
 
@@ -58,17 +65,13 @@ public class ChassisDriveToHeadingOld extends CommandBase {
     //Uses PID to create a motion controlled turn value
     double turn = chassis.getPID().getOutput(currentAngle);
     
-    // double distance = Math.hypot(gyro.getDisplacementX(), gyro.getDisplacementY());
     double distance = chassis.getAverageDistance();
-    // System.out.println(distance);
-    //If need to print out gyro
-    //System.out.println(gyro.getAngle());
 
-    double forwardSpeed = SinCurve.scurve(distance, initialPosition, initialPosition+accelDistance, 0.1, 1);
-    forwardSpeed -= SinCurve.scurve(distance, forwardDistance - accelDistance, forwardDistance, 0, 1);
+    double targetDistance = speedslew.calculate(forwardDistance);
 
+    double forwardSpeed = FB.fb(targetDistance, distance, 0.4);
 
-    if(Math.abs(targetBearing - currentAngle) > 10) {
+    if(Math.abs(targetBearing - currentAngle) > 20) {
       forwardSpeed = 0;
     }
 
@@ -87,6 +90,7 @@ public class ChassisDriveToHeadingOld extends CommandBase {
   @Override
   public void end(final boolean interrupted) {
     chassis.drive.arcadeDrive(0,0);
+
   }
 
   // Returns true when the command should end.

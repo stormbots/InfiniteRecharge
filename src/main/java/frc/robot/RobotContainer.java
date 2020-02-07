@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ChassisDriveToHeadingOld;
+import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -47,7 +47,7 @@ public class RobotContainer {
   private final Vision vision = new Vision(navX);
 
   // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
-  private final ChassisDriveToHeadingOld autoCommand;
+  private final ChassisDriveToHeadingBasic autoCommand;
 
 
   //Inputs
@@ -59,7 +59,7 @@ public class RobotContainer {
    */
   public RobotContainer() {
 
-    autoCommand = new ChassisDriveToHeadingOld(1, 0, navX, chassis);
+    autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
 
     configureDefaultCommands();
 

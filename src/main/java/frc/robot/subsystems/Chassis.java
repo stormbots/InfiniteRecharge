@@ -32,6 +32,10 @@ public class Chassis extends SubsystemBase {
 
   public DifferentialDrive drive;
 
+  public double LEFT_INVERSION;
+  public double RIGHT_INVERSION;
+  public double ACCEL_DISTANCE;
+
   // public Solenoid shifter = new Solenoid(2);
   // public Solenoid shifterInverse = new Solenoid(5);
 
@@ -75,13 +79,17 @@ public class Chassis extends SubsystemBase {
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
         ;
+
+        LEFT_INVERSION = 1;
+        RIGHT_INVERSION = -1;
+        ACCEL_DISTANCE = 0.25;
       break;
 
       case PRACTICE:
         left.setInverted(true);
         right.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
-        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
 
         pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)
@@ -89,13 +97,17 @@ public class Chassis extends SubsystemBase {
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
         ;
+
+        LEFT_INVERSION = 1;
+        RIGHT_INVERSION = -1;
+        ACCEL_DISTANCE = 0.25;
       break;
 
       case COMP: // THESE ARE CURRENTLY STORMX VALUES
         left.setInverted(true);
         right.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
-        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.METERS_TO_INCHES*(1/18.75));
+        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
 
         pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)
@@ -103,6 +115,10 @@ public class Chassis extends SubsystemBase {
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
         ;
+
+        LEFT_INVERSION = 1;
+        RIGHT_INVERSION = -1;
+        ACCEL_DISTANCE = 0.25;
       break;
 
       default:
@@ -158,7 +174,7 @@ public class Chassis extends SubsystemBase {
   }
 
   public double getAverageDistance() {
-    return (left.getEncoder().getPosition() - right.getEncoder().getPosition())/2.0;
+    return (LEFT_INVERSION*left.getEncoder().getPosition() + RIGHT_INVERSION*right.getEncoder().getPosition())/2.0;
   }
 
   public MiniPID getPID() {
