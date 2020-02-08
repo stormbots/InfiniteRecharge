@@ -14,7 +14,9 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.subsystems.Chassis;
@@ -25,6 +27,7 @@ import frc.robot.subsystems.Passthrough;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.Chassis.Gear;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -53,6 +56,7 @@ public class RobotContainer {
 
   //Inputs
   Joystick driver = new Joystick(0);
+  JoystickButton shiftButton = new JoystickButton(driver, 6);
 
 
   /**
@@ -73,6 +77,8 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
+    shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
   }
 
   /** 
@@ -103,7 +109,7 @@ public class RobotContainer {
     
     Command turnAwayFromShooting = new SequentialCommandGroup(
       turn(Constants.INITIAL_COMPASS_HEADING),
-      driveForward(-3) // WE REALLY NEED TO VARIFY WHAT NEGATIVE DOES
+      driveForward(-3)
     );
 
     autoCommand = new SequentialCommandGroup(
@@ -117,10 +123,10 @@ public class RobotContainer {
   }
 
   public Command turn(double targetAngle) {
-    return new ChassisDriveToHeadingBasic(0, targetAngle, navX, chassis);
+    return new ChassisDriveToHeadingBasic(0, targetAngle, 1, 0.05 /*Meters*/, navX, chassis);
   }
 
   public Command driveForward(double driveDistance) {
-    return new ChassisDriveToHeadingBasic(driveDistance, 0, navX, chassis);
+    return new ChassisDriveToHeadingBasic(driveDistance, 0, 1, 0.05 /*Meters*/, navX, chassis);
   }
 }

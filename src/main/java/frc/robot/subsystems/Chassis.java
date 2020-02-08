@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
 
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,16 +20,14 @@ import frc.robot.Constants.BotName;
 
 public class Chassis extends SubsystemBase {
 
-  // private AHRS navX = new AHRS(SPI.Port.kMXP);
-
   private MiniPID pid;
 
   private CANSparkMax left = new CANSparkMax(1,MotorType.kBrushless);
-  // private CANSparkMax leftA = new CANSparkMax(2,MotorType.kBrushless);
-  // private CANSparkMax leftB = new CANSparkMax(3,MotorType.kBrushless);
+  private CANSparkMax leftA = new CANSparkMax(2,MotorType.kBrushless);
+  private CANSparkMax leftB = new CANSparkMax(3,MotorType.kBrushless);
   private CANSparkMax right = new CANSparkMax(4,MotorType.kBrushless);
-  // private CANSparkMax rightA = new CANSparkMax(5,MotorType.kBrushless);
-  // private CANSparkMax rightB = new CANSparkMax(6,MotorType.kBrushless);
+  private CANSparkMax rightA = new CANSparkMax(5,MotorType.kBrushless);
+  private CANSparkMax rightB = new CANSparkMax(6,MotorType.kBrushless);
 
   public DifferentialDrive drive;
 
@@ -36,8 +35,8 @@ public class Chassis extends SubsystemBase {
   public double RIGHT_INVERSION;
   public double ACCEL_DISTANCE;
 
-  // public Solenoid shifter = new Solenoid(2);
-  // public Solenoid shifterInverse = new Solenoid(5);
+  public Solenoid shifter = new Solenoid(2);
+  public Solenoid shifterInverse = new Solenoid(5);
 
 
 
@@ -60,6 +59,9 @@ public class Chassis extends SubsystemBase {
    * Creates a new Chassis.
    */
   public Chassis() {
+
+    shift(Gear.LOW);
+
     //Invert master motors to ensure Positive motor values move forward, CW
     switch(Constants.botName){
       case TABI:
@@ -92,7 +94,7 @@ public class Chassis extends SubsystemBase {
         right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
 
         pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
-        .setI(0.05/200.0)
+        // .setI(0.05/200.0)
         .setOutputLimits(0.2)
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
@@ -100,7 +102,7 @@ public class Chassis extends SubsystemBase {
 
         LEFT_INVERSION = 1;
         RIGHT_INVERSION = -1;
-        ACCEL_DISTANCE = 0.25;
+        ACCEL_DISTANCE = 0.5;
       break;
 
       case COMP: // THESE ARE CURRENTLY STORMX VALUES
@@ -127,21 +129,21 @@ public class Chassis extends SubsystemBase {
     drive = new DifferentialDrive(left, right);
 
     //Set up the follower motors
-    // leftA.follow(left);
-    // leftB.follow(left);
-    // rightA.follow(right);
-    // rightB.follow(right);
+    leftA.follow(left);
+    leftB.follow(left);
+    rightA.follow(right);
+    rightB.follow(right);
 
     //Configure the stall currents and limits
     int stallCurrent = 150/6;
     int freeCurrent = 240/6;
     int stallRPM = 5700/8;
     left.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
-    // leftA.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
-    // leftB.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
+    leftA.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
+    leftB.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
     right.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
-    // rightA.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
-    // rightB.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
+    rightA.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
+    rightB.setSmartCurrentLimit(stallCurrent, freeCurrent, stallRPM);
 
     //Reset the encoders
     left.getEncoder().setPosition(0);
@@ -153,8 +155,8 @@ public class Chassis extends SubsystemBase {
 
   
   public void shift(Gear gear){
-    // shifter.set(gear.bool());
-    // shifterInverse.set(!gear.bool());
+    shifter.set(gear.bool());
+    shifterInverse.set(!gear.bool());
   }
 
 

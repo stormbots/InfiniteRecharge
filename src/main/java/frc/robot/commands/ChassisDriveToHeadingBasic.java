@@ -23,7 +23,8 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   private double targetBearing;
   private double initialBearing;
 
-
+  private double angleTolerance;
+  private double distanceTolerance;
   
   SlewRateLimiter speedslew;
 
@@ -32,13 +33,16 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
    * Creates a new ChassisDriveManual.
    * All distance units should be in Meters
    */
-  public ChassisDriveToHeadingBasic(double targetDistance, double targetBearing, AHRS gyro, Chassis chassis) {
+  public ChassisDriveToHeadingBasic(double targetDistance, double targetBearing, double angleTolerance, double distanceTolerance, AHRS gyro, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.chassis = chassis;
     this.gyro = gyro;
     this.forwardDistance = targetDistance;
     this.targetBearing = targetBearing;
     addRequirements(chassis);
+
+    this.angleTolerance = angleTolerance;
+    this.distanceTolerance = distanceTolerance;
 
     speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);
   }
@@ -97,6 +101,6 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (Math.abs(gyro.getAngle() - targetBearing) < 1) && (Math.abs(chassis.getAverageDistance() - forwardDistance) < 0.008);
+    return (Math.abs(gyro.getAngle() - targetBearing) < angleTolerance) && (Math.abs(chassis.getAverageDistance() - forwardDistance) < distanceTolerance);
   }
 }

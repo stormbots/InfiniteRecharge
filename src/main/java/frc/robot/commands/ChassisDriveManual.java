@@ -37,9 +37,14 @@ public class ChassisDriveManual extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    double forwardLinear = -move.getAsDouble();
+    double turnLineaer = turn.getAsDouble();
+
     chassis.drive.arcadeDrive(
-      -move.getAsDouble(),
-      turn.getAsDouble()
+      forwardLinear,
+      turnLineaer,
+      false
     );
   }
 
