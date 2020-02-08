@@ -14,6 +14,7 @@ import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.BotName;
@@ -35,7 +36,7 @@ public class Chassis extends SubsystemBase {
   public double RIGHT_INVERSION;
   public double ACCEL_DISTANCE;
 
-  public Solenoid shifter = new Solenoid(2);
+  public Solenoid shifter = new Solenoid(1);
   public Solenoid shifterInverse = new Solenoid(5);
 
 
@@ -43,8 +44,8 @@ public class Chassis extends SubsystemBase {
   // Use an Enum to define pnuematic truth values, so that you get good named values 
   // backed by type checking everywhere.
   public enum Gear{
-    HIGH(true,true),
-    LOW(false,false);
+    HIGH(false, false),
+    LOW(true, true);
     private boolean compbot,practicebot;
     Gear(boolean compbot, boolean practicebot){
       this.compbot = compbot;
@@ -163,7 +164,12 @@ public class Chassis extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    System.out.println(getAverageDistance());
+    // System.out.println(getAverageDistance());
+    // SmartDashboard.putNumber("Chassis/", value);
+    SmartDashboard.putBoolean("Chassis/shifter status", shifter.get());
+    SmartDashboard.putNumber("Chassis/average distance", getAverageDistance());
+
+
     
   }
 
