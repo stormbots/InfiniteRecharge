@@ -15,12 +15,13 @@ import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
   /**
    * Creates a new Shooter.
    */
-  private final CANSparkMax shooterMotor = new CANSparkMax(1 ,MotorType.kBrushless);
+  private final CANSparkMax shooterMotor = new CANSparkMax(11 ,MotorType.kBrushless);
   private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
@@ -30,7 +31,15 @@ public class Shooter extends SubsystemBase {
   double targetRPM = 0;
 
   public Shooter() {
+    switch(Constants.botName){
+      case PRACTICE:
+      break;
+      case COMP:
+      break;
+      default:
+    }
     feederMotor.setInverted(true);
+    feederMotor.setInverted(false);
     shooterMotor.setIdleMode(IdleMode.kCoast);
     feedForwardPID.setSetpointRange(2000/2.0);
     errorPID.setOutputLimits(0.0, 0.5);
@@ -46,12 +55,14 @@ public class Shooter extends SubsystemBase {
   }
 
   private void runClosedLoop() {
-    double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM);
+    double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM) ;
     double errorOutput = errorPID.getOutput(encoder.getVelocity(), targetRPM);
 
     if (encoder.getVelocity() < targetRPM*.5) {
       errorOutput = 0.0;
     }
+
+    feedForwardOutput *=2; //TODO Feeder should go faster, but need to find out by how much
 
     shooterMotor.set(feedForwardOutput + errorOutput);
     feederMotor.set(feedForwardOutput);
@@ -68,7 +79,7 @@ public class Shooter extends SubsystemBase {
     runClosedLoop();
 
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("RPM", encoder.getVelocity());
-    SmartDashboard.putNumber("Current", shooterMotor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
+    SmartDashboard.putNumber("shooter/amps", shooterMotor.getOutputCurrent());
   }
 }

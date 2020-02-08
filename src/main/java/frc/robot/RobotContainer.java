@@ -62,8 +62,9 @@ public class RobotContainer {
   Joystick driver = new Joystick(0);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
 
-  Button intakeButton = new JoystickButton(driver, 1);
-  Button shooterButton = new JoystickButton(driver, 2);
+  Joystick controller = new Joystick(1);
+  Button intakeButton = new JoystickButton(controller, 1);
+  Button shooterButton = new JoystickButton(controller, 2);
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -86,9 +87,11 @@ public class RobotContainer {
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
 
-    intakeButton.whileHeld(new EngageIntake(intake).andThen(new DisengageIntake(intake).withTimeout(0.1)));
+    intakeButton.whenPressed(new EngageIntake(intake));
+    intakeButton.whenReleased(new DisengageIntake(intake).withTimeout(0.1));
     //alternate toggle version
     //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1)));    
+    shooterButton.whenPressed(new RunShooter(()->1000, shooter));
 
     shooterButton.whileHeld(new RunShooter(()->2000,shooter));
   }

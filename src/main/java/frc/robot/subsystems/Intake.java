@@ -11,18 +11,19 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
 
-  CANSparkMax sideMotor = new CANSparkMax(7,MotorType.kBrushless);
-  CANSparkMax centerMotor = new CANSparkMax(8, MotorType.kBrushless);
-  Solenoid solenoid = new Solenoid(3);
+  CANSparkMax sideMotor = new CANSparkMax(8,MotorType.kBrushless);
+  CANSparkMax centerMotor = new CANSparkMax(7, MotorType.kBrushless);
+  Solenoid solenoid = new Solenoid(2+4);
   private final boolean UP = false;
   private final boolean DOWN = ! UP;
 
-  private final double SIDEMOTORSPEED = 0.1;
-  private final double CENTERMOTORSPEED = 0.1;
+  private final double SIDEMOTORSPEED = 0.6;
+  private final double CENTERMOTORSPEED = 1.0;
   
   //functions: 
   //engage/disengage
@@ -42,8 +43,14 @@ public class Intake extends SubsystemBase {
    * Creates a new Intake.
    */
   public Intake() {
+     centerMotor.setInverted(true);
+     sideMotor.setInverted(false);
 
-  }
+     centerMotor.setSmartCurrentLimit(6, 20, 5);
+     sideMotor.setSmartCurrentLimit(6, 20, 5);
+
+     intakeUp();
+    }
 
   public void engage(){
     intakeDown();
@@ -80,5 +87,8 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    // SmartDashboard.putNumber("intake/centerAmps", centerMotor.getOutputCurrent());
+    // SmartDashboard.putNumber("intake/sideAmps", sideMotor.getOutputCurrent());
   }
 }
