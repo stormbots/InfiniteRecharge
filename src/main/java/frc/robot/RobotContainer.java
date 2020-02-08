@@ -16,10 +16,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
+import frc.robot.commands.DisengageIntake;
+import frc.robot.commands.EngageIntake;
+import frc.robot.commands.RunShooter;
 import frc.robot.subsystems.Chassis;
+import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Intake;
@@ -27,7 +32,6 @@ import frc.robot.subsystems.Passthrough;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Spinner;
 import frc.robot.subsystems.Vision;
-import frc.robot.subsystems.Chassis.Gear;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -58,6 +62,8 @@ public class RobotContainer {
   Joystick driver = new Joystick(0);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
 
+  Button intakeButton = new JoystickButton(driver, 1);
+  Button shooterButton = new JoystickButton(driver, 2);
 
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -79,6 +85,12 @@ public class RobotContainer {
   private void configureButtonBindings() {
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
+
+    intakeButton.whileHeld(new EngageIntake(intake).andThen(new DisengageIntake(intake).withTimeout(0.1)));
+    //alternate toggle version
+    //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1)));    
+
+    shooterButton.whileHeld(new RunShooter(()->2000,shooter));
   }
 
   /** 
