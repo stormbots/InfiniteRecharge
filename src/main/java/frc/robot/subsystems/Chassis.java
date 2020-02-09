@@ -59,18 +59,35 @@ public class Chassis extends SubsystemBase {
   /**
    * Creates a new Chassis.
    */
-  public Chassis() {
+  public Chassis() {    
+    switch(Constants.botName){
+      case PRACTICE:
+      //do reversed
+      left = new CANSparkMax(4,MotorType.kBrushless);
+      leftA = new CANSparkMax(5,MotorType.kBrushless);
+      leftB = new CANSparkMax(6,MotorType.kBrushless);
+      right = new CANSparkMax(1,MotorType.kBrushless);
+      rightA = new CANSparkMax(2,MotorType.kBrushless);
+      rightB = new CANSparkMax(3,MotorType.kBrushless);
+      break;
 
-    shift(Gear.LOW);
+      default: 
+      //do proper
+      left = new CANSparkMax(1,MotorType.kBrushless);
+      leftA = new CANSparkMax(2,MotorType.kBrushless);
+      leftB = new CANSparkMax(3,MotorType.kBrushless);
+      right = new CANSparkMax(4,MotorType.kBrushless);
+      rightA = new CANSparkMax(5,MotorType.kBrushless);
+      rightB = new CANSparkMax(6,MotorType.kBrushless);
+
+    }
+
 
     //Invert master motors to ensure Positive motor values move forward, CW
     switch(Constants.botName){
       case TABI:
         left.setInverted(true);//TABI correction
         right.setInverted(true);//TABI correction
-        //NOTE: We also want to invert the right encoder, but it's illegal, 
-        // so we'll have to sort that out manually I guess.
-        //convert to Meters and Meters/second
         left.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
         right.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
         // left.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
@@ -152,6 +169,9 @@ public class Chassis extends SubsystemBase {
     //Minimize motor timer overruns
     left.set(0);
     right.set(0);
+
+    shift(Gear.LOW);
+
   }
 
   
@@ -159,6 +179,7 @@ public class Chassis extends SubsystemBase {
     shifter.set(gear.bool());
     shifterInverse.set(!gear.bool());
   }
+
 
 
   @Override

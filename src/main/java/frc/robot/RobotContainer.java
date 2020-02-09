@@ -23,6 +23,7 @@ import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.RunShooter;
+import frc.robot.commands.TempPassthroughCommand;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
@@ -90,10 +91,9 @@ public class RobotContainer {
     intakeButton.whenPressed(new EngageIntake(intake));
     intakeButton.whenReleased(new DisengageIntake(intake).withTimeout(0.1));
     //alternate toggle version
-    //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1)));    
+    //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1))); 
     shooterButton.whenPressed(new RunShooter(()->1000, shooter));
 
-    shooterButton.whileHeld(new RunShooter(()->2000,shooter));
   }
 
   /** 
@@ -105,6 +105,10 @@ public class RobotContainer {
     chassis.setDefaultCommand(
       new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(2), chassis)
       );
+
+
+    //TODO: dELETE ME
+    passthrough.setDefaultCommand(new TempPassthroughCommand(()->controller.getRawAxis(3),passthrough));
   }
 
 
@@ -124,7 +128,7 @@ public class RobotContainer {
     
     Command turnAwayFromShooting = new SequentialCommandGroup(
       turn(Constants.INITIAL_COMPASS_HEADING),
-      driveForward(-3)
+      driveForward(-2)
     );
 
     autoCommand = new SequentialCommandGroup(
