@@ -92,11 +92,13 @@ public class RobotContainer {
     chassis.setDefaultCommand(
       new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(4),chassis)
       );
-      //TODO! We want this on a button when held
-      //TODO This should also only activate near end of a match eventually
-    climber.setDefaultCommand(
-      new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
-    );
+    //TODO! We want this on a button when held
+    //TODO This should also only activate near end of a match eventually
+    // climber.setDefaultCommand(
+    //  DEBUG JOYSTICK STUFF
+    //  //new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
+    //  new ClimberSetPosition(()->driver.getRawAxis(3)*70,climber)
+    // );
   }
 
   /**
