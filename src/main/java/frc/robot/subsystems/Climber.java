@@ -26,8 +26,9 @@ public class Climber extends SubsystemBase {
    */
   // motors
   CANSparkMax armMotor = new CANSparkMax(12, MotorType.kBrushless);
-  CANSparkMax hookMotor = new CANSparkMax(13, MotorType.kBrushless);
-  // CANSparkMax translationMotor = new CANSparkMax(14, MotorType.kBrushless);
+  public CANSparkMax hookMotor = new CANSparkMax(13, MotorType.kBrushless);
+
+  //public CANSparkMax translationMotor = new CANSparkMax(14, MotorType.kBrushless);
 
 
 
@@ -105,7 +106,7 @@ public class Climber extends SubsystemBase {
     climbOutput = FB.fb(targetheight, armEncoder.getPosition(), 0.07);
     climbOutput = MathUtil.clamp(climbOutput, -0.1, 0.1);
     climbOutput = climbSlew.calculate(climbOutput);
-    // armMotor.set(climbOutput);
+    armMotor.set(climbOutput);
 
     SmartDashboard.putNumber("climb/encoderPos", armEncoder.getPosition());
     SmartDashboard.putNumber("climb/targetHeight", targetheight);

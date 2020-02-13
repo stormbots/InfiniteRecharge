@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import com.stormbots.Lerp;
-
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
+import frc.robot.commands.ClimbUp;
 import frc.robot.commands.ClimberSetHookRotation;
 import frc.robot.commands.ClimberSetPosition;
 import frc.robot.commands.ClimberSetTranslation;
@@ -57,6 +56,7 @@ public class RobotContainer {
   Button climbHookGrab = new JoystickButton(driver,9);
   Button translationMoveBackwards = new JoystickButton(driver, 10);
   Button armMoveDown = new JoystickButton(driver, 11);
+  Button climbButton = new JoystickButton(driver, 1);
   
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -81,6 +81,7 @@ public class RobotContainer {
     translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
     translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
 
+    climbButton.whileHeld(new ClimbUp(climber));
   }
 
   /** 
@@ -94,11 +95,12 @@ public class RobotContainer {
       );
     //TODO! We want this on a button when held
     //TODO This should also only activate near end of a match eventually
-    // climber.setDefaultCommand(
+    climber.setDefaultCommand(
     //  DEBUG JOYSTICK STUFF
-    //  //new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
-    //  new ClimberSetPosition(()->driver.getRawAxis(3)*70,climber)
-    // );
+    //  new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
+     new ClimberSetPosition(()->driver.getRawAxis(3)*70,climber)
+    );
+
   }
 
   /**
