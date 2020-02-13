@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -15,7 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
-  public Gyro gyro;
+  public AHRS gyro;
 
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   NetworkTableEntry tx = table.getEntry("tx");
@@ -32,15 +34,15 @@ public class Vision extends SubsystemBase {
   /**
    * Creates a new Vision.
    */
-  public Vision(Gyro gyro) {
-    this.gyro = gyro;
+  public Vision(final AHRS navX) {
+    this.gyro = navX;
 
     table = NetworkTableInstance.getDefault().getTable("limelight");
     tx = table.getEntry("tx");
     ty = table.getEntry("ty");
     ta = table.getEntry("ta");
     ts = table.getEntry("ts");
-    targetHeading = gyro.getAngle();
+    targetHeading = navX.getAngle();
   }
 
   @Override
@@ -62,20 +64,23 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    double distance = ((92-8.25)/(Math.tan(Math.toRadians(25+y))));
+    final double TARGET_HEIGHT = 92;
+    final double MOUNT_HEIGHT = 8.25;
+    final double MOUNT_ANGLE_RADIANS = 25;
+
+    final double distance = ((TARGET_HEIGHT-MOUNT_HEIGHT)/(Math.tan(Math.toRadians(MOUNT_ANGLE_RADIANS+y))));
     
     // target height - mount height / tan(mounting angle in radians + error y)
-    //92 is FRC target height
-    //46.5 is clerk desk height
+    //92 is FRC target height and 46.5 is clerk desk target height
     //has a roughly 3 inch error
-    //35 deg. when resting all the way back
+
 
     // post to smart dashboard periodically
-    SmartDashboard.putNumber("LimelightX", x);
-    SmartDashboard.putNumber("LimelightY", y);
-    SmartDashboard.putNumber("Distance to Target", distance);
-    SmartDashboard.putNumber("Gyro Current", gyro.getAngle());
-    SmartDashboard.putNumber("Gyro Target", targetHeading);
+    SmartDashboard.putNumber("vision/LimelightX", x);
+    SmartDashboard.putNumber("vision/LimelightY", y);
+    SmartDashboard.putNumber("vision/Distance to Target", distance);
+    SmartDashboard.putNumber("vision/Gyro Current", gyro.getAngle());
+    SmartDashboard.putNumber("vision/Gyro Target", targetHeading);
   }
 
 /**

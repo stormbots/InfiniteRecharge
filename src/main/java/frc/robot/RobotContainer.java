@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import com.analog.adis16448.frc.ADIS16448_IMU;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -15,16 +14,13 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ChassisVisionTargeting;
-import frc.robot.commands.ExampleCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
+import frc.robot.commands.ChassisVisionTargeting;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.RunShooter;

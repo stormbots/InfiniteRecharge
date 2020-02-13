@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import com.kauailabs.navx.frc.AHRS;
 import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.networktables.NetworkTable;
@@ -23,15 +24,15 @@ public class ChassisVisionTargeting extends CommandBase {
 
   Chassis chassis;
   Vision vision; 
-  private Gyro gyro;
+  private AHRS gyro;
 
   MiniPID pidTurn = new MiniPID(0.015,0,0);
 
-  public ChassisVisionTargeting(Vision vision, Gyro gyro, Chassis chassis) {
+  public ChassisVisionTargeting(Vision vision, AHRS navX, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(chassis);
     this.vision = vision;
-    this.gyro = gyro;
+    this.gyro = navX;
     this.chassis = chassis;
   }
 
