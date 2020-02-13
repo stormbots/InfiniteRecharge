@@ -7,9 +7,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.BotName;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -28,6 +31,21 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    // Figure out which bot we're on.
+    String botString = Preferences.getInstance().getString("botName", "none").toUpperCase().trim();
+    switch(botString){
+      case "COMP":     Constants.botName = BotName.COMP;break;
+      case "PRACTICE": Constants.botName = BotName.PRACTICE;break;
+      case "TABI":     Constants.botName = BotName.TABI;break;
+      default:
+        botString = "COMP";
+        Constants.botName = BotName.COMP;
+        System.err.println("ROBOT NAME NOT DEFINED:");
+        System.err.println("Assuming COMP for safety: View Preferences to change");
+    }
+    Preferences.getInstance().putString("botName",botString);
+    SmartDashboard.setPersistent("Preferences/botName");
+
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     robot = new RobotContainer();
@@ -65,6 +83,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    
+    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
+
     autonomousCommand = robot.getAutonomousCommand();
 
     // schedule the autonomous command (example)

@@ -9,24 +9,23 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Chassis;
+import edu.wpi.first.wpiutil.math.MathUtil;
+import frc.robot.subsystems.Passthrough;
 
-public class ChassisDriveManual extends CommandBase {
-  private final Chassis chassis;
-  private DoubleSupplier move;
-  private DoubleSupplier turn;
+public class TempPassthroughCommand extends CommandBase {
+  private Passthrough pt;
+  DoubleSupplier power;
 
-  /**
-   * Creates a new ChassisDriveManual.
-   */
-  public ChassisDriveManual(DoubleSupplier move, DoubleSupplier turn, Chassis chassis) {
+    
+/**
+   * Creates a new TempPassThroughCommand.
+   */ 
+  public TempPassthroughCommand(DoubleSupplier power,Passthrough pt) {
+    this.pt = pt;
+    this.power = power;
+    addRequirements(pt);
     // Use addRequirements() here to declare subsystem dependencies.
-    this.chassis = chassis;
-    this.move = move;
-    this.turn = turn;
-    addRequirements(chassis);
   }
 
   // Called when the command is initially scheduled.
@@ -36,25 +35,14 @@ public class ChassisDriveManual extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-
-    double forwardLinear = -move.getAsDouble();
-    double turnLinear = turn.getAsDouble();
-
-    double forwardSquared = Math.abs(forwardLinear) * forwardLinear;
-    double turnSquared = Math.abs(turnLinear) * turnLinear;
-
-    chassis.drive.arcadeDrive(
-      forwardLinear,
-      turnLinear,
-      false
-    );
+  public void execute() {  
+    double newpower = MathUtil.clamp(power.getAsDouble(),-1.0,1.0);
+    pt.tempmotor.set(newpower);
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(final boolean interrupted) {
-    chassis.drive.arcadeDrive(0,0);
+  public void end(boolean interrupted) {
   }
 
   // Returns true when the command should end.

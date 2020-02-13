@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2019 FIRST. All Rights Reserved.                             */
+/* Copyright (c) 2018-2019 FIRST. All Rights Reserved.                        */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -9,52 +9,49 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import com.stormbots.closedloop.MiniPID;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Chassis;
+import frc.robot.subsystems.Shooter;
 
-public class ChassisDriveManual extends CommandBase {
-  private final Chassis chassis;
-  private DoubleSupplier move;
-  private DoubleSupplier turn;
+/**
+ * Runs the PID shooter.
+ */
+public class RunShooter extends CommandBase {
+  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+  private final Shooter shooter;
 
   /**
-   * Creates a new ChassisDriveManual.
+   * Creates a new ExampleCommand.
+   *
+   * @param subsystem The subsystem used by this command.
    */
-  public ChassisDriveManual(DoubleSupplier move, DoubleSupplier turn, Chassis chassis) {
+   DoubleSupplier targetRPM ;
+
+  public RunShooter(DoubleSupplier targetRPM, Shooter shooter) {
+    this.shooter = shooter;
+    this.targetRPM = targetRPM;
     // Use addRequirements() here to declare subsystem dependencies.
-    this.chassis = chassis;
-    this.move = move;
-    this.turn = turn;
-    addRequirements(chassis);
+    addRequirements(shooter);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    shooter.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    double forwardLinear = -move.getAsDouble();
-    double turnLinear = turn.getAsDouble();
-
-    double forwardSquared = Math.abs(forwardLinear) * forwardLinear;
-    double turnSquared = Math.abs(turnLinear) * turnLinear;
-
-    chassis.drive.arcadeDrive(
-      forwardLinear,
-      turnLinear,
-      false
-    );
+    shooter.setRPM(targetRPM.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(final boolean interrupted) {
-    chassis.drive.arcadeDrive(0,0);
+  public void end(boolean interrupted) {
+    shooter.setRPM(0);
   }
 
   // Returns true when the command should end.

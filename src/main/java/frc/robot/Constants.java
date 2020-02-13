@@ -15,5 +15,12 @@ package frc.robot;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants {
+public class Constants {
+    public enum BotName {COMP,PRACTICE,TABI};
+    public static BotName botName = BotName.COMP;
+
+    /** Convert Inches to Meter */
+    public static double INCHES_TO_METERS = 0.0254;
+
+    public static double INITIAL_COMPASS_HEADING = 0;
 }
