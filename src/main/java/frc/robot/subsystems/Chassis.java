@@ -23,12 +23,15 @@ public class Chassis extends SubsystemBase {
   // private CANSparkMax rightA = new CANSparkMax(5,MotorType.kBrushless);
   // private CANSparkMax rightB = new CANSparkMax(6,MotorType.kBrushless);
 
-  public DifferentialDrive drive = new DifferentialDrive(left, right);
-
+  public DifferentialDrive drive;
   /**
    * Creates a new Chassis.
    */
   public Chassis() {
+    left.setInverted(true);
+    right.setInverted(true);
+    drive = new DifferentialDrive(left, right);
+
     //Configure the motors
     // leftA.follow(left);
     // leftB.follow(left);

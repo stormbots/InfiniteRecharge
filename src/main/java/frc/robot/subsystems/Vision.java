@@ -62,8 +62,13 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    double distance = ((46.5-8.25)/(Math.tan(Math.toRadians(30+y)))); 
+    double distance = ((92-8.25)/(Math.tan(Math.toRadians(25+y))));
+    
     // target height - mount height / tan(mounting angle in radians + error y)
+    //92 is FRC target height
+    //46.5 is clerk desk height
+    //has a roughly 3 inch error
+    //35 deg. when resting all the way back
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("LimelightX", x);
@@ -90,7 +95,7 @@ public class Vision extends SubsystemBase {
   }
 
   public void targetPipeline(){
-    table.getEntry("pipeline").setNumber(0);
+    table.getEntry("pipeline").setNumber(2); //0 for NON_3D
   }
 
   public void driverPipeline(){

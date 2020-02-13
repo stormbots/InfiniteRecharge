@@ -11,6 +11,7 @@ import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Vision;
@@ -37,9 +38,14 @@ public class ChassisVisionTargeting extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-
-    pidTurn.setSetpointRange(30); //TODO Find proper value
-    pidTurn.setOutputLimits(0.3);
+    gyro.reset();
+    pidTurn.reset();
+    pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
+    pidTurn.setP(0.012);
+    pidTurn.setI(0.003);
+    pidTurn.setD(0.0015);
+    pidTurn.setMaxIOutput(0.15);
+    pidTurn.setOutputLimits(0.35);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -53,10 +59,15 @@ public class ChassisVisionTargeting extends CommandBase {
     vision.targetPipeline();
     vision.lightsOn();
     
-    double outputTurn = pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
-    chassis.drive.arcadeDrive(0, outputTurn); 
+    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+    // double outputTurn = pidTurn.getOutput(0, vision.getTargetHeading());
+    chassis.drive.arcadeDrive(0, outputTurn,true); //wrong and bad
+    // chassis.drive.arcadeDrive(0, outputTurn,false);  //good but needs tuning
+
     //TODO Chassis inversion thing! Arcade drive backwards! 
     //keep an eye out for when it's fixed or not working - may need a "-"
+    SmartDashboard.putNumber("LLPIDOut", outputTurn);
+   
   }
 
   // Called once the command ends or is interrupted.

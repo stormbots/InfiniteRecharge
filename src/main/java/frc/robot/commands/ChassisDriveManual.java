@@ -38,8 +38,8 @@ public class ChassisDriveManual extends CommandBase {
   @Override
   public void execute() {
     chassis.drive.arcadeDrive(
-      move.getAsDouble(),
-      -turn.getAsDouble()
+      -move.getAsDouble(),
+      turn.getAsDouble()
     );
   }
 
