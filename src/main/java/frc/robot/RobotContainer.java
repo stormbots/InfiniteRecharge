@@ -22,8 +22,8 @@ import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
+import frc.robot.commands.PassthroughIdle;
 import frc.robot.commands.RunShooter;
-import frc.robot.commands.TempPassthroughCommand;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
@@ -54,6 +54,7 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Spinner spinner = new Spinner();
   private final Vision vision = new Vision(navX);
+  
 
   // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
   private Command autoCommand;
@@ -67,11 +68,20 @@ public class RobotContainer {
   Button intakeButton = new JoystickButton(controller, 1);
   Button shooterButton = new JoystickButton(controller, 2);
 
+  private JoystickButton loadBall = new JoystickButton(driver, 1);
+  private JoystickButton prepareForLoading = new JoystickButton(driver, 2);
+  private JoystickButton prepareForShooting = new JoystickButton(driver, 3);
+  private JoystickButton shoot = new JoystickButton(driver, 4);
+
+
   /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
 
+    
+
+    
     configureDefaultCommands();
 
     // Configure the button bindings
@@ -94,6 +104,19 @@ public class RobotContainer {
     //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1))); 
     shooterButton.whenPressed(new RunShooter(()->1000, shooter));
 
+    
+    loadBall.whenPressed(new InstantCommand(()->{
+      passthrough.loadBall(); 
+    }));
+
+    prepareForLoading.whenPressed(new InstantCommand(()->{
+      passthrough.prepareForLoading(); 
+    }));
+
+    shoot.whenPressed(new InstantCommand(()->{
+      passthrough.shoot(); 
+    }));
+
   }
 
   /** 
@@ -106,9 +129,12 @@ public class RobotContainer {
       new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(2), chassis)
       );
 
+      passthrough.setDefaultCommand(
+        new PassthroughIdle(passthrough)
+      );
 
     //TODO: dELETE ME
-    passthrough.setDefaultCommand(new TempPassthroughCommand(()->controller.getRawAxis(3),passthrough));
+    // passthrough.setDefaultCommand(new TempPassthroughCommand(()->controller.getRawAxis(3),passthrough));
   }
 
 

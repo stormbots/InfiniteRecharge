@@ -437,6 +437,10 @@ public class MiniPID{
 		return this;
 	}
 
+	public boolean isOnTarget(double tolerance){
+		return bounded(setpoint, lastActual-tolerance, lastActual+tolerance);
+	}
+
 	//**************************************
 	// Helper functions
 	//**************************************
