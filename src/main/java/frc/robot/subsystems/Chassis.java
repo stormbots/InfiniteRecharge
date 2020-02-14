@@ -198,6 +198,8 @@ public class Chassis extends SubsystemBase {
       default:
 
     }
+
+    //TODO: Must be removed if running PD controlled chassis, should be controlled better than commenting
     drive = new DifferentialDrive(left, right);
 
     //Set up the follower motors
