@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
 
@@ -21,7 +22,17 @@ import frc.robot.Constants.BotName;
 
 public class Chassis extends SubsystemBase {
 
-  private MiniPID pid;
+  public final double kP;
+  public final double kD;
+
+  public final double kS;
+  public final double kV;
+  public final double kA;
+
+  public final double maxChassisVelocity;
+
+
+  private MiniPID turningPID;
 
   private CANSparkMax left = new CANSparkMax(1,MotorType.kBrushless);
   private CANSparkMax leftA = new CANSparkMax(2,MotorType.kBrushless);
@@ -44,8 +55,8 @@ public class Chassis extends SubsystemBase {
   // Use an Enum to define pnuematic truth values, so that you get good named values 
   // backed by type checking everywhere.
   public enum Gear{
-    HIGH(false, false),
-    LOW(true, true);
+    HIGH(true, true),
+    LOW(false, false);
     private boolean compbot,practicebot;
     Gear(boolean compbot, boolean practicebot){
       this.compbot = compbot;
@@ -62,7 +73,7 @@ public class Chassis extends SubsystemBase {
   public Chassis() {    
     switch(Constants.botName){
       case PRACTICE:
-      //do reversed
+      //left and right motors are swapped
       left = new CANSparkMax(4,MotorType.kBrushless);
       leftA = new CANSparkMax(5,MotorType.kBrushless);
       leftB = new CANSparkMax(6,MotorType.kBrushless);
@@ -72,7 +83,7 @@ public class Chassis extends SubsystemBase {
       break;
 
       default: 
-      //do proper
+      //left and right motors are propper
       left = new CANSparkMax(1,MotorType.kBrushless);
       leftA = new CANSparkMax(2,MotorType.kBrushless);
       leftB = new CANSparkMax(3,MotorType.kBrushless);
@@ -80,6 +91,47 @@ public class Chassis extends SubsystemBase {
       rightA = new CANSparkMax(5,MotorType.kBrushless);
       rightB = new CANSparkMax(6,MotorType.kBrushless);
 
+    }
+
+    left.setIdleMode(IdleMode.kBrake);
+    leftA.setIdleMode(IdleMode.kCoast);
+    leftB.setIdleMode(IdleMode.kCoast);
+    right.setIdleMode(IdleMode.kBrake);
+    rightA.setIdleMode(IdleMode.kCoast);
+    rightB.setIdleMode(IdleMode.kCoast);
+
+    switch(Constants.botName){
+      case TABI:
+      kP = 0.0;//507;//13.5;//
+      kD = 0.0;
+    
+      kS = 0.152;//0.128;
+      kV = 1.98;//0.077;
+      kA = 0;//0.354;//0.0109;
+    
+      maxChassisVelocity = 3;
+      break;
+
+      case PRACTICE: // THE PROPER GEARING FOUND EXPERIMENTALLY IS 4.76/10 or 0.476
+      kP = 0.551;
+      kD = 0.0;
+    
+      kS = 0.166;
+      kV = 0.121;
+      kA = 0.0122;
+    
+      maxChassisVelocity = 2;
+      break;
+
+      default:
+      kP = 0;
+      kD = 0;
+    
+      kS = 0;
+      kV = 0;
+      kA = 0;
+    
+      maxChassisVelocity = 0;
     }
 
 
@@ -90,10 +142,10 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);//TABI correction
         left.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
         right.getEncoder().setPositionConversionFactor(Math.PI*0.105*14/70);
-        // left.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
-        // right.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
+        left.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
+        right.getEncoder().setVelocityConversionFactor(Math.PI*0.105*14/70/60);
 
-        pid = new MiniPID(0.2/30, 0, 0.0)
+        turningPID = new MiniPID(0.2/30, 0, 0.0)
         .setI(0.05/200.0)
         .setOutputLimits(0.2)
         .setMaxIOutput(0.15)
@@ -108,10 +160,12 @@ public class Chassis extends SubsystemBase {
       case PRACTICE:
         left.setInverted(true);
         right.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
-        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        left.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
+        right.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
+        left.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
+        right.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
 
-        pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
+        turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         // .setI(0.05/200.0)
         .setOutputLimits(0.2)
         .setMaxIOutput(0.15)
@@ -129,7 +183,7 @@ public class Chassis extends SubsystemBase {
         left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
         right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
 
-        pid = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
+        turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)
         .setOutputLimits(0.2)
         .setMaxIOutput(0.15)
@@ -189,9 +243,20 @@ public class Chassis extends SubsystemBase {
     // SmartDashboard.putNumber("Chassis/", value);
     SmartDashboard.putBoolean("Chassis/shifter status", shifter.get());
     SmartDashboard.putNumber("Chassis/average distance", getAverageDistance());
+    SmartDashboard.putNumber("Chassis/average velocity", getAverageVelocity());
+    SmartDashboard.putNumber("Chassis/left velocity", left.getEncoder().getVelocity());
 
 
     
+  }
+
+
+  public CANSparkMax getLeftLeadMotor() {
+    return left;
+  }
+
+  public CANSparkMax getRightLeadMotor() {
+    return right;
   }
 
   public CANEncoder getLeftEncoder() {
@@ -206,8 +271,12 @@ public class Chassis extends SubsystemBase {
     return (LEFT_INVERSION*left.getEncoder().getPosition() + RIGHT_INVERSION*right.getEncoder().getPosition())/2.0;
   }
 
+  public double getAverageVelocity() {
+    return (LEFT_INVERSION*left.getEncoder().getVelocity() + RIGHT_INVERSION*right.getEncoder().getVelocity())/2.0;
+  }
+
   public MiniPID getPID() {
-    return pid;
+    return turningPID;
   }
 
 }

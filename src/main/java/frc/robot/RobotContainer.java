@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
+import frc.robot.commands.ChassisDrivePDControl;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;

@@ -18,7 +18,7 @@ public class Intake extends SubsystemBase {
 
   CANSparkMax sideMotor = new CANSparkMax(8,MotorType.kBrushless);
   CANSparkMax centerMotor = new CANSparkMax(7, MotorType.kBrushless);
-  Solenoid solenoid = new Solenoid(2+4);
+  Solenoid solenoid = new Solenoid(2);
   private final boolean UP = false;
   private final boolean DOWN = ! UP;
 

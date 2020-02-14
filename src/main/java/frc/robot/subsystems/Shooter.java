@@ -38,8 +38,8 @@ public class Shooter extends SubsystemBase {
       break;
       default:
     }
+    // feederMotor.setInverted(false);
     feederMotor.setInverted(true);
-    feederMotor.setInverted(false);
     shooterMotor.setIdleMode(IdleMode.kCoast);
     feedForwardPID.setSetpointRange(2000/2.0);
     errorPID.setOutputLimits(0.0, 0.5);
