@@ -1,5 +1,7 @@
 package com.stormbots.closedloop;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -44,6 +46,15 @@ public class MiniPID{
 	private double outputFilter=0;
 
 	private double setpointRange=0;
+
+	/** User-defined function for precise modeling of the controlled system
+	 * Note, setpoint and error are constrained by any configuration options provided by the system.
+	 */
+	public interface FeedForwardLambda{
+		public double compute(double setpoint, double actual, double error);
+	}
+	private FeedForwardLambda feedForwardLambda = (s,a,e)->{return 0.0031415;};
+
 
 	//**********************************
 	// Constructor functions
@@ -152,6 +163,24 @@ public class MiniPID{
 	public MiniPID setF(double f){
 		F=f;
 		checkSigns();
+		return this;
+	}
+
+	/**
+	 * Configure the FeedForward parameter using arbitrary function and system parameters <br>
+	 * This allows for precise modelling of the expected beaviour of your system,
+	 * allowing effective PID use on a wider variety of systems.
+	 * <br>
+	 * Examples:
+	 * <li> For a position system that lifts elevator, the lambda would return a constant value, which 
+	 * represents the motor power necessary to counteract gravity. 
+	 * <li> For a positional system controlling a vertically rotating arm, kPowerAtFullExtension*sin(angle) operation
+	 * to counteract gravity
+	 * @param ff lambda that models the system based on known parameters 
+	 * @return
+	 */
+	public MiniPID setF(FeedForwardLambda ff){
+		this.feedForwardLambda = ff;
 		return this;
 	}
 
@@ -284,6 +313,8 @@ public class MiniPID{
 
 		// Calculate F output. Notice, this depends only on the setpoint, and not the error. 
 		Foutput=F*setpoint;
+		// Handle user-provided functions to model things we can't handle well 
+		Foutput += feedForwardLambda.compute(setpoint, actual, error);
 
 		// Calculate P term
 		Poutput=P*error;   

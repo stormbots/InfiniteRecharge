@@ -49,6 +49,9 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     robot = new RobotContainer();
+
+    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();  
+
   }
 
   /**
@@ -76,6 +79,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
+
+    SmartDashboard.putNumber("Chassis/COMPASS HEADING", robot.navX.getCompassHeading());
+
   }
 
   /**
@@ -84,7 +90,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     
-    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
+    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();  
 
     autonomousCommand = robot.getAutonomousCommand();
 
@@ -99,6 +105,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
+
+    SmartDashboard.putNumber("Chassis/compass error", robot.navX.getCompassHeading() - Constants.INITIAL_COMPASS_HEADING);
+
+
   }
 
   @Override

@@ -80,8 +80,13 @@ public class Chassis extends SubsystemBase {
       right = new CANSparkMax(1,MotorType.kBrushless);
       rightA = new CANSparkMax(2,MotorType.kBrushless);
       rightB = new CANSparkMax(3,MotorType.kBrushless);
-      break;
 
+      LEFT_INVERSION = 1;
+      RIGHT_INVERSION = -1;
+    break;
+      case COMP:
+        //456 on right
+        //123 on left
       default: 
       //left and right motors are propper
       left = new CANSparkMax(1,MotorType.kBrushless);
@@ -90,6 +95,8 @@ public class Chassis extends SubsystemBase {
       right = new CANSparkMax(4,MotorType.kBrushless);
       rightA = new CANSparkMax(5,MotorType.kBrushless);
       rightB = new CANSparkMax(6,MotorType.kBrushless);
+      LEFT_INVERSION = -1;
+      RIGHT_INVERSION = 1;
 
     }
 
@@ -150,30 +157,36 @@ public class Chassis extends SubsystemBase {
         .setOutputLimits(0.2)
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
+        // .setF((s,a,e)->{
+        //   return Math.signum(e)*0.08;
+        // }) //FIXME: this should work but doesnt
         ;
 
-        LEFT_INVERSION = 1;
-        RIGHT_INVERSION = -1;
         ACCEL_DISTANCE = 0.25;
       break;
 
       case PRACTICE:
         left.setInverted(true);
         right.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
-        right.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
-        left.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
-        right.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
 
-        turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
+        left.getEncoder().setPositionConversionFactor(7.3914 / 287.4546);
+        right.getEncoder().setPositionConversionFactor(7.3914 / 287.4546);
+        left.getEncoder().setVelocityConversionFactor(7.3914 / 287.4546 / 60);
+        right.getEncoder().setVelocityConversionFactor(7.3914 / 287.4546 / 60);
+
+        // left.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
+        // right.getEncoder().setPositionConversionFactor(Math.PI*0.152*(1/0.476));
+        // left.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
+        // right.getEncoder().setVelocityConversionFactor(Math.PI*0.152*(1/0.476) / 60);
+
+        turningPID = new MiniPID(0.3/30, 0, 0.0) // need to actually find these values for the actual robot
         // .setI(0.05/200.0)
-        .setOutputLimits(0.2)
+        .setOutputLimits(1)
         .setMaxIOutput(0.15)
         .setSetpointRange(30)
         ;
 
-        LEFT_INVERSION = 1;
-        RIGHT_INVERSION = -1;
+
         ACCEL_DISTANCE = 0.5;
       break;
 
@@ -190,8 +203,6 @@ public class Chassis extends SubsystemBase {
         .setSetpointRange(30)
         ;
 
-        LEFT_INVERSION = 1;
-        RIGHT_INVERSION = -1;
         ACCEL_DISTANCE = 0.25;
       break;
 
@@ -243,10 +254,12 @@ public class Chassis extends SubsystemBase {
     // This method will be called once per scheduler run
     // System.out.println(getAverageDistance());
     // SmartDashboard.putNumber("Chassis/", value);
-    SmartDashboard.putBoolean("Chassis/shifter status", shifter.get());
+    // SmartDashboard.putBoolean("Chassis/shifter status", shifter.get());
     SmartDashboard.putNumber("Chassis/average distance", getAverageDistance());
     SmartDashboard.putNumber("Chassis/average velocity", getAverageVelocity());
     SmartDashboard.putNumber("Chassis/left velocity", left.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Chassis/inital compass heading", Constants.INITIAL_COMPASS_HEADING);
+
 
 
     

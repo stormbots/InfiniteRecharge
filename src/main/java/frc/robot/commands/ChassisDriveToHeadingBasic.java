@@ -8,23 +8,30 @@
 package frc.robot.commands;
 
 
+import java.util.function.DoubleSupplier;
+
 import com.kauailabs.navx.frc.AHRS;
+import com.stormbots.Clamp;
 import com.stormbots.closedloop.FB;
 import com.stormbots.interp.SinCurve;
 
 import edu.wpi.first.wpilibj.SlewRateLimiter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.Chassis;
 
 public class ChassisDriveToHeadingBasic extends CommandBase {
   private final Chassis chassis;
   private AHRS gyro;
-  private double forwardDistance;
+  private double targetDistance;
+  private DoubleSupplier targetBearingSupplier;
   private double targetBearing;
   private double initialBearing;
 
   private double angleTolerance;
   private double distanceTolerance;
+
   
   SlewRateLimiter speedslew;
 
@@ -33,28 +40,37 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
    * Creates a new ChassisDriveManual.
    * All distance units should be in Meters
    */
-  public ChassisDriveToHeadingBasic(double targetDistance, double targetBearing, double angleTolerance, double distanceTolerance, AHRS gyro, Chassis chassis) {
+  public ChassisDriveToHeadingBasic(double targetDistance, DoubleSupplier targetBearingSupplier, double angleTolerance, double distanceTolerance, AHRS gyro, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(chassis);
+
     this.chassis = chassis;
     this.gyro = gyro;
-    this.forwardDistance = targetDistance;
-    this.targetBearing = targetBearing;
-    addRequirements(chassis);
+    this.targetDistance = targetDistance;
+    this.targetBearingSupplier = targetBearingSupplier;
 
     this.angleTolerance = angleTolerance;
     this.distanceTolerance = distanceTolerance;
 
+
     speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);
+
+    
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
+
     chassis.getLeftEncoder().setPosition(0);
     chassis.getRightEncoder().setPosition(0);
-
-    gyro.reset();
     
+    // gyro.reset();
+    
+    targetBearing = targetBearingSupplier.getAsDouble();
+
+
     initialBearing = gyro.getAngle();
     chassis.getPID().setSetpoint(initialBearing + targetBearing);
 
@@ -65,21 +81,31 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   @Override
   public void execute() {
 
+
+    SmartDashboard.putNumber("Chassis/targetBearing", targetBearing);
+    SmartDashboard.putNumber("Chassis/targetBearingSupplier", targetBearingSupplier.getAsDouble());
+
+
     double currentAngle =  gyro.getAngle();
     //Uses PID to create a motion controlled turn value
     double turn = chassis.getPID().getOutput(currentAngle);
     
     double distance = chassis.getAverageDistance();
 
-    double targetDistance = speedslew.calculate(forwardDistance);
+    double targetDistance = speedslew.calculate(this.targetDistance);
 
-    double forwardSpeed = FB.fb(targetDistance, distance, 0.4);
+    double forwardSpeed = FB.fb(targetDistance, distance, 0.4); // TABI 0.4 || PRACTICE 0.
+
 
     if(Math.abs(targetBearing - currentAngle) > 20) {
       forwardSpeed = 0;
     }
 
     // forwardSpeed = 0; //DEBUG
+
+    turn+= Math.signum(turn)*0.08; //TODO: fIXME WHEN MINIPID WORKS PROPERLY
+    // turn+= Math.signum(turn)*0.02; //TODO: fIXME WHEN MINIPID WORKS PROPERLY // TABIIIIIIIIIIIIIIIIIIIII
+
 
     chassis.drive.arcadeDrive(
         forwardSpeed, 
@@ -94,13 +120,29 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   @Override
   public void end(final boolean interrupted) {
     chassis.drive.arcadeDrive(0,0);
-    System.out.println("That's all folks!");
-
+    System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThat's all folks!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return (Math.abs(gyro.getAngle() - targetBearing) < angleTolerance) && (Math.abs(chassis.getAverageDistance() - forwardDistance) < distanceTolerance);
+
+    // angleTolerance = Math.copySign(angleTolerance, targetBearing.getAsDouble());
+
+    SmartDashboard.putNumber("Chassis/angle Error", gyro.getAngle() - (initialBearing + targetBearing) );
+    SmartDashboard.putNumber("Chassis/position Error", chassis.getAverageDistance() - targetDistance);
+    SmartDashboard.putBoolean("Chassis/Exit Total", ( Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance)
+    && ( Clamp.bounded(chassis.getAverageDistance(), targetDistance-distanceTolerance, targetDistance+distanceTolerance) ) ));
+
+    SmartDashboard.putBoolean("Chassis/Exit Angle", Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance));
+
+    return ( Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance)
+    && ( Clamp.bounded(chassis.getAverageDistance(), targetDistance-distanceTolerance, targetDistance+distanceTolerance) ) );
+
+
+
+
+
+
   }
 }

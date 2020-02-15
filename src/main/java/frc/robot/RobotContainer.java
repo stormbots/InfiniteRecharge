@@ -7,12 +7,15 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -122,13 +125,15 @@ public class RobotContainer {
 
     // autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
 
+
     Command turnToShoot = new SequentialCommandGroup(
       //vision.visionStuff();
-      turn(-45)
+      turn(() -> -45)
     );
     
+
     Command turnAwayFromShooting = new SequentialCommandGroup(
-      turn(Constants.INITIAL_COMPASS_HEADING),
+      turn(() -> 45),//calculateDistnaceToHome() ),
       driveForward(-2)
     );
 
@@ -142,11 +147,50 @@ public class RobotContainer {
     return autoCommand;
   }
 
-  public Command turn(double targetAngle) {
-    return new ChassisDriveToHeadingBasic(0, targetAngle, 1, 0.05 /*Meters*/, navX, chassis);
+  public Command turn(DoubleSupplier targetAngle) {
+    return new ChassisDriveToHeadingBasic(0, targetAngle, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
   }
 
   public Command driveForward(double driveDistance) {
-    return new ChassisDriveToHeadingBasic(driveDistance, 0, 1, 0.05 /*Meters*/, navX, chassis);
+    return new ChassisDriveToHeadingBasic(driveDistance, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
   }
+
+  // public double calculateAngleFromHome() {
+  //   return calculateTargetAngle(navX.getCompassHeading(), Constants.INITIAL_COMPASS_HEADING);
+  // }
+
+  // public double calculateTargetAngle(double startAngle, double finalAngle) {
+  //   double angleDifference = finalAngle - startAngle;
+  //   if(angleDifference <= 0) return 360 + angleDifference;
+  //   if(angleDifference <= 180) return angleDifference;
+  //   else return 360 - angleDifference;
+  // }
+
+
+  public double calculateDistnaceToHome() {
+
+    return 0 - navX.getAngle();
+
+    // double initialAngle = navX.getCompassHeading();
+    // double finalAngle = Constants.INITIAL_COMPASS_HEADING;
+
+    // double angleDifference = finalAngle - initialAngle;
+
+    // SmartDashboard.putNumber("Chassis/Pre Modificaiton AngleDifference", angleDifference);
+
+
+    // if(angleDifference > 180) angleDifference += -360;
+    // if(angleDifference < -180) angleDifference += 360;
+
+    // SmartDashboard.putNumber("Chassis/Post Modificaiton AngleDifference", angleDifference);
+
+    // return angleDifference;
+
+  }
+
+
+
+  
+
+
 }
