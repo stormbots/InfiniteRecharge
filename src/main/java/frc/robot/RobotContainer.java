@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDrivePDControl;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
+import frc.robot.commands.ChassisVisionTargeting;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.RunShooter;
@@ -65,6 +66,7 @@ public class RobotContainer {
 
   //Inputs
   Joystick driver = new Joystick(0);
+  JoystickButton visionButton = new JoystickButton(driver, 5);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
 
   Joystick controller = new Joystick(1);
@@ -89,6 +91,7 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    visionButton.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
 
@@ -111,7 +114,6 @@ public class RobotContainer {
       );
 
 
-    //TODO: dELETE ME
     passthrough.setDefaultCommand(new TempPassthroughCommand(()->controller.getRawAxis(3),passthrough));
   }
 
