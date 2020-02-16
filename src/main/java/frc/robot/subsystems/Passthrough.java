@@ -27,12 +27,12 @@ public class Passthrough extends SubsystemBase {
   MiniPID pid;
 
   
-  final double BALLLENGTH = 3.5; //inches
-  final double PASSTHROUGHLENGTH = BALLLENGTH * 5; //Placeholder Number, Replace Later  
+  final double BALLLENGTH = 7; //inches
+  double PASSTHROUGHLENGTH = 27; //Placeholder Number, Replace Later  
   double positionOfFirstBall = 0; //positon ahead of the first ball
   double positionOfLastBall = 0; //position behind the last ball
   double setpoint=0; //targetposition
-  int numberOfBalls = 3;  //The robot can have 3 balls at the start of the match
+  int numberOfBalls = 0;  //The robot can have 3 balls at the start of the match
 
   private final boolean BLOCKED = false; // TODO find correct value
   private final boolean NOTBLOCKED = !BLOCKED; // TODO find correct value
@@ -52,18 +52,20 @@ public class Passthrough extends SubsystemBase {
     switch(Constants.botName){
       case COMP:
       //fallthrough until otherwise known
-      case PRACTICE:
+    case PRACTICE:
+      encoder.setPositionConversionFactor(21.25/42.2); //TODO: make sure this ratio is right, flip numerator and denominator if not right
       pid = new MiniPID(1/3.0,0,0)
-      .setOutputLimits(0.2);
+      .setOutputLimits(0.3);
       ;
-      default:
+    break;
+    default:
       pid = new MiniPID(0,0,0);
     }
 
     motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
+    encoder.setPosition(0);
     pid.setSetpoint(encoder.getPosition());
-    motor.setInverted(true);
-    encoder.setPositionConversionFactor(27.0/38.384); //TODO: make sure this ratio is right, flip numerator and denominator if not right
+    motor.setInverted(false);
   }
 
   @Override
@@ -82,7 +84,7 @@ public class Passthrough extends SubsystemBase {
       numberOfBalls -= numberOfBalls>0 ? 1 : 0;
     };
     
-    if(encoder.getVelocity() > 0){ //Balls moving toward shooter
+    if(encoder.getVelocity() < 0){ //Balls moving toward shooter
       // if(shootSensorLastReading == NOTBLOCKED &&  shootSensorReading == BLOCKED ){
       //   double oldfirstball = positionOfFirstBall;
       //   positionOfFirstBall = encoder.getDistance() + PASSTHROUGHLENGTH;
@@ -93,15 +95,14 @@ public class Passthrough extends SubsystemBase {
         positionOfLastBall = encoder.getPosition();
         if(setpoint == oldlastball) setpoint = positionOfLastBall;
       }
-    }
-
-    if(encoder.getVelocity() < 0 ){ // balls moving away from shooter
+    }else{ // balls moving away from shooter
       // if(shootSensorLastReading == BLOCKED && shootSensorReading == NOTBLOCKED) {
       //   double oldfirstball = positionOfFirstBall;
       //   positionOfFirstBall = encoder.getDistance() + PASSTHROUGHLENGTH;
       //   if(setpoint == oldfirstball) setpoint = positionOfFirstBall;
       // }
       if(intakeSensorLastReading == NOTBLOCKED && intakeSensorReading == BLOCKED) {
+        //don't need to go
         double oldlastball = positionOfLastBall;
         positionOfLastBall = encoder.getPosition();
         if(setpoint == oldlastball) setpoint = positionOfLastBall;
@@ -111,8 +112,7 @@ public class Passthrough extends SubsystemBase {
     switch(passthroughState){
       case IDLE: 
         if(readySensorLastReading != readySensorReading){
-          loadBall();
-          passthroughState = PassthroughState.LOADING; 
+          // loadBall();
         }
       break;
       case LOADING:
@@ -136,12 +136,13 @@ public class Passthrough extends SubsystemBase {
 
 
     //Actuate motors!
+    double output = 0;
     switch(passthroughState){
       case DISABLED:
         motor.set(0);
       break;
       default:
-        double output = pid.getOutput(currentPosition, setpoint);
+        output = pid.getOutput(currentPosition, setpoint);
         motor.set(output);
     }
 
@@ -152,10 +153,13 @@ public class Passthrough extends SubsystemBase {
 
     // Print things to dashboard
     SmartDashboard.putNumber("pt/setpoint", setpoint);
+    SmartDashboard.putString("pt/state", passthroughState.toString());
+    SmartDashboard.putNumber("pt/motorOutput", output);
     SmartDashboard.putNumber("pt/currentPosition", currentPosition);
     SmartDashboard.putNumber("pt/positionOfLastBall", positionOfLastBall);
     SmartDashboard.putNumber("pt/positionOfFirstBall", positionOfFirstBall);
     SmartDashboard.putBoolean("pt/sensorReady", isReadySensorBlocked());
+    SmartDashboard.putNumber("pt/numBalls", numberOfBalls);
     // SmartDashboard.putBoolean("pt/sensorBackOfQueue", intakeSensor.get());
     // SmartDashboard.putBoolean("pt/sensorShooter", shootSensor.get());
 
@@ -188,12 +192,14 @@ public class Passthrough extends SubsystemBase {
   public void shoot(){
     if(passthroughState == PassthroughState.SHOOTING)return;
     passthroughState = PassthroughState.SHOOTING;
-    setpoint = encoder.getPosition()-PASSTHROUGHLENGTH - BALLLENGTH;
+    setpoint = encoder.getPosition() - PASSTHROUGHLENGTH - 2*BALLLENGTH;
   }
 
   /** Dump all balls out the intake */
   public void eject() {   
-    setpoint = encoder.getPosition() + PASSTHROUGHLENGTH;
+    if(passthroughState == PassthroughState.EJECTING)return;
+    passthroughState = PassthroughState.EJECTING;
+    setpoint = encoder.getPosition() + PASSTHROUGHLENGTH + 2*BALLLENGTH;
     numberOfBalls = 0;
   }
 
@@ -204,6 +210,6 @@ public class Passthrough extends SubsystemBase {
   //
   public void reset(){
     passthroughState = PassthroughState.IDLE;
-    setpoint = encoder.getPosition();
+    setpoint = encoder.getPosition(); 
   }
 }

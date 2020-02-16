@@ -23,6 +23,7 @@ import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.PassthroughIdle;
+import frc.robot.commands.PassthroughLoadManually;
 import frc.robot.commands.RunShooter;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
@@ -105,16 +106,10 @@ public class RobotContainer {
     shooterButton.whenPressed(new RunShooter(()->1000, shooter));
 
     
-    loadBall.whenPressed(new InstantCommand(()->{
-      passthrough.loadBall(); 
-    }));
-
-    prepareForLoading.whenPressed(new InstantCommand(()->{
-      passthrough.prepareForLoading(); 
-    }));
+    loadBall.whenPressed(new PassthroughLoadManually(passthrough));
 
     shoot.whenPressed(new InstantCommand(()->{
-      passthrough.shoot(); 
+      passthrough.eject(); 
     }));
 
   }
