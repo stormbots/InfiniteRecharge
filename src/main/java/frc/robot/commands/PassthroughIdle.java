@@ -25,7 +25,7 @@ public class PassthroughIdle extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    passthrough.prepareForLoading();
+    if(passthrough.getBallCount()>0) passthrough.prepareForLoading();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

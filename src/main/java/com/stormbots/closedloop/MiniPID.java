@@ -351,7 +351,6 @@ public class MiniPID{
 		// System.out.printf("Final output %5.2f [ %5.2f, %5.2f , %5.2f  ], eSum %.2f\n",output,Poutput, Ioutput, Doutput,errorSum );
 		// System.out.printf("%5.2f\t%5.2f\t%5.2f\t%5.2f\n",output,Poutput, Ioutput, Doutput );
 
-		SmartDashboard.putNumber("PID error", error);
 		lastOutput=output;
 		return output;
 	}
@@ -437,9 +436,6 @@ public class MiniPID{
 		return this;
 	}
 
-	public boolean isOnTarget(double tolerance){
-		return bounded(setpoint, lastActual-tolerance, lastActual+tolerance);
-	}
 
 	//**************************************
 	// Helper functions

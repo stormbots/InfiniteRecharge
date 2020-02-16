@@ -14,7 +14,10 @@ import com.stormbots.Clamp;
 import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -49,6 +52,10 @@ public class Passthrough extends SubsystemBase {
    * Creates a new Passthrough.
    */
   public Passthrough() {
+    //Throw debug commands on the dashboard
+    SmartDashboard.putData("pt/LoadBall",new InstantCommand(()->loadBall()));
+    SmartDashboard.putData("pt/Shoot",new InstantCommand(()->shoot()));
+    SmartDashboard.putData("pt/Eject",new InstantCommand(()->eject()));
     switch(Constants.botName){
       case COMP:
       //fallthrough until otherwise known
@@ -58,14 +65,25 @@ public class Passthrough extends SubsystemBase {
       .setOutputLimits(0.3);
       ;
     break;
+    case TABI://fallthrough
     default:
-      pid = new MiniPID(0,0,0);
+    encoder.setPositionConversionFactor(21.25/4.0);//set for the wheel on tabi
+    pid = new MiniPID(0.01,0,0).setOutputLimits(0.12);
     }
 
-    motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
-    encoder.setPosition(0);
-    pid.setSetpoint(encoder.getPosition());
     motor.setInverted(false);
+    motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
+    
+    //reset the system's positioning
+    encoder.setPosition(0);
+    positionOfFirstBall=0;
+    positionOfLastBall=0;
+    pid.setSetpoint(encoder.getPosition());
+
+    //avoid sensor edge startup glitches
+    shootSensorLastReading = shootSensor.get();
+    intakeSensorLastReading = intakeSensor.get();
+    readySensorLastReading = readySensor.get();
   }
 
   @Override
@@ -111,29 +129,28 @@ public class Passthrough extends SubsystemBase {
 
     switch(passthroughState){
       case IDLE: 
-        if(readySensorLastReading != readySensorReading){
-          // loadBall();
+        if(readySensorLastReading != readySensorReading && DriverStation.getInstance().isEnabled()){
+          loadBall();
         }
       break;
       case LOADING:
-        if(pid.isOnTarget(1)){
+        if(isOnTarget(1)){
           passthroughState = PassthroughState.IDLE; 
         }
       break;
       case SHOOTING:
-        if(pid.isOnTarget(1)){
+        if(isOnTarget(1)){
           passthroughState = PassthroughState.IDLE; 
         }
       break;
       case EJECTING:
-      if(pid.isOnTarget(1)){
+      if(isOnTarget(1)){
         passthroughState = PassthroughState.IDLE; 
       }
       break;
       default:
       //Do nothing?
     }
-
 
     //Actuate motors!
     double output = 0;
@@ -152,18 +169,19 @@ public class Passthrough extends SubsystemBase {
     readySensorLastReading = readySensorReading;
 
     // Print things to dashboard
-    SmartDashboard.putNumber("pt/setpoint", setpoint);
+    SmartDashboard.putNumber("pt/posTarget", setpoint);
+    SmartDashboard.putNumber("pt/posCurrent", currentPosition);
     SmartDashboard.putString("pt/state", passthroughState.toString());
     SmartDashboard.putNumber("pt/motorOutput", output);
-    SmartDashboard.putNumber("pt/currentPosition", currentPosition);
-    SmartDashboard.putNumber("pt/positionOfLastBall", positionOfLastBall);
-    SmartDashboard.putNumber("pt/positionOfFirstBall", positionOfFirstBall);
+    SmartDashboard.putNumber("pt/posLastBall", positionOfLastBall);
+    SmartDashboard.putNumber("pt/posFirstBall", positionOfFirstBall);
     SmartDashboard.putBoolean("pt/sensorReady", isReadySensorBlocked());
     SmartDashboard.putNumber("pt/numBalls", numberOfBalls);
     // SmartDashboard.putBoolean("pt/sensorBackOfQueue", intakeSensor.get());
     // SmartDashboard.putBoolean("pt/sensorShooter", shootSensor.get());
 
     SmartDashboard.putNumber("pt/output", motor.getOutputCurrent());
+    SmartDashboard.putBoolean("pt/isOnTarget", isOnTarget(1));
   }
 
   public void loadBall() {
@@ -211,5 +229,13 @@ public class Passthrough extends SubsystemBase {
   public void reset(){
     passthroughState = PassthroughState.IDLE;
     setpoint = encoder.getPosition(); 
+  }
+
+  public double getBallCount(){
+    return numberOfBalls;
+  }
+
+  public boolean isOnTarget(double tolerance){
+    return Clamp.bounded(encoder.getPosition(),setpoint-tolerance,setpoint+tolerance);
   }
 }
