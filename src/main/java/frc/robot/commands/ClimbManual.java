@@ -9,26 +9,32 @@ package frc.robot.commands;
 
 import java.util.function.DoubleSupplier;
 
+import com.stormbots.Lerp;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Climber;
 
 /**
  * An example command that uses an example subsystem.
  */
-public class ClimberSetTranslation extends CommandBase {
+public class ClimbManual extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  DoubleSupplier translationPower;
-  private final Climber climber;
+  private Climber Climber;
+  private frc.robot.subsystems.Climber climber;
+  private DoubleSupplier joystickValue;
+  private boolean enable = false;
+
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ClimberSetTranslation(DoubleSupplier translationPower, Climber climber) {
+  public ClimbManual(DoubleSupplier targetHeight, Climber climber) {
     this.climber = climber;
-    this.translationPower = translationPower;
+    this.joystickValue = targetHeight;
     // Use addRequirements() here to declare subsystem dependencies.
-    //addRequirements(subsystem);
+    addRequirements(climber);
   }
 
   // Called when the command is initially scheduled.
@@ -39,7 +45,13 @@ public class ClimberSetTranslation extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //climber.setTranslationPower(translationPower.getAsDouble());
+    //ensure joystick is where we need it before running
+    if(joystickValue.getAsDouble()>0.9)enable=true;
+    if(enable==false)return;
+
+    double height = Lerp.lerp(joystickValue.getAsDouble(), 1, -1, climber.CLIMBER_BASE_HEIGHT, climber.MAX_HEIGHT );
+    // climber.setHeight(height);
+    SmartDashboard.putNumber("climb/targetHeight", height);
   }
 
   // Called once the command ends or is interrupted.

@@ -14,11 +14,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ClimbUp;
+import frc.robot.commands.ClimbManual;
 import frc.robot.commands.ClimberSetHookRotation;
-import frc.robot.commands.ClimberSetPosition;
 import frc.robot.commands.ClimberSetTranslation;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.SpinSpoolNegitive;
+import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -57,8 +58,10 @@ public class RobotContainer {
   Button translationMoveBackwards = new JoystickButton(driver, 10);
   Button armMoveDown = new JoystickButton(driver, 11);
   Button climbButton = new JoystickButton(driver, 1);
-  
-  /**
+  Button tempButtonPositive = new JoystickButton(driver, 2);
+  Button tempButtonNegitive = new JoystickButton(driver, 4);
+  //arm encoder values -0.0238
+    /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
@@ -80,8 +83,11 @@ public class RobotContainer {
     climbHookGrab.whenPressed(new ClimberSetHookRotation(()->180,climber));
     translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
     translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
+    tempButtonPositive.whileHeld(new SpinSpoolPositive(climber));
+    tempButtonNegitive.whileHeld(new SpinSpoolNegitive(climber));
 
-    climbButton.whileHeld(new ClimbUp(climber));
+
+    //climbButton.whileHeld(new ClimbUp(climber));
   }
 
   /** 
@@ -95,11 +101,10 @@ public class RobotContainer {
       );
     //TODO! We want this on a button when held
     //TODO This should also only activate near end of a match eventually
-    climber.setDefaultCommand(
-    //  DEBUG JOYSTICK STUFF
-    //  new ClimberSetPosition(()->Lerp.lerp(driver.getRawAxis(3), -1, 1, 0, 90),climber)
-     new ClimberSetPosition(()->driver.getRawAxis(3)*70,climber)
-    );
+    // climber.setDefaultCommand(
+    //   new ClimbManual(()->driver.getRawAxis(3),climber)
+    // );
+    
 
   }
 
