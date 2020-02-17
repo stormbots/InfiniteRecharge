@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.stormbots.Lerp;
@@ -23,16 +24,20 @@ public class ClimbManual extends CommandBase {
   private Climber Climber;
   private frc.robot.subsystems.Climber climber;
   private DoubleSupplier joystickValue;
-  private boolean enable = false;
+  /** Safety check to avoid joystick errors*/
+  private boolean enableSafety = false;
+  /** Allow a button or game timer to enable */
+  private BooleanSupplier enableOperator;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ClimbManual(DoubleSupplier targetHeight, Climber climber) {
+  public ClimbManual(BooleanSupplier enable, DoubleSupplier targetHeight, Climber climber) {
     this.climber = climber;
     this.joystickValue = targetHeight;
+    this.enableOperator = enable;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(climber);
   }
@@ -46,8 +51,10 @@ public class ClimbManual extends CommandBase {
   @Override
   public void execute() {
     //ensure joystick is where we need it before running
-    if(joystickValue.getAsDouble()>0.9)enable=true;
-    if(enable==false)return;
+    if(joystickValue.getAsDouble()>0.9)enableSafety=true;
+    if(enableSafety==false)return;
+    //ensure operator and/or game timer allows this to run
+    if(enableOperator.getAsBoolean()==false)return;
 
     double height = Lerp.lerp(joystickValue.getAsDouble(), 1, -1, climber.CLIMBER_BASE_HEIGHT, climber.MAX_HEIGHT );
     // climber.setHeight(height);

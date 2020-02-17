@@ -58,8 +58,9 @@ public class RobotContainer {
   Button translationMoveBackwards = new JoystickButton(driver, 10);
   Button armMoveDown = new JoystickButton(driver, 11);
   Button climbButton = new JoystickButton(driver, 1);
+  Button climbEnable = new JoystickButton(driver, 4);
   Button tempButtonPositive = new JoystickButton(driver, 2);
-  Button tempButtonNegitive = new JoystickButton(driver, 4);
+  Button tempButtonNegative = new JoystickButton(driver, 4);
   //arm encoder values -0.0238
     /**
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -79,12 +80,18 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    climbHookReseat.whenPressed(new ClimberSetHookRotation(()->0,climber));
-    climbHookGrab.whenPressed(new ClimberSetHookRotation(()->180,climber));
-    translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
-    translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
+    climbHookReseat.whenPressed(()->{
+      if(!climbEnable.get())return;
+      climber.setHookAngle(0);
+    });
+    climbHookGrab.whenPressed(()->{
+      if(!climbEnable.get())return;
+      climber.setHookAngle(180);
+    });
+    // translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
+    // translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
     tempButtonPositive.whileHeld(new SpinSpoolPositive(climber));
-    tempButtonNegitive.whileHeld(new SpinSpoolNegitive(climber));
+    tempButtonNegative.whileHeld(new SpinSpoolNegitive(climber));
 
 
     //climbButton.whileHeld(new ClimbUp(climber));
@@ -101,9 +108,9 @@ public class RobotContainer {
       );
     //TODO! We want this on a button when held
     //TODO This should also only activate near end of a match eventually
-    // climber.setDefaultCommand(
-    //   new ClimbManual(()->driver.getRawAxis(3),climber)
-    // );
+    climber.setDefaultCommand(
+      new ClimbManual(()->climbEnable.get(),()->driver.getRawAxis(3),climber)
+    );
     
 
   }
