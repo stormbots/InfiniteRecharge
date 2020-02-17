@@ -30,6 +30,15 @@ import frc.robot.commands.EngageIntake;
 import frc.robot.commands.PassthroughIdle;
 import frc.robot.commands.PassthroughLoadManually;
 import frc.robot.commands.RunShooter;
+import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.ChassisDriveManual;
+import frc.robot.commands.ClimbManual;
+import frc.robot.commands.ClimberSetHookRotation;
+import frc.robot.commands.ClimberSetTranslation;
+import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.SpinSpoolNegitive;
+import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
@@ -81,13 +90,21 @@ public class RobotContainer {
   private JoystickButton shoot = new JoystickButton(driver, 4);
 
 
-  /**
+  Button armMoveUp = new JoystickButton(driver, 6);
+  Button climbHookReseat = new JoystickButton(driver, 7);
+  Button translationMoveForwards = new JoystickButton(driver, 8);
+  Button climbHookGrab = new JoystickButton(driver,9);
+  Button translationMoveBackwards = new JoystickButton(driver, 10);
+  Button armMoveDown = new JoystickButton(driver, 11);
+  Button climbButton = new JoystickButton(driver, 1);
+  Button climbEnable = new JoystickButton(driver, 4);
+  Button tempButtonPositive = new JoystickButton(driver, 2);
+  Button tempButtonNegative = new JoystickButton(driver, 4);
+
+  /*
    * The container for the robot.  Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
-    
-
     
     configureDefaultCommands();
 
@@ -119,6 +136,21 @@ public class RobotContainer {
       passthrough.eject(); 
     }));
 
+    climbHookReseat.whenPressed(()->{
+      if(!climbEnable.get())return;
+      climber.setHookAngle(0);
+    });
+    climbHookGrab.whenPressed(()->{
+      if(!climbEnable.get())return;
+      climber.setHookAngle(180);
+    });
+    // translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
+    // translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
+    tempButtonPositive.whileHeld(new SpinSpoolPositive(climber));
+    tempButtonNegative.whileHeld(new SpinSpoolNegitive(climber));
+
+
+    //climbButton.whileHeld(new ClimbUp(climber));
   }
 
   /** 
@@ -131,12 +163,15 @@ public class RobotContainer {
       new ChassisDriveManual(()->driver.getRawAxis(1),  ()->driver.getRawAxis(2), chassis)
       );
 
-      passthrough.setDefaultCommand(
-        new PassthroughIdle(passthrough)
-      );
+    passthrough.setDefaultCommand(
+      new PassthroughIdle(passthrough)
+    );
 
+    //TODO This should also only activate near end of a match eventually
+    climber.setDefaultCommand(
+      new ClimbManual(()->climbEnable.get(),()->driver.getRawAxis(3),climber)
+    );
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
