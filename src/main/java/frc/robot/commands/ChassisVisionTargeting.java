@@ -45,6 +45,8 @@ public class ChassisVisionTargeting extends CommandBase {
     //TODO: We shouldn't need to reset for vision to work right and apparently it'll mess up Zach and his autos
     //gyro.reset();
 
+    pidTurn = chassis.getPID();
+
     pidTurn.reset();
     pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
     pidTurn.setP(0.012);
