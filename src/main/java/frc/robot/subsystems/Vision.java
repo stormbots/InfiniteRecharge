@@ -71,7 +71,7 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y))));
+    distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y)))+5);//5 is a MAGIC! just our weird error, accept it.
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("vision/LimelightX", x);
@@ -103,7 +103,12 @@ public class Vision extends SubsystemBase {
   }
 
   public void targetPipeline(){
-    table.getEntry("pipeline").setNumber(2); //0 for NON_3D
+    table.getEntry("pipeline").setNumber(0); //0 for NON_3D, 2 for 3D
+    table.getEntry("ledMode").setNumber(3);
+  }
+  public void targetPipelineFancy(){
+    table.getEntry("pipeline").setNumber(2); //0 for NON_3D, 2 for 3D
+    table.getEntry("ledMode").setNumber(3);
   }
 
   public void driverPipeline(){

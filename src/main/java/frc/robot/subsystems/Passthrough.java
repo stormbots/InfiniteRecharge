@@ -58,13 +58,12 @@ public class Passthrough extends SubsystemBase {
       //TODO: Calibrate compbot
       encoder.setPositionConversionFactor(21.25/42.2);
       pid = new MiniPID(1/3.0,0,0)
-      .setOutputLimits(0.3);
-      ;
+      .setOutputLimits(0.4);
       motor.setInverted(false);
     break;
     case PRACTICE:
       encoder.setPositionConversionFactor(21.25/42.2);
-      pid = new MiniPID(1/3.0,0,0)
+      pid = new MiniPID(1/5.0,0,0)
       .setOutputLimits(0.3);
       ;
       motor.setInverted(false);
@@ -168,7 +167,7 @@ public class Passthrough extends SubsystemBase {
       break;
       default:
         output = pid.getOutput(currentPosition, setpoint);
-        output += output<0 ? -0.08 : 0.08; //add estimated static feed-forward to help with generic system friction
+        //output += output<0 ? -0.04 : 0.04; //add estimated static feed-forward to help with generic system friction
         motor.set(output);
     }
 

@@ -30,10 +30,10 @@ public class Constants {
     // public static double VISION_DESK_CLERK_TARGET_HEIGHT = 46.5;
 
     /** Height of the camera, in inches */
-    public static double CAMERA_MOUNT_HEIGHT = 8.25;
+    public static double CAMERA_MOUNT_HEIGHT = 16.25;
 
     /**Mount tilt back, in degrees*/
-    public static double CAMERA_MOUNT_ANGLE = 25;
+    public static double CAMERA_MOUNT_ANGLE = 13.64;
   
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;

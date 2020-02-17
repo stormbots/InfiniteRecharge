@@ -49,9 +49,9 @@ public class ChassisVisionTargeting extends CommandBase {
 
     pidTurn.reset();
     pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
-    pidTurn.setP(0.012);
-    pidTurn.setI(0.003);
-    pidTurn.setD(0.0015);
+    pidTurn.setP(0.013);
+    pidTurn.setI(0.001);
+    // pidTurn.setD(0.0015);
     pidTurn.setMaxIOutput(0.15);
     pidTurn.setOutputLimits(0.35);
 
@@ -70,7 +70,7 @@ public class ChassisVisionTargeting extends CommandBase {
 
     //Add a static feed-forward which makes things much more robust
     if(Constants.botName!=BotName.TABI){
-      outputTurn += outputTurn>0 ? 0.08 : -0.08;
+      outputTurn += outputTurn>0 ? 0.035 : -0.035;
     }
 
     chassis.drive.arcadeDrive(0, outputTurn,false);

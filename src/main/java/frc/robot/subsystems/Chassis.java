@@ -201,7 +201,7 @@ public class Chassis extends SubsystemBase {
         ACCEL_DISTANCE = 0.5;
       break;
 
-      case COMP: // THESE ARE CURRENTLY STORMX VALUES
+      case COMP:
         left.setInverted(true);
         right.setInverted(true);
         left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
