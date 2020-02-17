@@ -25,24 +25,23 @@ public class Shooter extends SubsystemBase {
   private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
-  MiniPID feedForwardPID = new MiniPID(0,0,0,1/5700.0);
-  MiniPID errorPID = new MiniPID(1/5700.0,0,0);
+  MiniPID feedForwardPID = new MiniPID(0,0,0,1/5700.0).setSetpointRange(2000/2.0);;
+  MiniPID errorPID = new MiniPID(1/5700.0,0,0).setOutputLimits(0.0, 0.5);;
 
   double targetRPM = 0;
 
   public Shooter() {
     switch(Constants.botName){
-      case PRACTICE:
-      break;
       case COMP:
+        feederMotor.setInverted(true);
       break;
+
+      case PRACTICE:
       default:
+        feederMotor.setInverted(true);
+      break;
     }
-    // feederMotor.setInverted(false);
-    feederMotor.setInverted(true);
-    shooterMotor.setIdleMode(IdleMode.kCoast);
-    feedForwardPID.setSetpointRange(2000/2.0);
-    errorPID.setOutputLimits(0.0, 0.5);
+    shooterMotor.setIdleMode(IdleMode.kBrake);
   }
 
   public void reset() {
@@ -62,7 +61,10 @@ public class Shooter extends SubsystemBase {
       errorOutput = 0.0;
     }
 
-    feedForwardOutput *=2; //TODO Feeder should go faster, but need to find out by how much
+    feedForwardOutput *=2; 
+    //TODO Feeder is geared to 1/10th the speed of shooter. Just run it as fast as possible now
+    // and we'll be moving it to the Passthrough in a bit.
+
 
     shooterMotor.set(feedForwardOutput + errorOutput);
     feederMotor.set(feedForwardOutput);

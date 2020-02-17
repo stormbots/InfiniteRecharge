@@ -73,31 +73,38 @@ public class Chassis extends SubsystemBase {
   public Chassis() {    
     switch(Constants.botName){
       case PRACTICE:
-      //left and right motors are swapped
-      left = new CANSparkMax(4,MotorType.kBrushless);
-      leftA = new CANSparkMax(5,MotorType.kBrushless);
-      leftB = new CANSparkMax(6,MotorType.kBrushless);
-      right = new CANSparkMax(1,MotorType.kBrushless);
-      rightA = new CANSparkMax(2,MotorType.kBrushless);
-      rightB = new CANSparkMax(3,MotorType.kBrushless);
+        //left and right motors are swapped
+        left = new CANSparkMax(4,MotorType.kBrushless);
+        leftA = new CANSparkMax(5,MotorType.kBrushless);
+        leftB = new CANSparkMax(6,MotorType.kBrushless);
+        right = new CANSparkMax(1,MotorType.kBrushless);
+        rightA = new CANSparkMax(2,MotorType.kBrushless);
+        rightB = new CANSparkMax(3,MotorType.kBrushless);
 
-      LEFT_INVERSION = 1;
-      RIGHT_INVERSION = -1;
-    break;
+        LEFT_INVERSION = 1;
+        RIGHT_INVERSION = -1;
+      break;
       case COMP:
         //456 on right
         //123 on left
-      default: 
-      //left and right motors are propper
-      left = new CANSparkMax(1,MotorType.kBrushless);
-      leftA = new CANSparkMax(2,MotorType.kBrushless);
-      leftB = new CANSparkMax(3,MotorType.kBrushless);
-      right = new CANSparkMax(4,MotorType.kBrushless);
-      rightA = new CANSparkMax(5,MotorType.kBrushless);
-      rightB = new CANSparkMax(6,MotorType.kBrushless);
-      LEFT_INVERSION = -1;
-      RIGHT_INVERSION = 1;
-
+        left = new CANSparkMax(1,MotorType.kBrushless);
+        leftA = new CANSparkMax(2,MotorType.kBrushless);
+        leftB = new CANSparkMax(3,MotorType.kBrushless);
+        right = new CANSparkMax(4,MotorType.kBrushless);
+        rightA = new CANSparkMax(5,MotorType.kBrushless);
+        rightB = new CANSparkMax(6,MotorType.kBrushless);
+        LEFT_INVERSION = -1;
+        RIGHT_INVERSION = 1;
+      break;
+      case TABI: 
+        left = new CANSparkMax(1,MotorType.kBrushless);
+        leftA = new CANSparkMax(2,MotorType.kBrushless);
+        leftB = new CANSparkMax(3,MotorType.kBrushless);
+        right = new CANSparkMax(4,MotorType.kBrushless);
+        rightA = new CANSparkMax(5,MotorType.kBrushless);
+        rightB = new CANSparkMax(6,MotorType.kBrushless);
+        LEFT_INVERSION = -1;
+        RIGHT_INVERSION = 1;
     }
 
     left.setIdleMode(IdleMode.kBrake);
@@ -108,15 +115,16 @@ public class Chassis extends SubsystemBase {
     rightB.setIdleMode(IdleMode.kCoast);
 
     switch(Constants.botName){
-      case TABI:
-      kP = 0.0;//507;//13.5;//
+      case COMP:
+      //TODO: Calculate properly: Using practice bot as reference temporarily
+      kP = 0.551;
       kD = 0.0;
     
-      kS = 0.152;//0.128;
-      kV = 1.98;//0.077;
-      kA = 0;//0.354;//0.0109;
+      kS = 0.166;
+      kV = 0.121;
+      kA = 0.0122;
     
-      maxChassisVelocity = 3;
+      maxChassisVelocity = 2;
       break;
 
       case PRACTICE: // THE PROPER GEARING FOUND EXPERIMENTALLY IS 4.76/10 or 0.476
@@ -130,15 +138,18 @@ public class Chassis extends SubsystemBase {
       maxChassisVelocity = 2;
       break;
 
-      default:
-      kP = 0;
-      kD = 0;
+      case TABI: //falls through to default
+      default://default needed to make compiler happy
+      kP = 0.0;//507;//13.5;//
+      kD = 0.0;
     
-      kS = 0;
-      kV = 0;
-      kA = 0;
+      kS = 0.152;//0.128;
+      kV = 1.98;//0.077;
+      kA = 0;//0.354;//0.0109;
     
-      maxChassisVelocity = 0;
+      maxChassisVelocity = 3;
+      break;
+
     }
 
 
@@ -257,12 +268,9 @@ public class Chassis extends SubsystemBase {
     // SmartDashboard.putBoolean("Chassis/shifter status", shifter.get());
     SmartDashboard.putNumber("Chassis/average distance", getAverageDistance());
     SmartDashboard.putNumber("Chassis/average velocity", getAverageVelocity());
-    SmartDashboard.putNumber("Chassis/left velocity", left.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Chassis/velocityLeft", left.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Chassis/velocityRight", right.getEncoder().getVelocity());
     SmartDashboard.putNumber("Chassis/inital compass heading", Constants.INITIAL_COMPASS_HEADING);
-
-
-
-    
   }
 
 

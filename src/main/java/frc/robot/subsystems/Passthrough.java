@@ -52,26 +52,29 @@ public class Passthrough extends SubsystemBase {
    * Creates a new Passthrough.
    */
   public Passthrough() {
-    //Throw debug commands on the dashboard
-    SmartDashboard.putData("pt/LoadBall",new InstantCommand(()->loadBall()));
-    SmartDashboard.putData("pt/Shoot",new InstantCommand(()->shoot()));
-    SmartDashboard.putData("pt/Eject",new InstantCommand(()->eject()));
+    //Initialize the particular robot
     switch(Constants.botName){
-      case COMP:
-      //fallthrough until otherwise known
-    case PRACTICE:
-      encoder.setPositionConversionFactor(21.25/42.2); //TODO: make sure this ratio is right, flip numerator and denominator if not right
+    case COMP:
+      //TODO: Calibrate compbot
+      encoder.setPositionConversionFactor(21.25/42.2);
       pid = new MiniPID(1/3.0,0,0)
       .setOutputLimits(0.3);
       ;
+      motor.setInverted(false);
     break;
-    case TABI://fallthrough
+    case PRACTICE:
+      encoder.setPositionConversionFactor(21.25/42.2);
+      pid = new MiniPID(1/3.0,0,0)
+      .setOutputLimits(0.3);
+      ;
+      motor.setInverted(false);
+    break;
+    case TABI://fallthrough to default
     default:
-    encoder.setPositionConversionFactor(21.25/4.0);//set for the wheel on tabi
-    pid = new MiniPID(0.01,0,0).setOutputLimits(0.12);
+      encoder.setPositionConversionFactor(21.25/4.0);//~1 rotation on tabi's wheel
+      pid = new MiniPID(0.01,0,0).setOutputLimits(0.12);
     }
 
-    motor.setInverted(false);
     motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
     
     //reset the system's positioning
@@ -84,6 +87,11 @@ public class Passthrough extends SubsystemBase {
     shootSensorLastReading = shootSensor.get();
     intakeSensorLastReading = intakeSensor.get();
     readySensorLastReading = readySensor.get();
+
+    //Throw debug commands on the dashboard
+    SmartDashboard.putData("pt/LoadBall",new InstantCommand(()->loadBall()));
+    SmartDashboard.putData("pt/Shoot",new InstantCommand(()->shoot()));
+    SmartDashboard.putData("pt/Eject",new InstantCommand(()->eject()));
   }
 
   @Override
@@ -160,6 +168,7 @@ public class Passthrough extends SubsystemBase {
       break;
       default:
         output = pid.getOutput(currentPosition, setpoint);
+        output += output<0 ? -0.08 : 0.08; //add estimated static feed-forward to help with generic system friction
         motor.set(output);
     }
 

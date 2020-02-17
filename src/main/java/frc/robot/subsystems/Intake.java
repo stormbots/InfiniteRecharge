@@ -13,17 +13,18 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
 
   CANSparkMax sideMotor = new CANSparkMax(8,MotorType.kBrushless);
   CANSparkMax centerMotor = new CANSparkMax(7, MotorType.kBrushless);
   Solenoid solenoid = new Solenoid(2);
-  private final boolean UP = false;
-  private final boolean DOWN = ! UP;
+  private boolean UP;
+  private boolean DOWN;
 
-  private final double SIDEMOTORSPEED = 0.6;
-  private final double CENTERMOTORSPEED = 1.0;
+  private double SIDEMOTORSPEED;
+  private double CENTERMOTORSPEED;
   
   //functions: 
   //engage/disengage
@@ -43,14 +44,32 @@ public class Intake extends SubsystemBase {
    * Creates a new Intake.
    */
   public Intake() {
-     centerMotor.setInverted(true);
-     sideMotor.setInverted(false);
-
-     centerMotor.setSmartCurrentLimit(6, 20, 5);
-     sideMotor.setSmartCurrentLimit(6, 20, 5);
-
-     intakeUp();
+    switch(Constants.botName){
+      case COMP:
+        centerMotor.setInverted(true);
+        sideMotor.setInverted(false);
+  
+        centerMotor.setSmartCurrentLimit(6, 20, 5);
+        sideMotor.setSmartCurrentLimit(6, 20, 5);
+        UP = false;
+        DOWN = ! UP;
+      break;
+      case TABI:
+      //no break: fallthrought to practice
+      case PRACTICE:
+        centerMotor.setInverted(true);
+        sideMotor.setInverted(false);
+  
+        centerMotor.setSmartCurrentLimit(6, 20, 5);
+        sideMotor.setSmartCurrentLimit(6, 20, 5);
+        UP = false;
+        DOWN = ! UP;
     }
+
+    SIDEMOTORSPEED = 0.6;
+    CENTERMOTORSPEED = 1.0;
+    intakeUp();
+  }
 
   public void engage(){
     intakeDown();
@@ -88,7 +107,7 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    // SmartDashboard.putNumber("intake/centerAmps", centerMotor.getOutputCurrent());
-    // SmartDashboard.putNumber("intake/sideAmps", sideMotor.getOutputCurrent());
+    SmartDashboard.putNumber("intake/centerAmps", centerMotor.getOutputCurrent());
+    SmartDashboard.putNumber("intake/sideAmps", sideMotor.getOutputCurrent());
   }
 }
