@@ -15,29 +15,21 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ChassisDrivePDControl;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
+import frc.robot.commands.ClimbManual;
 import frc.robot.commands.DisengageIntake;
 import frc.robot.commands.EngageIntake;
 import frc.robot.commands.PassthroughIdle;
-import frc.robot.commands.PassthroughLoadManually;
 import frc.robot.commands.RunShooter;
-import edu.wpi.first.wpilibj2.command.button.Button;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ClimbManual;
-import frc.robot.commands.ClimberSetHookRotation;
-import frc.robot.commands.ClimberSetTranslation;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.commands.SpinSpoolNegitive;
+import frc.robot.commands.SpinSpoolNegative;
 import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
@@ -77,29 +69,26 @@ public class RobotContainer {
 
   //Inputs
   Joystick driver = new Joystick(0);
-  JoystickButton visionButton = new JoystickButton(driver, 5);
+  JoystickButton visionAimToTarget = new JoystickButton(driver, 5);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
 
   Joystick controller = new Joystick(1);
   Button intakeButton = new JoystickButton(controller, 1);
-  Button shooterButton = new JoystickButton(controller, 2);
+  Button shooterSpinDefaultSpeed = new JoystickButton(controller, 2);
+  Button shooterSpinCalculatedSpeed = new JoystickButton(controller, 3);//TODO: Implement properly
+  JoystickButton loadBallManually = new JoystickButton(controller, 4);//backup button: Doesn't need to be used much
+  JoystickButton shoot = new JoystickButton(controller, 5);
+  JoystickButton eject = new JoystickButton(controller, 6);
 
-  private JoystickButton loadBall = new JoystickButton(driver, 1);
-  private JoystickButton prepareForLoading = new JoystickButton(driver, 2);
-  private JoystickButton prepareForShooting = new JoystickButton(driver, 3);
-  private JoystickButton shoot = new JoystickButton(driver, 4);
+  Button climbEnable = new JoystickButton(controller, 7);
+  Button climbHookRetract = new JoystickButton(controller, 8);
+  Button climbHookGrab = new JoystickButton(controller,9);
+  Button climbTranslateRight = new JoystickButton(controller, 10);
+  Button climbTranslateSideways = new JoystickButton(controller, 11);
 
-
-  Button armMoveUp = new JoystickButton(driver, 6);
-  Button climbHookReseat = new JoystickButton(driver, 7);
-  Button translationMoveForwards = new JoystickButton(driver, 8);
-  Button climbHookGrab = new JoystickButton(driver,9);
-  Button translationMoveBackwards = new JoystickButton(driver, 10);
-  Button armMoveDown = new JoystickButton(driver, 11);
-  Button climbButton = new JoystickButton(driver, 1);
-  Button climbEnable = new JoystickButton(driver, 4);
-  Button tempButtonPositive = new JoystickButton(driver, 2);
-  Button tempButtonNegative = new JoystickButton(driver, 4);
+  //DEBUG: Will need to be removed soon
+  Button tempClimbSpoolPositive = new JoystickButton(controller, 12);
+  Button tempClimbSpoolNegative = new JoystickButton(controller, 13);
 
   /*
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -119,24 +108,30 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    visionButton.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
+    /* Driver Buttons */
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
+    visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
 
+    /* Player 2 normal Buttons */
     intakeButton.whenPressed(new EngageIntake(intake));
     intakeButton.whenReleased(new DisengageIntake(intake).withTimeout(0.1));
-    //alternate toggle version
-    //intakeButton.toggleWhenPressed(engage.andThen(disengage.withTimeout(0.1))); 
-    shooterButton.whenPressed(new RunShooter(()->1000, shooter));
 
+    shooterSpinDefaultSpeed.whileHeld(new RunShooter(()->1000, shooter));
+
+    shooterSpinCalculatedSpeed.whileHeld(new RunShooter(()->{
+      if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
+      else { return 1000;}
+    }, shooter));
     
-    loadBall.whenPressed(new PassthroughLoadManually(passthrough));
+    shoot.whenPressed(()->passthrough.shoot());
+    loadBallManually.whenPressed(()->passthrough.loadBall());
+    eject.whenPressed(()->passthrough.eject());
+      
 
-    shoot.whenPressed(new InstantCommand(()->{
-      passthrough.eject(); 
-    }));
+    /*Player 2 Climb Buttons */
 
-    climbHookReseat.whenPressed(()->{
+    climbHookRetract.whenPressed(()->{
       if(!climbEnable.get())return;
       climber.setHookAngle(0);
     });
@@ -144,13 +139,13 @@ public class RobotContainer {
       if(!climbEnable.get())return;
       climber.setHookAngle(180);
     });
+    //TODO: Not implemented in hardware yet
     // translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
     // translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
-    tempButtonPositive.whileHeld(new SpinSpoolPositive(climber));
-    tempButtonNegative.whileHeld(new SpinSpoolNegitive(climber));
 
-
-    //climbButton.whileHeld(new ClimbUp(climber));
+    /*Debug Buttons */ //TODO: Remove these before competitions
+    tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
+    tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
   }
 
   /** 
@@ -171,6 +166,16 @@ public class RobotContainer {
     climber.setDefaultCommand(
       new ClimbManual(()->climbEnable.get(),()->driver.getRawAxis(3),climber)
     );
+
+    //Ensure that after vision is used, it returns to Driver view
+    vision.setDefaultCommand( new FunctionalCommand(
+      ()->vision.driverPipeline(),
+      ()->{}, 
+      (interrupted)->{}, 
+      ()->false,
+      vision
+    ));
+    
   }
 
   /**

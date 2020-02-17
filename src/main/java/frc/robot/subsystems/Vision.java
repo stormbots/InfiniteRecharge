@@ -7,17 +7,22 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.CAMERA_MOUNT_ANGLE;
+import static frc.robot.Constants.CAMERA_MOUNT_HEIGHT;
+import static frc.robot.Constants.SHOOTER_WHEEL_DIAMETER;
+import static frc.robot.Constants.VISION_TARGET_HEIGHT;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
   public AHRS gyro;
+
 
   NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
   NetworkTableEntry tx = table.getEntry("tx");
@@ -34,7 +39,7 @@ public class Vision extends SubsystemBase {
   /**
    * Creates a new Vision.
    */
-  public Vision(final AHRS navX) {
+  public Vision(AHRS navX) {
     this.gyro = navX;
 
     table = NetworkTableInstance.getDefault().getTable("limelight");
@@ -64,16 +69,8 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    final double TARGET_HEIGHT = 92;
-    final double MOUNT_HEIGHT = 8.25;
-    final double MOUNT_ANGLE_RADIANS = 25;
-
-    final double distance = ((TARGET_HEIGHT-MOUNT_HEIGHT)/(Math.tan(Math.toRadians(MOUNT_ANGLE_RADIANS+y))));
+    distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y))));
     
-    // target height - mount height / tan(mounting angle in radians + error y)
-    //92 is FRC target height and 46.5 is clerk desk target height
-    //has a roughly 3 inch error
-
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("vision/LimelightX", x);
@@ -104,6 +101,26 @@ public class Vision extends SubsystemBase {
   }
 
   public void driverPipeline(){
+    validTarget=false;
     table.getEntry("pipeline").setNumber(1);
   }
+
+  public boolean isTargetValid(){
+    return validTarget;
+  }
+
+  /** Returns distance, in Inches */
+  public double getDistance(){
+    return validTarget ? distance : 0;
+  }
+
+  /** Calculates and returns a target RPM needed to hit the  */
+  public double getRPMForDistance(double distanceInInches){
+    double diameter= SHOOTER_WHEEL_DIAMETER; //from Constants.java: You'll need this for the calculation so I stuffed it here to make it easier
+    // TODO: Impliment me 
+    double targetRPM = 1000;
+    return targetRPM;
+  }
+  
+
 }

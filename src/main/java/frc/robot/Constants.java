@@ -22,5 +22,28 @@ public class Constants {
     /** Convert Inches to Meter */
     public static double INCHES_TO_METERS = 0.0254;
 
+    /** Initial compass bearing of the robot on boot. Potentially useful. Set in  */
     public static double INITIAL_COMPASS_HEADING = 0;
+
+
+    public static double VISION_TARGET_HEIGHT = 92;
+    // public static double VISION_DESK_CLERK_TARGET_HEIGHT = 46.5;
+
+    /** Height of the camera, in inches */
+    public static double CAMERA_MOUNT_HEIGHT = 8.25;
+
+    /**Mount tilt back, in degrees*/
+    public static double CAMERA_MOUNT_ANGLE = 25;
+  
+    /** Diameter of the shooter wheel, in inches*/
+    public static double SHOOTER_WHEEL_DIAMETER=4;
+
+
+    /** In case we need to manage robot differences, we can do so here.*/
+    public static void Initialize(){
+        if(botName==BotName.COMP){
+
+        }else{ //all other bots
+        }
+    }
 }

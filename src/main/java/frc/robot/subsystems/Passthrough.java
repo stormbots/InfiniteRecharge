@@ -175,12 +175,14 @@ public class Passthrough extends SubsystemBase {
     SmartDashboard.putNumber("pt/motorOutput", output);
     SmartDashboard.putNumber("pt/posLastBall", positionOfLastBall);
     SmartDashboard.putNumber("pt/posFirstBall", positionOfFirstBall);
-    SmartDashboard.putBoolean("pt/sensorReady", isReadySensorBlocked());
+    SmartDashboard.putBoolean("pt/isReadySensorBlocked", isReadySensorBlocked());
+    SmartDashboard.putBoolean("pt/sensorRawShoot", shootSensor.get());
+    SmartDashboard.putBoolean("pt/sensorRawIntake", intakeSensor.get());
+    SmartDashboard.putBoolean("pt/sensorRawReady", readySensor.get());
     SmartDashboard.putNumber("pt/numBalls", numberOfBalls);
     // SmartDashboard.putBoolean("pt/sensorBackOfQueue", intakeSensor.get());
     // SmartDashboard.putBoolean("pt/sensorShooter", shootSensor.get());
 
-    SmartDashboard.putNumber("pt/output", motor.getOutputCurrent());
     SmartDashboard.putBoolean("pt/isOnTarget", isOnTarget(1));
   }
 

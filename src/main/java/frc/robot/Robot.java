@@ -47,6 +47,7 @@ public class Robot extends TimedRobot {
     }
     Preferences.getInstance().putString("botName",botString);
     SmartDashboard.setPersistent("Preferences/botName");
+    Constants.Initialize();
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.

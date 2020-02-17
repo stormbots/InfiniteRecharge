@@ -14,6 +14,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
+import frc.robot.Constants.BotName;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Vision;
 
@@ -47,23 +49,26 @@ public class ChassisVisionTargeting extends CommandBase {
     pidTurn.setD(0.0015);
     pidTurn.setMaxIOutput(0.15);
     pidTurn.setOutputLimits(0.35);
+
+    vision.targetPipeline();
+    vision.lightsOn();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    //directly off limelight
-    //double output = pid.getOutput(x, 0);
-    //driver.arcadeDrive(0, output);
-
-    vision.targetPipeline();
-    vision.lightsOn();
-    
-    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+    //Direct vision backup method
     // double outputTurn = pidTurn.getOutput(0, vision.getTargetHeading());
-    chassis.drive.arcadeDrive(0, outputTurn,true); //wrong and bad
-    // chassis.drive.arcadeDrive(0, outputTurn,false);  //good but needs tuning
+  
+    //preferred gyro method
+    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+
+    //Add a static feed-forward which makes things much more robust
+    if(Constants.botName!=BotName.TABI){
+      outputTurn += outputTurn>0 ? 0.08 : -0.08;
+    }
+
+    chassis.drive.arcadeDrive(0, outputTurn,false);
 
     //TODO Chassis inversion thing! Arcade drive backwards! 
     //keep an eye out for when it's fixed or not working - may need a "-"

@@ -17,7 +17,7 @@ import frc.robot.subsystems.Climber;
 /**
  * An example command that uses an example subsystem.
  */
-public class SpinSpoolNegitive extends CommandBase {
+public class SpinSpoolNegative extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private frc.robot.subsystems.Climber climber;
 
@@ -26,7 +26,7 @@ public class SpinSpoolNegitive extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public SpinSpoolNegitive(Climber climber) {
+  public SpinSpoolNegative(Climber climber) {
     this.climber = climber;
     // Use addRequirements() here to declare subsystem dependencies.
     //addRequirements(subsystem);
