@@ -74,8 +74,8 @@ public class RobotContainer {
 
   Joystick controller = new Joystick(1);
   Button intakeButton = new JoystickButton(controller, 1);
-  Button shooterSpinDefaultSpeed = new JoystickButton(controller, 2);
-  Button shooterSpinCalculatedSpeed = new JoystickButton(controller, 3);//TODO: Implement properly
+  Button shooterSpinCalculatedSpeed = new JoystickButton(controller, 2);//TODO: Implement properly
+  Button shooterSpinDefaultSpeed = new JoystickButton(controller, 3);
   JoystickButton loadBallManually = new JoystickButton(controller, 4);//backup button: Doesn't need to be used much
   JoystickButton shoot = new JoystickButton(controller, 5);
   JoystickButton eject = new JoystickButton(controller, 6);
