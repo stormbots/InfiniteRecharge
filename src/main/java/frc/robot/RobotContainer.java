@@ -25,10 +25,10 @@ import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
 import frc.robot.commands.ClimbManual;
-import frc.robot.commands.DisengageIntake;
-import frc.robot.commands.EngageIntake;
+import frc.robot.commands.IntakeDisengage;
+import frc.robot.commands.IntakeEngage;
 import frc.robot.commands.PassthroughIdle;
-import frc.robot.commands.RunShooter;
+import frc.robot.commands.ShooterSetRPM;
 import frc.robot.commands.SpinSpoolNegative;
 import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
@@ -114,12 +114,12 @@ public class RobotContainer {
     visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
 
     /* Player 2 normal Buttons */
-    intakeButton.whenPressed(new EngageIntake(intake));
-    intakeButton.whenReleased(new DisengageIntake(intake).withTimeout(0.1));
+    intakeButton.whenPressed(new IntakeEngage(intake));
+    intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
-    shooterSpinDefaultSpeed.whileHeld(new RunShooter(()->1000, shooter));
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->1000, shooter));
 
-    shooterSpinCalculatedSpeed.whileHeld(new RunShooter(()->{
+    shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
       if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
       else { return 1000;}
     }, shooter));
@@ -185,17 +185,32 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
+    //To help with integration, I expect our auto is going to look like this sequence: 
+
+    // new ShooterSetRPM(()->1000, shooter); //parallel 
+    // //rotate approximately to goal (depending on vision)
+
+    // new ChassisVisionTargeting(vision, navX, chassis)
+    //   .withTimeout(2)
+    //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } );
+    // new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(3);
+    // new ShooterSetRPM(()->0, shooter).withTimeout(0);
+    // //turn back
+    // new IntakeEngage(intake);
+    // //drive
+    // new IntakeDisengage(intake);
+
+
     // autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
 
 
     Command turnToShoot = new SequentialCommandGroup(
-      //vision.visionStuff();
       turn(() -> -45)
     );
     
 
     Command turnAwayFromShooting = new SequentialCommandGroup(
-      turn(() -> 45),//calculateDistnaceToHome() ),
+      turn(() -> 45),//calculateAngleToInitialCompassBearing() ),
       driveForward(-2)
     );
 
@@ -229,25 +244,26 @@ public class RobotContainer {
   // }
 
 
-  public double calculateDistnaceToHome() {
+  public double calculateAngleToInitialCompassBearing() {
 
+    //Valid basically as long as we never reset the navx's gyro
     return 0 - navX.getAngle();
 
-    // double initialAngle = navX.getCompassHeading();
-    // double finalAngle = Constants.INITIAL_COMPASS_HEADING;
+    /* TODO: We may or may not need this code, leave it in here for now
+    //Does not work if the gyro is un-calibrated.
+    double initialAngle = navX.getCompassHeading();
+    double finalAngle = Constants.INITIAL_COMPASS_HEADING;
+    double angleDifference = finalAngle - initialAngle;
+    SmartDashboard.putNumber("chassis/Pre Modification AngleDifference", angleDifference);
+    
+    if(angleDifference > 180) angleDifference += -360;
+    if(angleDifference < -180) angleDifference += 360;
+    
+    SmartDashboard.putNumber("chassis/Post Modification AngleDifference", angleDifference);
 
-    // double angleDifference = finalAngle - initialAngle;
-
-    // SmartDashboard.putNumber("Chassis/Pre Modificaiton AngleDifference", angleDifference);
-
-
-    // if(angleDifference > 180) angleDifference += -360;
-    // if(angleDifference < -180) angleDifference += 360;
-
-    // SmartDashboard.putNumber("Chassis/Post Modificaiton AngleDifference", angleDifference);
-
-    // return angleDifference;
-
+    return angleDifference;
+    //*/
+    
   }
 
 

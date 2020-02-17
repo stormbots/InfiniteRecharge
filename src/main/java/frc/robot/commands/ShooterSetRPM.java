@@ -7,45 +7,51 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
+import com.stormbots.closedloop.MiniPID;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 
 /**
- * An example command that uses an example subsystem.
+ * Runs the PID shooter.
  */
-public class DisengageIntake extends CommandBase {
+public class ShooterSetRPM extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Intake intake;
+  private final Shooter shooter;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DisengageIntake(Intake intake) {
-    this.intake = intake;
+   DoubleSupplier targetRPM ;
+
+  public ShooterSetRPM(DoubleSupplier targetRPM, Shooter shooter) {
+    this.shooter = shooter;
+    this.targetRPM = targetRPM;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(intake);
+    addRequirements(shooter);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.intakeUp();
+    shooter.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  
   public void execute() {
-    intake.intakeOn();
+    shooter.setRPM(targetRPM.getAsDouble());
   }
-  
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.intakeOff();
+    shooter.setRPM(0);
   }
 
   // Returns true when the command should end.

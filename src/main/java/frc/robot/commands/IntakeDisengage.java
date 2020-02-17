@@ -7,56 +7,50 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import com.stormbots.closedloop.MiniPID;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Intake;
 
 /**
- * Runs the PID shooter.
+ * An example command that uses an example subsystem.
  */
-public class RunShooter extends CommandBase {
+public class IntakeDisengage extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Shooter shooter;
+  private final Intake intake;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-   DoubleSupplier targetRPM ;
-
-  public RunShooter(DoubleSupplier targetRPM, Shooter shooter) {
-    this.shooter = shooter;
-    this.targetRPM = targetRPM;
+  public IntakeDisengage(Intake intake) {
+    this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(shooter);
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.reset();
+    intake.intakeUp();
+    intake.intakeOff();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
+  
   public void execute() {
-    shooter.setRPM(targetRPM.getAsDouble());
   }
+  
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.setRPM(0);
+    intake.intakeOff();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

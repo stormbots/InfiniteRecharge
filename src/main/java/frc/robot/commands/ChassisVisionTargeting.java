@@ -41,7 +41,10 @@ public class ChassisVisionTargeting extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    gyro.reset();
+    
+    //TODO: We shouldn't need to reset for vision to work right and apparently it'll mess up Zach and his autos
+    //gyro.reset();
+
     pidTurn.reset();
     pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
     pidTurn.setP(0.012);
@@ -72,7 +75,7 @@ public class ChassisVisionTargeting extends CommandBase {
 
     //TODO Chassis inversion thing! Arcade drive backwards! 
     //keep an eye out for when it's fixed or not working - may need a "-"
-    SmartDashboard.putNumber("LLPIDOut", outputTurn);
+    SmartDashboard.putNumber("vision/AimingOutput", outputTurn);
    
   }
 

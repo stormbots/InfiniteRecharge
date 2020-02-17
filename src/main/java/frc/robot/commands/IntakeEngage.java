@@ -13,7 +13,7 @@ import frc.robot.subsystems.Intake;
 /**
  * An example command that uses an example subsystem.
  */
-public class EngageIntake extends CommandBase {
+public class IntakeEngage extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   // brings in the intake subsystem
   private final Intake intake;
@@ -23,7 +23,7 @@ public class EngageIntake extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public EngageIntake(Intake intake) {
+  public IntakeEngage(Intake intake) {
     this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(intake);
