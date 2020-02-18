@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
+import frc.robot.commands.ChassisVisionTargetingFancy;
 import frc.robot.commands.ClimbManual;
 import frc.robot.commands.IntakeDisengage;
 import frc.robot.commands.IntakeEngage;
@@ -115,8 +116,7 @@ public class RobotContainer {
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
     visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
-    visionAimToTargetFancy.whileHeld(new ChassisVisionTargeting(vision, navX, chassis)
-    .alongWith( new RunCommand( ()->{vision.targetPipelineFancy();} ) ))
+    visionAimToTargetFancy.whileHeld(new ChassisVisionTargetingFancy(vision, navX, chassis));
     ;
     
 
