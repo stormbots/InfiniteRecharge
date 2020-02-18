@@ -35,13 +35,13 @@ public class Passthrough extends SubsystemBase {
   double positionOfFirstBall = 0; //positon ahead of the first ball
   double positionOfLastBall = 0; //position behind the last ball
   double setpoint=0; //targetposition
-  int numberOfBalls = 0;  //The robot can have 3 balls at the start of the match
+  int numberOfBalls = 0;  
 
   private final boolean BLOCKED = false; // TODO find correct value
   private final boolean NOTBLOCKED = !BLOCKED; // TODO find correct value
   private DigitalInput intakeSensor = new DigitalInput(1); //sensor on the begining of passthrough
   private DigitalInput readySensor = new DigitalInput(0); //sensor that's outside the passthrough that detects if a ball is ready to intake 
-  private DigitalInput shootSensor = new DigitalInput(3); // sensor closest to shooter
+  private DigitalInput shootSensor = new DigitalInput(2); // sensor closest to shooter
   private boolean shootSensorLastReading = NOTBLOCKED;
   private boolean intakeSensorLastReading = NOTBLOCKED;
   private boolean readySensorLastReading = NOTBLOCKED;
@@ -57,8 +57,8 @@ public class Passthrough extends SubsystemBase {
     case COMP:
       //TODO: Calibrate compbot
       encoder.setPositionConversionFactor(21.25/42.2);
-      pid = new MiniPID(1/3.0,0,0)
-      .setOutputLimits(0.3);
+      pid = new MiniPID(1/5.0,0,0)
+      .setOutputLimits(0.4);
       ;
       motor.setInverted(false);
     break;
@@ -75,7 +75,10 @@ public class Passthrough extends SubsystemBase {
       pid = new MiniPID(0.01,0,0).setOutputLimits(0.12);
     }
 
-    motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
+
+
+    // motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
+    motor.setSmartCurrentLimit(20, 20); //TODO Test current constraints
     
     //reset the system's positioning
     encoder.setPosition(0);
@@ -89,9 +92,14 @@ public class Passthrough extends SubsystemBase {
     readySensorLastReading = readySensor.get();
 
     //Throw debug commands on the dashboard
-    SmartDashboard.putData("pt/LoadBall",new InstantCommand(()->loadBall()));
-    SmartDashboard.putData("pt/Shoot",new InstantCommand(()->shoot()));
-    SmartDashboard.putData("pt/Eject",new InstantCommand(()->eject()));
+    SmartDashboard.putData("pt/LoadBall",new InstantCommand(()->loadBall(),this));
+    SmartDashboard.putData("pt/Shoot",new InstantCommand(()->shoot(),this));
+    SmartDashboard.putData("pt/Eject",new InstantCommand(()->eject(),this));
+
+    // SmartDashboard.putData("pt/rawsensor3", new DigitalInput(3));
+    // SmartDashboard.putData("pt/rawsensor4", new DigitalInput(4));
+    // SmartDashboard.putData("pt/rawsensor5", new DigitalInput(5));
+
   }
 
   @Override
@@ -168,7 +176,8 @@ public class Passthrough extends SubsystemBase {
       break;
       default:
         output = pid.getOutput(currentPosition, setpoint);
-        output += output<0 ? -0.08 : 0.08; //add estimated static feed-forward to help with generic system friction
+        // output = 0.2; // TODO: SET THIS BAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCKKKKKKKKKKKKKKKKKKKKKKKKKK
+        //not needed? output += output<0 ? -0.08 : 0.08; //add estimated static feed-forward to help with generic system friction
         motor.set(output);
     }
 
@@ -182,6 +191,7 @@ public class Passthrough extends SubsystemBase {
     SmartDashboard.putNumber("pt/posCurrent", currentPosition);
     SmartDashboard.putString("pt/state", passthroughState.toString());
     SmartDashboard.putNumber("pt/motorOutput", output);
+    SmartDashboard.putNumber("pt/motorAmps", motor.getOutputCurrent());
     SmartDashboard.putNumber("pt/posLastBall", positionOfLastBall);
     SmartDashboard.putNumber("pt/posFirstBall", positionOfFirstBall);
     SmartDashboard.putBoolean("pt/isReadySensorBlocked", isReadySensorBlocked());
@@ -194,6 +204,7 @@ public class Passthrough extends SubsystemBase {
 
     SmartDashboard.putBoolean("pt/isOnTarget", isOnTarget(1));
   }
+
 
   public void loadBall() {
     if(numberOfBalls >= 4) return;

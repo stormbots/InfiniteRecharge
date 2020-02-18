@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -27,9 +29,9 @@ import frc.robot.commands.ChassisVisionTargeting;
 import frc.robot.commands.ClimbManual;
 import frc.robot.commands.IntakeDisengage;
 import frc.robot.commands.IntakeEngage;
+import frc.robot.commands.PassthroughEject;
 import frc.robot.commands.PassthroughIdle;
 import frc.robot.commands.ShooterSetRPM;
-import frc.robot.commands.SpinSpoolNegative;
 import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
@@ -88,7 +90,7 @@ public class RobotContainer {
 
   //DEBUG: Will need to be removed soon
   Button tempClimbSpoolPositive = new JoystickButton(controller, 12);
-  Button tempClimbSpoolNegative = new JoystickButton(controller, 13);
+  // Button tempClimbSpoolNegative = new JoystickButton(controller, 13);
 
   /*
    * The container for the robot.  Contains subsystems, OI devices, and commands.
@@ -126,8 +128,7 @@ public class RobotContainer {
     
     shoot.whenPressed(()->passthrough.shoot());
     loadBallManually.whenPressed(()->passthrough.loadBall());
-    eject.whenPressed(()->passthrough.eject());
-      
+    eject.whenPressed(new PassthroughEject(passthrough, intake));
 
     /*Player 2 Climb Buttons */
 
@@ -145,7 +146,7 @@ public class RobotContainer {
 
     /*Debug Buttons */ //TODO: Remove these before competitions
     tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
-    tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
+    // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
   }
 
   /** 
@@ -187,41 +188,59 @@ public class RobotContainer {
 
     //To help with integration, I expect our auto is going to look like this sequence: 
 
-    // new ShooterSetRPM(()->1000, shooter); //parallel 
-    // //rotate approximately to goal (depending on vision)
+    Command aimAndSpinUp = new ParallelCommandGroup(
+      new ShooterSetRPM(()->1, shooter).withTimeout(1),
 
-    // new ChassisVisionTargeting(vision, navX, chassis)
-    //   .withTimeout(2)
-    //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } );
-    // new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(3);
-    // new ShooterSetRPM(()->0, shooter).withTimeout(0);
-    // //turn back
-    // new IntakeEngage(intake);
-    // //drive
-    // new IntakeDisengage(intake);
+      new ChassisVisionTargeting(vision, navX, chassis)
+        .withTimeout(2)
+        .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
+    );
 
+    Command fire = new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(3);
+
+    Command resetPositionAndShooter = new ParallelCommandGroup(
+      new ShooterSetRPM(()->0, shooter).withTimeout(0),
+      new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
+    );
+
+    Command intakeAndDriveBack = new ParallelCommandGroup(
+      new IntakeEngage(intake),
+      new ChassisDriveToHeadingBasic(-4, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
+    );
+
+    Command disengageIntake = new IntakeDisengage(intake);
+
+    Command  autoFromTrenchAlignment = new SequentialCommandGroup(
+
+      aimAndSpinUp, // then
+
+      fire, // and then
+
+      resetPositionAndShooter, // and then
+
+      intakeAndDriveBack, // and then
+      
+      disengageIntake
+    );
 
     // autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
 
 
-    Command turnToShoot = new SequentialCommandGroup(
-      turn(() -> -45)
-    );
+    // Command turnToShoot = new SequentialCommandGroup(
+    //   turn(() -> -45)
+    // );
     
 
-    Command turnAwayFromShooting = new SequentialCommandGroup(
-      turn(() -> 45),//calculateAngleToInitialCompassBearing() ),
-      driveForward(-2)
-    );
+    // Command turnAwayFromShooting = new SequentialCommandGroup(
+    //   turn(() -> 45),//calculateAngleToInitialCompassBearing() ),
+    //   driveForward(-2)
+    // );
 
-    autoCommand = new SequentialCommandGroup(
-      turnToShoot,
-      turnAwayFromShooting
-    );
+    autoCommand = autoFromTrenchAlignment;
 
 
     // An ExampleCommand will run in autonomous
-    return autoCommand;
+    return autoFromTrenchAlignment;
   }
 
   public Command turn(DoubleSupplier targetAngle) {

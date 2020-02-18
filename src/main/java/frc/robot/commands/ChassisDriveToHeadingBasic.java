@@ -97,9 +97,9 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
     double forwardSpeed = FB.fb(targetDistance, distance, 0.4); // TABI 0.4 || PRACTICE 0.
 
 
-    if(Math.abs(targetBearing - currentAngle) > 20) {
-      forwardSpeed = 0;
-    }
+    // if(Math.abs(targetBearing - currentAngle) > 20) {
+    //   forwardSpeed = 0;
+    // }
 
     // forwardSpeed = 0; //DEBUG
 
