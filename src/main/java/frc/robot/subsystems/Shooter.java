@@ -29,7 +29,7 @@ public class Shooter extends SubsystemBase {
 
 
   MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2)*1.1);
-  MiniPID errorPID = new MiniPID(1/5700.0,0,0).setOutputLimits(-0.1, 0.5);
+  MiniPID errorPID = new MiniPID(1/5700.0*1.2,0,0).setOutputLimits(-0.05, 0.5);
   private final SlewRateLimiter feedForwardSlew = new SlewRateLimiter( 1/2.0 ,0);
 
   double targetRPM = 0;
@@ -73,8 +73,6 @@ public class Shooter extends SubsystemBase {
 
     // double feedForwardOutput = feedForward.calculate(targetRPM,0.0202);//todo: Accelleration
 
-    errorOutput = 0;
-
     if (encoder.getVelocity() < targetRPM*.5) {
       errorOutput = 0.0;
     }
@@ -88,6 +86,10 @@ public class Shooter extends SubsystemBase {
     feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
     shooterMotor.set(feedForwardOutput + errorOutput);
     feederMotor.set(feedForwardOutput + errorOutput);
+
+    SmartDashboard.putNumber("shooter/contribFF", feedForwardOutput);
+    SmartDashboard.putNumber("shooter/contribPID", errorOutput);
+
   }
 
   //public void setMotorSpeed(double speed) {
