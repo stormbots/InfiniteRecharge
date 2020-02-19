@@ -45,8 +45,8 @@ public class ChassisDriveManual extends CommandBase {
     double turnSquared = Math.abs(turnLinear) * turnLinear;
 
     chassis.drive.arcadeDrive(
-      forwardLinear,
-      turnLinear,
+      forwardSquared,
+      turnSquared,
       false
     );
   }
