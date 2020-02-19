@@ -10,8 +10,7 @@ package frc.robot.commands;
 import com.kauailabs.navx.frc.AHRS;
 import com.stormbots.closedloop.MiniPID;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
@@ -57,6 +56,7 @@ public class ChassisVisionTargetingFancy extends CommandBase {
     // pidTurn.setD(0.0015);
     pidTurn.setMaxIOutput(0.15);
     pidTurn.setOutputLimits(0.35);
+    pidTurn.setF((s,a,e)->{return Math.abs(e)*0.035;/*static FeedForward*/ });
 
     vision.targetPipelineFancy();
     vision.lightsOn();
@@ -72,21 +72,19 @@ public class ChassisVisionTargetingFancy extends CommandBase {
 
     if(!foundValidTarget){
       //look for target
-      if(vision.isTargetValid()){
+      if(vision.isTargetValid() && NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").getDouble(0)>0){
         foundValidTarget = true;
-        targetHeading = vision.getTargetHeading();
+        targetHeading = gyro.getAngle() + NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
       }
       return;
     }
 
   
     //preferred gyro method
-    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), targetHeading);
-
-    //Add a static feed-forward which makes things much more robust
-    if(Constants.botName!=BotName.TABI){
-      outputTurn += outputTurn>0 ? 0.035 : -0.035;
-    }
+    double outputTurn = pidTurn.getOutput(gyro.getAngle(), targetHeading);
+    // SmartDashboard.putNumber("vision/FancyTargetAngle",targetHeading);
+    // SmartDashboard.putNumber("vision/FancyGyro",gyro.getAngle());
+    // SmartDashboard.putNumber("vision/FancyOutput",outputTurn);
 
     chassis.drive.arcadeDrive(0, outputTurn,false);
 

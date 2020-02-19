@@ -53,7 +53,7 @@ public class MiniPID{
 	public interface FeedForwardLambda{
 		public double compute(double setpoint, double actual, double error);
 	}
-	private FeedForwardLambda feedForwardLambda = (s,a,e)->{return 0.0031415;};
+	private FeedForwardLambda feedForwardLambda = (s,a,e)->{return 0.0;};
 
 
 	//**********************************

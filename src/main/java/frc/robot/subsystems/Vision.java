@@ -29,6 +29,7 @@ public class Vision extends SubsystemBase {
   NetworkTableEntry ty = table.getEntry("ty");
   NetworkTableEntry ta = table.getEntry("ta");
   NetworkTableEntry ts = table.getEntry("ts");
+  NetworkTableEntry tv = table.getEntry("tv");
 
   boolean validTarget = true;
   double x = 0;
@@ -49,12 +50,17 @@ public class Vision extends SubsystemBase {
     ty = table.getEntry("ty");
     ta = table.getEntry("ta");
     ts = table.getEntry("ts");
+    tv = table.getEntry("tv");
     targetHeading = navX.getAngle();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    if(tv.getDouble(0.0) == 0) {
+      return;
+    }
 
     // read values periodically
     if (ta.getDouble(0.0) < 0.5 && ts.getDouble(0.0) >= -120 && ts.getDouble(0.0) <= -60) {
@@ -63,7 +69,7 @@ public class Vision extends SubsystemBase {
       // Good target!
       x = tx.getDouble(0.0);
       y = ty.getDouble(0.0);
-      targetHeading = gyro.getAngle() - x;
+      targetHeading = gyro.getAngle() + x;
       validTarget = true;
     }
 
