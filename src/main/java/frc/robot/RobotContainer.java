@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
+import frc.robot.commands.ChassisVisionTargetingFancy;
 import frc.robot.commands.ClimbManual;
 import frc.robot.commands.IntakeDisengage;
 import frc.robot.commands.IntakeEngage;
@@ -72,6 +74,7 @@ public class RobotContainer {
   //Inputs
   Joystick driver = new Joystick(0);
   JoystickButton visionAimToTarget = new JoystickButton(driver, 5);
+  JoystickButton visionAimToTargetFancy = new JoystickButton(driver, 7);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
 
   Joystick controller = new Joystick(1);
@@ -114,6 +117,9 @@ public class RobotContainer {
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
     visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
+    visionAimToTargetFancy.whileHeld(new ChassisVisionTargetingFancy(vision, navX, chassis));
+    ;
+    
 
     /* Player 2 normal Buttons */
     intakeButton.whenPressed(new IntakeEngage(intake));

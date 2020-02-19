@@ -19,7 +19,7 @@ import frc.robot.Constants.BotName;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Vision;
 
-public class ChassisVisionTargeting extends CommandBase {
+public class ChassisVisionTargetingFancy extends CommandBase {
   /**
    * Creates a new ChassisVisionTargeting.
    */
@@ -30,7 +30,10 @@ public class ChassisVisionTargeting extends CommandBase {
 
   MiniPID pidTurn = new MiniPID(0.015,0,0);
 
-  public ChassisVisionTargeting(Vision vision, AHRS navX, Chassis chassis) {
+  Double targetHeading = 0.0;
+  private boolean foundValidTarget;
+
+  public ChassisVisionTargetingFancy(Vision vision, AHRS navX, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(chassis);
     this.vision = vision;
@@ -55,8 +58,10 @@ public class ChassisVisionTargeting extends CommandBase {
     pidTurn.setMaxIOutput(0.15);
     pidTurn.setOutputLimits(0.35);
 
-    vision.targetPipeline();
+    vision.targetPipelineFancy();
     vision.lightsOn();
+
+    foundValidTarget=false;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -64,9 +69,19 @@ public class ChassisVisionTargeting extends CommandBase {
   public void execute() {
     //Direct vision backup method
     // double outputTurn = pidTurn.getOutput(0, vision.getTargetHeading());
+
+    if(!foundValidTarget){
+      //look for target
+      if(vision.isTargetValid()){
+        foundValidTarget = true;
+        targetHeading = vision.getTargetHeading();
+      }
+      return;
+    }
+
   
     //preferred gyro method
-    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), targetHeading);
 
     //Add a static feed-forward which makes things much more robust
     if(Constants.botName!=BotName.TABI){

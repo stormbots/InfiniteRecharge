@@ -36,6 +36,8 @@ public class Vision extends SubsystemBase {
   double targetHeading = 0;
   double distance = 0;
 
+  private double rpmForDistance = 0;
+
   /**
    * Creates a new Vision.
    */
@@ -69,8 +71,7 @@ public class Vision extends SubsystemBase {
       return;
     }
 
-    distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y))));
-    
+    distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y)))+5);//5 is a MAGIC! just our weird error, accept it.
 
     // post to smart dashboard periodically
     SmartDashboard.putNumber("vision/LimelightX", x);
@@ -78,6 +79,11 @@ public class Vision extends SubsystemBase {
     SmartDashboard.putNumber("vision/Distance to Target", distance);
     SmartDashboard.putNumber("vision/Gyro Current", gyro.getAngle());
     SmartDashboard.putNumber("vision/Gyro Target", targetHeading);
+    SmartDashboard.putNumber("vision/rpmForDistance", rpmForDistance);
+
+    SmartDashboard.putNumber("vision/rpm(120)", getRPMForDistance(120));
+    SmartDashboard.putNumber("vision/rpm(100)", getRPMForDistance(100));
+    SmartDashboard.putNumber("vision/rpm(160)", getRPMForDistance(160));
   }
 
 /**
@@ -97,7 +103,12 @@ public class Vision extends SubsystemBase {
   }
 
   public void targetPipeline(){
-    table.getEntry("pipeline").setNumber(2); //0 for NON_3D
+    table.getEntry("pipeline").setNumber(0); //0 for NON_3D, 2 for 3D
+    table.getEntry("ledMode").setNumber(3);
+  }
+  public void targetPipelineFancy(){
+    table.getEntry("pipeline").setNumber(2); //0 for NON_3D, 2 for 3D
+    table.getEntry("ledMode").setNumber(3);
   }
 
   public void driverPipeline(){
@@ -116,11 +127,20 @@ public class Vision extends SubsystemBase {
 
   /** Calculates and returns a target RPM needed to hit the  */
   public double getRPMForDistance(double distanceInInches){
-    double diameter= SHOOTER_WHEEL_DIAMETER; //from Constants.java: You'll need this for the calculation so I stuffed it here to make it easier
+    double diameter = SHOOTER_WHEEL_DIAMETER; //from Constants.java: You'll need this for the calculation so I stuffed it here to make it easier
     // TODO: Impliment me 
-    double targetRPM = 1000;
-    return targetRPM;
+    // double targetRPM = 1000;
+    // return targetRPM;
+
+    double mountAngleRadians = Math.toRadians(CAMERA_MOUNT_ANGLE);
+
+    rpmForDistance = Math
+      .sqrt(Math.abs((16 * Math.pow(distance, 2)) / (distance * Math.cos(mountAngleRadians) * Math.sin(mountAngleRadians)
+          - (VISION_TARGET_HEIGHT - CAMERA_MOUNT_HEIGHT) * Math.pow(Math.cos(mountAngleRadians), 2))))
+      * (60) * (3 / Math.PI);
+    //TODO: 3/pi is "simplified" form of rotations/feet and needs to be de-converted to use the actual wheel diameter constant
+    
+    return 1000;
   }
   
-
 }

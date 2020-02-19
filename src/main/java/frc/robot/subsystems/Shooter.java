@@ -13,6 +13,8 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
 
+import edu.wpi.first.wpilibj.SlewRateLimiter;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -25,10 +27,14 @@ public class Shooter extends SubsystemBase {
   private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
-  MiniPID feedForwardPID = new MiniPID(0,0,0,1/5700.0).setSetpointRange(2000/2.0);;
-  MiniPID errorPID = new MiniPID(1/5700.0,0,0).setOutputLimits(0.0, 0.5);;
+
+  MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2)*1.1);
+  MiniPID errorPID = new MiniPID(1/5700.0*1.2,0,0).setOutputLimits(-0.05, 0.5);
+  private final SlewRateLimiter feedForwardSlew = new SlewRateLimiter( 1/2.0 ,0);
 
   double targetRPM = 0;
+
+  SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
 
   public Shooter() {
     switch(Constants.botName){
@@ -41,7 +47,14 @@ public class Shooter extends SubsystemBase {
         feederMotor.setInverted(true);
       break;
     }
-    shooterMotor.setIdleMode(IdleMode.kBrake);
+    shooterMotor.setIdleMode(IdleMode.kCoast);
+    shooterMotor.setOpenLoopRampRate(0.1);
+
+    encoder.setPosition(0);
+    encoder.setPositionConversionFactor(2);
+    encoder.setVelocityConversionFactor(2);
+
+    if(!SmartDashboard.containsKey("shooter/RMPDebugSet"))SmartDashboard.putNumber("shooter/RMPDebugSet", 1000);
   }
 
   public void reset() {
@@ -57,6 +70,9 @@ public class Shooter extends SubsystemBase {
     double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM) ;
     double errorOutput = errorPID.getOutput(encoder.getVelocity(), targetRPM);
 
+
+    // double feedForwardOutput = feedForward.calculate(targetRPM,0.0202);//todo: Accelleration
+
     if (encoder.getVelocity() < targetRPM*.5) {
       errorOutput = 0.0;
     }
@@ -65,9 +81,15 @@ public class Shooter extends SubsystemBase {
     //TODO Feeder is geared to 1/10th the speed of shooter. Just run it as fast as possible now
     // and we'll be moving it to the Passthrough in a bit.
 
+    feedForwardOutput*=0.5;// Rely more on error feedback because bad calculations
 
+    feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
     shooterMotor.set(feedForwardOutput + errorOutput);
-    feederMotor.set(feedForwardOutput);
+    feederMotor.set(feedForwardOutput + errorOutput);
+
+    SmartDashboard.putNumber("shooter/contribFF", feedForwardOutput);
+    SmartDashboard.putNumber("shooter/contribPID", errorOutput);
+
   }
 
   //public void setMotorSpeed(double speed) {
@@ -83,5 +105,8 @@ public class Shooter extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
     SmartDashboard.putNumber("shooter/amps", shooterMotor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/positons", encoder.getPosition());
+    SmartDashboard.putNumber("shooter/appliedOutput", shooterMotor.getAppliedOutput());
+    SmartDashboard.putNumber("shooter/outputCurrent", shooterMotor.getOutputCurrent());
   }
 }
