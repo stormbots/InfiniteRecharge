@@ -65,7 +65,7 @@ public class Passthrough extends SubsystemBase {
     case PRACTICE:
       encoder.setPositionConversionFactor(21.25/42.2);
       pid = new MiniPID(1/5.0,0,0)
-      .setOutputLimits(0.3);
+      .setOutputLimits(0.5);
       ;
       motor.setInverted(false);
     break;
@@ -78,7 +78,7 @@ public class Passthrough extends SubsystemBase {
 
 
     // motor.setSmartCurrentLimit(20,30,30); //TODO Test current constraints
-    motor.setSmartCurrentLimit(20, 20); //TODO Test current constraints
+    motor.setSmartCurrentLimit(30, 30); //TODO Test current constraints
     
     //reset the system's positioning
     encoder.setPosition(0);
@@ -153,6 +153,9 @@ public class Passthrough extends SubsystemBase {
         if(isOnTarget(1)){
           passthroughState = PassthroughState.IDLE; 
         }
+        if(intakeSensorLastReading == BLOCKED && intakeSensorReading == NOTBLOCKED) {
+          numberOfBalls += 1;
+        }
       break;
       case SHOOTING:
         if(isOnTarget(1)){
@@ -216,7 +219,6 @@ public class Passthrough extends SubsystemBase {
     if(numberOfBalls == 0){
       positionOfFirstBall = positionOfLastBall+BALLLENGTH;
     }
-    numberOfBalls += 1;
   }
 
   public void prepareForLoading(){
