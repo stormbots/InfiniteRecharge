@@ -7,59 +7,50 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Chassis;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Passthrough;
 
-public class ChassisDriveManual extends CommandBase {
-  private final Chassis chassis;
-  private DoubleSupplier move;
-  private DoubleSupplier turn;
+public class PassthroughEject extends CommandBase {
+  private Passthrough passthrough;
+  private Intake intake;
 
   /**
-   * Creates a new ChassisDriveManual.
+   * Creates a new PassthroughShoot.
    */
-  public ChassisDriveManual(DoubleSupplier move, DoubleSupplier turn, Chassis chassis) {
+  public PassthroughEject(Passthrough passthrough, Intake intake) {
+    this.passthrough = passthrough;
+    this.intake = intake;
     // Use addRequirements() here to declare subsystem dependencies.
-    this.chassis = chassis;
-    this.move = move;
-    this.turn = turn;
-    addRequirements(chassis);
+    addRequirements(passthrough);
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+
+    passthrough.eject();
   }
+    
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
 
-    double forwardLinear = -move.getAsDouble();
-    double turnLinear = turn.getAsDouble();
-
-    double forwardSquared = Math.abs(forwardLinear) * forwardLinear;
-    double turnSquared = Math.abs(turnLinear) * turnLinear;
-
-    chassis.drive.arcadeDrive(
-      forwardSquared,
-      turnSquared,
-      false
-    );
+    intake.intakeReverse();
+    //Periodic does all the work    
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(final boolean interrupted) {
-    chassis.drive.arcadeDrive(0,0);
+  public void end(boolean interrupted) {
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return passthrough.isOnTarget(4);
   }
+
 }

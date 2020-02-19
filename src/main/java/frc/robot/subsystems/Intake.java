@@ -17,8 +17,8 @@ import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
 
-  CANSparkMax sideMotor = new CANSparkMax(8,MotorType.kBrushless);
-  CANSparkMax centerMotor = new CANSparkMax(7, MotorType.kBrushless);
+  CANSparkMax sideMotor = new CANSparkMax(7,MotorType.kBrushless);
+  CANSparkMax centerMotor = new CANSparkMax(8, MotorType.kBrushless);
   Solenoid solenoid = new Solenoid(2);
   private boolean UP;
   private boolean DOWN;
@@ -47,7 +47,7 @@ public class Intake extends SubsystemBase {
     switch(Constants.botName){
       case COMP:
         centerMotor.setInverted(true);
-        sideMotor.setInverted(false);
+        sideMotor.setInverted(true);
   
         centerMotor.setSmartCurrentLimit(6, 20, 5);
         sideMotor.setSmartCurrentLimit(6, 20, 5);
@@ -86,13 +86,15 @@ public class Intake extends SubsystemBase {
     sideMotor.set(SIDEMOTORSPEED);
     centerMotor.set(CENTERMOTORSPEED);
   }
-  // public void setMotorSpeed(double speed) {
-  //   sideIntake.set(speed);
-  //   frontIntake.set(speed);
-  // }
+
   public void intakeOff(){
     sideMotor.set(0.0);
     centerMotor.set(0.0);
+  }
+
+  public void intakeReverse(){
+    sideMotor.set(-SIDEMOTORSPEED);
+    centerMotor.set(-CENTERMOTORSPEED);
   }
 
   public void intakeUp() {
