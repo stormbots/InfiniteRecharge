@@ -62,11 +62,14 @@ public class ChassisVisionTargeting extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    if(!vision.isTargetValid())return;
+    
     //Direct vision backup method
     // double outputTurn = pidTurn.getOutput(0, vision.getTargetHeading());
   
     //preferred gyro method
-    double outputTurn = -pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+    double outputTurn = pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
 
     //Add a static feed-forward which makes things much more robust
     if(Constants.botName!=BotName.TABI){

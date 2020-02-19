@@ -125,7 +125,8 @@ public class RobotContainer {
     intakeButton.whenPressed(new IntakeEngage(intake));
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->1000, shooter));
+    //shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->1000, shooter));
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
 
     shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
       if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
