@@ -47,6 +47,9 @@ public class MiniPID{
 
 	private double setpointRange=0;
 
+	private double continuousMax=0;
+	private double continuousMin=0;
+
 	/** User-defined function for precise modeling of the controlled system
 	 * Note, setpoint and error are constrained by any configuration options provided by the system.
 	 */
@@ -300,6 +303,7 @@ public class MiniPID{
 		double Ioutput;
 		double Doutput;
 		double Foutput;
+		double continuousHalfRange;
 
 		this.setpoint=setpoint;
 
@@ -310,6 +314,14 @@ public class MiniPID{
 
 		// Do the simple parts of the calculations
 		double error=setpoint-actual;
+
+		// If we're in continous mode, wrap our error to better match the system
+		if(continuousMin != continuousMax){
+			continuousHalfRange = (continuousMax-continuousMin)/2;
+			error %= (continuousHalfRange*2);
+			if(error>continuousHalfRange) error-=2*continuousHalfRange;
+			if(error<-continuousHalfRange) error+=2*continuousHalfRange;
+		}
 
 		// Calculate F output. Notice, this depends only on the setpoint, and not the error. 
 		Foutput=F*setpoint;
@@ -446,6 +458,35 @@ public class MiniPID{
 	 */
 	public MiniPID setSetpointRange(double range){
 		setpointRange=range;
+		return this;
+	}
+	
+	/**
+	 * Tell the controller that min and max represent the same same physical value.
+	 * <br>
+	 * This is notably useful for position control of angular values. In many such systems, 
+	 * 0 and 360 represent the same heading, but without special handling you'll often
+	 * correct the error going in an inefficient direction.
+	 * <br>
+	 * Note, that restricting setpoints or sensor inputs to the specified range are not
+	 * required. The controller wraps all values back within this range automatically.
+	 * 
+	 * @param minSensorValue Lower bound of the continuous range
+	 * @param maxSensorValue Lower bound of the continuous range
+	 */
+	public MiniPID setContinuousMode(double minSensorValue, double maxSensorValue){
+		this.continuousMin = minSensorValue;
+		this.continuousMax = maxSensorValue;
+		return this;
+	}
+
+	/**
+	 * Disable the continous mode, and resume normal operation.
+	 *  
+	 */
+	public MiniPID setContinousModeOff(){
+		this.continuousMin=0;
+		this.continuousMax=0;
 		return this;
 	}
 
