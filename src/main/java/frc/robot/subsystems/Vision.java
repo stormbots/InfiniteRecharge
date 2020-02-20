@@ -9,6 +9,8 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.CAMERA_MOUNT_ANGLE;
 import static frc.robot.Constants.CAMERA_MOUNT_HEIGHT;
+import static frc.robot.Constants.SHOOTER_ANGLE;
+import static frc.robot.Constants.SHOOTER_HEIGHT;
 import static frc.robot.Constants.SHOOTER_WHEEL_DIAMETER;
 import static frc.robot.Constants.VISION_TARGET_HEIGHT;
 
@@ -58,6 +60,22 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
+    // post to smart dashboard periodically
+    SmartDashboard.putNumber("vision/LimelightX", x);
+    SmartDashboard.putNumber("vision/LimelightY", y);
+    SmartDashboard.putNumber("vision/Distance to Target", distance);
+    SmartDashboard.putNumber("vision/Gyro Current", gyro.getAngle());
+    SmartDashboard.putNumber("vision/Gyro Target", targetHeading);
+    SmartDashboard.putNumber("vision/rpmForDistance", rpmForDistance);
+
+    SmartDashboard.putNumber("vision/rpm(13)", getRPMForDistance(12*13));
+    SmartDashboard.putNumber("vision/rpm(15)", getRPMForDistance(12*15));
+    SmartDashboard.putNumber("vision/rpm(17)", getRPMForDistance(12*17));
+    SmartDashboard.putNumber("vision/rpm(19)", getRPMForDistance(12*19));
+    SmartDashboard.putNumber("vision/rpm(21)", getRPMForDistance(12*21));
+    SmartDashboard.putNumber("vision/rpm(23)", getRPMForDistance(12*23));
+
+
     if(tv.getDouble(0.0) == 0) {
       return;
     }
@@ -79,17 +97,6 @@ public class Vision extends SubsystemBase {
 
     distance = ((VISION_TARGET_HEIGHT-CAMERA_MOUNT_HEIGHT)/(Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE+y)))+5);//5 is a MAGIC! just our weird error, accept it.
 
-    // post to smart dashboard periodically
-    SmartDashboard.putNumber("vision/LimelightX", x);
-    SmartDashboard.putNumber("vision/LimelightY", y);
-    SmartDashboard.putNumber("vision/Distance to Target", distance);
-    SmartDashboard.putNumber("vision/Gyro Current", gyro.getAngle());
-    SmartDashboard.putNumber("vision/Gyro Target", targetHeading);
-    SmartDashboard.putNumber("vision/rpmForDistance", rpmForDistance);
-
-    SmartDashboard.putNumber("vision/rpm(120)", getRPMForDistance(120));
-    SmartDashboard.putNumber("vision/rpm(100)", getRPMForDistance(100));
-    SmartDashboard.putNumber("vision/rpm(160)", getRPMForDistance(160));
   }
 
 /**
@@ -133,20 +140,26 @@ public class Vision extends SubsystemBase {
 
   /** Calculates and returns a target RPM needed to hit the  */
   public double getRPMForDistance(double distanceInInches){
-    double diameter = SHOOTER_WHEEL_DIAMETER; //from Constants.java: You'll need this for the calculation so I stuffed it here to make it easier
-    // TODO: Impliment me 
-    // double targetRPM = 1000;
-    // return targetRPM;
 
-    double mountAngleRadians = Math.toRadians(CAMERA_MOUNT_ANGLE);
+    double distanceInFeet = distanceInInches/12;
+    double height = (VISION_TARGET_HEIGHT - SHOOTER_HEIGHT)/12;
 
-    rpmForDistance = Math
-      .sqrt(Math.abs((16 * Math.pow(distance, 2)) / (distance * Math.cos(mountAngleRadians) * Math.sin(mountAngleRadians)
-          - (VISION_TARGET_HEIGHT - CAMERA_MOUNT_HEIGHT) * Math.pow(Math.cos(mountAngleRadians), 2))))
-      * (60) * (3 / Math.PI);
+    double SHOOTER_ANGLE_RADIANS=Math.toRadians(SHOOTER_ANGLE);
+
+    rpmForDistance = 
     //TODO: 3/pi is "simplified" form of rotations/feet and needs to be de-converted to use the actual wheel diameter constant
-    
-    return 1000;
+    //the three comes from 4 in being 1/3 of a foot...1/1/3 is 3. 
+
+    (Math.sqrt( (16*Math.pow(distanceInFeet, 2)) / 
+      (distanceInFeet*Math.cos(SHOOTER_ANGLE_RADIANS)*Math.sin(SHOOTER_ANGLE_RADIANS) - 
+      ( (height) *Math.pow(Math.cos(SHOOTER_ANGLE_RADIANS), 2)) ) )
+      )
+      *(60*12*(1/(Math.PI*SHOOTER_WHEEL_DIAMETER)));
+
+    rpmForDistance *= 2;
+      //* (60) * (3/Math.PI);
+      // /((SHOOTER_WHEEL_DIAMETER/2) * 0.10472);
+    return rpmForDistance;
   }
   
 }
