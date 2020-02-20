@@ -25,8 +25,8 @@ import frc.robot.Constants;
 
 public class Climber extends SubsystemBase {
   CANSparkMax armMotor = new CANSparkMax(12, MotorType.kBrushless);
-  public CANSparkMax spoolMotor = new CANSparkMax(13, MotorType.kBrushless);
-  public CANSparkMax hookMotor = new CANSparkMax(14, MotorType.kBrushless);
+  public CANSparkMax spoolMotor = new CANSparkMax(14, MotorType.kBrushless);
+  public CANSparkMax hookMotor = new CANSparkMax(13, MotorType.kBrushless);
 
   CANEncoder armEncoder = new CANEncoder(armMotor);
   CANEncoder spoolEncoder = new CANEncoder(spoolMotor);
@@ -69,21 +69,23 @@ public class Climber extends SubsystemBase {
 
       //Configure motor setup
       armMotor.setInverted(true);
-      armMotor.setIdleMode(IdleMode.kBrake); //TODO: Delete me
+      armMotor.setIdleMode(IdleMode.kCoast); //TODO: Delete me
       armMotor.setSmartCurrentLimit(20);
-      armEncoder.setPositionConversionFactor(1);
+      armEncoder.setPositionConversionFactor(90/59.88);
 
       spoolMotor.setInverted(true);
-      spoolMotor.setIdleMode(IdleMode.kBrake); //TODO: Delete me
+      spoolMotor.setIdleMode(IdleMode.kCoast); //TODO: Delete me
       spoolMotor.setSmartCurrentLimit(20);
-      spoolEncoder.setPositionConversionFactor(1);
+      spoolEncoder.setPositionConversionFactor(32/539.0);
   
+      hookMotor.setInverted(true);
       hookMotor.setSmartCurrentLimit(2);
       hookMotor.setIdleMode(IdleMode.kCoast);
-      hookEncoder.setPositionConversionFactor(1);
+      hookEncoder.setPositionConversionFactor(180/38.666);
       
       armEncoder.setPosition(0.0);
       spoolEncoder.setPosition(0.0);
+      hookEncoder.setPosition(0.0);
     break;
     case PRACTICE:
     //fallthrough to default
