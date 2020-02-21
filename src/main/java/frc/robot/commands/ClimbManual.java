@@ -57,8 +57,8 @@ public class ClimbManual extends CommandBase {
     if(enableOperator.getAsBoolean()==false)return;
 
     double height = Lerp.lerp(joystickValue.getAsDouble(), 1, -1, climber.CLIMBER_BASE_HEIGHT, climber.MAX_HEIGHT );
-    // climber.setHeight(height);
-    SmartDashboard.putNumber("climb/targetHeight", height);
+    climber.setHeight(height);
+    SmartDashboard.putNumber("climb/joystickTargetHeight", height);
   }
 
   // Called once the command ends or is interrupted.

@@ -49,8 +49,8 @@ public class Intake extends SubsystemBase {
         centerMotor.setInverted(true);
         sideMotor.setInverted(true);
   
-        centerMotor.setSmartCurrentLimit(6, 20, 5);
-        sideMotor.setSmartCurrentLimit(6, 20, 5);
+        centerMotor.setSmartCurrentLimit(30);
+        sideMotor.setSmartCurrentLimit(20);
         UP = false;
         DOWN = ! UP;
       break;
@@ -111,5 +111,8 @@ public class Intake extends SubsystemBase {
 
     SmartDashboard.putNumber("intake/centerAmps", centerMotor.getOutputCurrent());
     SmartDashboard.putNumber("intake/sideAmps", sideMotor.getOutputCurrent());
+    SmartDashboard.putNumber("intake/centerTemp", centerMotor.getMotorTemperature());
+    SmartDashboard.putNumber("intake/sideTemp", sideMotor.getMotorTemperature());
+
   }
 }

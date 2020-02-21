@@ -172,7 +172,7 @@ public class RobotContainer {
 
     //TODO This should also only activate near end of a match eventually
     climber.setDefaultCommand(
-      new ClimbManual(()->climbEnable.get(),()->driver.getRawAxis(3),climber)
+      new ClimbManual(()->climbEnable.get(),()->controller.getRawAxis(3),climber)
     );
 
     //Ensure that after vision is used, it returns to Driver view
