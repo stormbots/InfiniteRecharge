@@ -13,6 +13,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
 
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,6 +24,7 @@ public class Shooter extends SubsystemBase {
   /**
    * Creates a new Shooter.
    */
+  
   private final CANSparkMax shooterMotor = new CANSparkMax(11 ,MotorType.kBrushless);
   private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
@@ -34,7 +36,12 @@ public class Shooter extends SubsystemBase {
 
   double targetRPM = 0;
 
-  SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
+  // Not currently in use but may use later
+  // SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
+
+  Notifier notifier = new Notifier(()->runClosedLoop());
+
+
 
   public Shooter() {
     switch(Constants.botName){
@@ -55,6 +62,8 @@ public class Shooter extends SubsystemBase {
     encoder.setVelocityConversionFactor(2);
 
     if(!SmartDashboard.containsKey("shooter/RMPDebugSet"))SmartDashboard.putNumber("shooter/RMPDebugSet", 1000);
+
+    notifier.startPeriodic(20);
   }
 
   public void reset() {
@@ -99,7 +108,7 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
 
-    runClosedLoop();
+    // runClosedLoop();
 
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
