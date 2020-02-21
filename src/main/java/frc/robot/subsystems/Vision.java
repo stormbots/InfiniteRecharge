@@ -109,20 +109,18 @@ public class Vision extends SubsystemBase {
   }
 
   public void lightsOn(){
-    table.getEntry("ledMode").setNumber(3);
+    // table.getEntry("ledMode").setNumber(3);
   }
 
   public void lightsOff(){
-    table.getEntry("ledMode").setNumber(1);
+    // table.getEntry("ledMode").setNumber(1);
   }
 
   public void targetPipeline(){
     table.getEntry("pipeline").setNumber(0); //0 for NON_3D, 2 for 3D
-    table.getEntry("ledMode").setNumber(3);
   }
   public void targetPipelineFancy(){
     table.getEntry("pipeline").setNumber(2); //0 for NON_3D, 2 for 3D
-    table.getEntry("ledMode").setNumber(3);
   }
 
   public void driverPipeline(){

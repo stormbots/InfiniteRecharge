@@ -59,7 +59,7 @@ public class RobotContainer {
   public final AHRS navX = new AHRS(SPI.Port.kMXP);
 
   private final Chassis chassis = new Chassis();
-  private final Climber climber = new Climber();
+  public final Climber climber = new Climber();
   private final Intake intake = new Intake();
   private final Passthrough passthrough = new Passthrough();
   private final Shooter shooter = new Shooter();
@@ -92,7 +92,7 @@ public class RobotContainer {
   Button climbTranslateSideways = new JoystickButton(controller, 11);
 
   //DEBUG: Will need to be removed soon
-  Button tempClimbSpoolPositive = new JoystickButton(controller, 12);
+  //Button tempClimbSpoolPositive = new JoystickButton(controller, 12);
   // Button tempClimbSpoolNegative = new JoystickButton(controller, 13);
 
   /*
@@ -152,7 +152,7 @@ public class RobotContainer {
     // translationMoveBackwards.whenPressed(new ClimberSetTranslation(()->-0.2,climber));
 
     /*Debug Buttons */ //TODO: Remove these before competitions
-    tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
+    // tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
     // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
   }
 

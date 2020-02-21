@@ -10,6 +10,7 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.stormbots.Lerp;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,6 +46,7 @@ public class ClimbManual extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    climber.setMotorIdleModes(IdleMode.kBrake);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -53,6 +55,7 @@ public class ClimbManual extends CommandBase {
     //ensure joystick is where we need it before running
     if(joystickValue.getAsDouble()>0.9)enableSafety=true;
     if(enableSafety==false)return;
+
     //ensure operator and/or game timer allows this to run
     if(enableOperator.getAsBoolean()==false)return;
 

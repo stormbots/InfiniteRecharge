@@ -39,7 +39,7 @@ public class Shooter extends SubsystemBase {
   // Not currently in use but may use later
   // SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
 
-  Notifier notifier = new Notifier(()->runClosedLoop());
+  // Notifier notifier = new Notifier(()->runClosedLoop());
 
 
 
@@ -63,7 +63,7 @@ public class Shooter extends SubsystemBase {
 
     if(!SmartDashboard.containsKey("shooter/RMPDebugSet"))SmartDashboard.putNumber("shooter/RMPDebugSet", 1000);
 
-    notifier.startPeriodic(20);
+    // notifier.startPeriodic(20);
   }
 
   public void reset() {
@@ -108,7 +108,7 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
 
-    // runClosedLoop();
+    runClosedLoop();
 
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());

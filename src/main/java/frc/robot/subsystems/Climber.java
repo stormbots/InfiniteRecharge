@@ -57,8 +57,8 @@ public class Climber extends SubsystemBase {
     switch(Constants.botName){
     case COMP:
       //Configure constants for the bot
-      ARM_LENGTH_1 = 32.5;
-      ARM_LENGTH_2 = 22.5;
+      ARM_LENGTH_1 = 32.75;
+      ARM_LENGTH_2 = 28;
     
       MAX_ARM_ANGLE = 89.0;
       MIN_ARM_ANGLE = 0.0;
@@ -69,23 +69,26 @@ public class Climber extends SubsystemBase {
 
       //Configure motor setup
       armMotor.setInverted(true);
-      armMotor.setIdleMode(IdleMode.kCoast); //TODO: Delete me
+      armMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       armMotor.setSmartCurrentLimit(20);
       armEncoder.setPositionConversionFactor(90/59.88);
 
       spoolMotor.setInverted(true);
-      spoolMotor.setIdleMode(IdleMode.kCoast); //TODO: Delete me
+      spoolMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       spoolMotor.setSmartCurrentLimit(20);
       spoolEncoder.setPositionConversionFactor(32/539.0);
   
       hookMotor.setInverted(true);
       hookMotor.setSmartCurrentLimit(2);
-      hookMotor.setIdleMode(IdleMode.kCoast);
+      hookMotor.setIdleMode(IdleMode.kCoast);//NOTE: Intentionally coast
       hookEncoder.setPositionConversionFactor(180/38.666);
       
       armEncoder.setPosition(0.0);
-      spoolEncoder.setPosition(0.0);
+      //spoolEncoder.setPosition(0.0);
       hookEncoder.setPosition(0.0);
+
+      spoolPID = new MiniPID(1/12.0, 0, 0).setSetpoint(12);
+      climbPID = new MiniPID(1/12.0, 0, 0).setSetpoint(12);
     break;
     case PRACTICE:
     //fallthrough to default
@@ -150,6 +153,11 @@ public class Climber extends SubsystemBase {
     this.hookTargetAngle=angle;
   }
 
+  public void setMotorIdleModes(IdleMode mode){
+    armMotor.setIdleMode(mode);
+    spoolMotor.setIdleMode(mode);
+  }
+
   /* Helper Functions */
   private double getSpoolHeight(){
     double currentSpoolHeight = spoolEncoder.getPosition()+CLIMBER_BASE_HEIGHT;
@@ -164,9 +172,11 @@ public class Climber extends SubsystemBase {
     return (Math.sin(theta) * ARM_LENGTH_1) + (Math.sin(theta) * ARM_LENGTH_2) + CLIMBER_BASE_HEIGHT;
   }
 
-/*********** Periodic Stuff ********* */
+
+  /*********** Periodic Stuff ********* */
   @Override
   public void periodic() {
+    targetHeight = Clamp.clamp(targetHeight, CLIMBER_BASE_HEIGHT, MAX_HEIGHT);
     /* Height stuff */
     double spoolOutput = spoolPID.getOutput(getSpoolHeight(), targetHeight);
    
@@ -185,14 +195,14 @@ public class Climber extends SubsystemBase {
     hookOutput = Clamp.clamp(hookOutput, -0.3,0.3); //Not safety: Low output power is desirable for hook
 
     //TODO Remove/adjust safety clamps to appropriate values
-    spoolOutput = MathUtil.clamp(spoolOutput, -0.1, 0.1);
+    spoolOutput = MathUtil.clamp(spoolOutput, -0.3, 0.3);
     armOutput = MathUtil.clamp(armOutput, -0.1, 0.1);
 
     if(!disable){
       //TODO : Enable and test climber
-      // spoolMotor.set(spoolOutput);
-      // armMotor.set(armOutput);
-      // hookMotor.set(hookOutput);
+      //spoolMotor.set(spoolOutput);
+      //armMotor.set(armOutput);
+      //hookMotor.set(hookOutput);
     }
 
     //Update SmartDashbaord
@@ -207,6 +217,9 @@ public class Climber extends SubsystemBase {
 
     SmartDashboard.putNumber("climb/hookAngle", hookEncoder.getPosition());
     SmartDashboard.putNumber("climb/hookAmps", hookMotor.getOutputCurrent());
+    SmartDashboard.putNumber("climb/spooloutput", spoolMotor.get());
+    SmartDashboard.putNumber("climb/armoutput", armMotor.get());
+
 
    }
 }

@@ -83,8 +83,15 @@ public class Intake extends SubsystemBase {
   }
 
   public void intakeOn(){
-    sideMotor.set(SIDEMOTORSPEED);
-    centerMotor.set(CENTERMOTORSPEED);
+    double sideOutput = SIDEMOTORSPEED;
+    double centerOutput = CENTERMOTORSPEED;
+
+    //TODO: monitor temps and remove power if things overheat
+    // sideMotor.getMotorTemperature();
+    // centerMotor.getMotorTemperature();
+
+    sideMotor.set(sideOutput);
+    centerMotor.set(centerOutput);
   }
 
   public void intakeOff(){
