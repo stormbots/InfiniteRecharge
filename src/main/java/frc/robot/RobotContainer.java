@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -195,53 +196,54 @@ public class RobotContainer {
 
     //To help with integration, I expect our auto is going to look like this sequence: 
 
-    Command aimAndSpinUp = new ParallelCommandGroup(
-      new ShooterSetRPM(()->1, shooter).withTimeout(1),
 
-      new ChassisVisionTargeting(vision, navX, chassis)
-        .withTimeout(2)
-        .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
+    
+    Command aimAndGetToSpeed = new ParallelCommandGroup(
+      new ShooterSetRPM(()->2000, shooter).withTimeout(4),
+
+    new ChassisDriveToHeadingBasic(0, () -> -35, 3, 0.05, navX, chassis)
+
+      // new ChassisVisionTargeting(vision, navX, chassis)
+      //   .withTimeout(4)
+      //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
     );
 
-    Command fire = new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(3);
+    Command fireAtSpeed = new ParallelDeadlineGroup
+    (
+      new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(6),
+      new ShooterSetRPM(() -> 2000, shooter).withTimeout(8)
+    );
 
     Command resetPositionAndShooter = new ParallelCommandGroup(
-      new ShooterSetRPM(()->0, shooter).withTimeout(0),
+      // new ShooterSetRPM(()->0, shooter).withTimeout(0),
       new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
     );
 
     Command intakeAndDriveBack = new ParallelCommandGroup(
       new IntakeEngage(intake),
-      new ChassisDriveToHeadingBasic(-4, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
+      new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
     );
 
-    Command disengageIntake = new IntakeDisengage(intake);
+    Command stopIntakeAndDriveForward = new ParallelCommandGroup(
+      new IntakeDisengage(intake),
+      new ChassisDriveToHeadingBasic(4, () -> 0, 3, 0.05, navX, chassis)
+    );
 
+    // Command disengageIntake = new IntakeDisengage(intake);
+
+    
     Command  autoFromTrenchAlignment = new SequentialCommandGroup(
 
-      aimAndSpinUp, // then
+      aimAndGetToSpeed, // then
 
-      fire, // and then
+      fireAtSpeed, // and then
 
       resetPositionAndShooter, // and then
 
       intakeAndDriveBack, // and then
       
-      disengageIntake
+      stopIntakeAndDriveForward
     );
-
-    // autoCommand = new ChassisDriveToHeadingBasic(1, 180, navX, chassis);
-
-
-    // Command turnToShoot = new SequentialCommandGroup(
-    //   turn(() -> -45)
-    // );
-    
-
-    // Command turnAwayFromShooting = new SequentialCommandGroup(
-    //   turn(() -> 45),//calculateAngleToInitialCompassBearing() ),
-    //   driveForward(-2)
-    // );
 
     autoCommand = autoFromTrenchAlignment;
 
@@ -250,13 +252,13 @@ public class RobotContainer {
     return autoFromTrenchAlignment;
   }
 
-  public Command turn(DoubleSupplier targetAngle) {
-    return new ChassisDriveToHeadingBasic(0, targetAngle, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
-  }
+  // public Command turn(DoubleSupplier targetAngle) {
+  //   return new ChassisDriveToHeadingBasic(0, targetAngle, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
+  // }
 
-  public Command driveForward(double driveDistance) {
-    return new ChassisDriveToHeadingBasic(driveDistance, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
-  }
+  // public Command driveForward(double driveDistance) {
+  //   return new ChassisDriveToHeadingBasic(driveDistance, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
+  // }
 
   // public double calculateAngleFromHome() {
   //   return calculateTargetAngle(navX.getCompassHeading(), Constants.INITIAL_COMPASS_HEADING);
@@ -281,15 +283,7 @@ public class RobotContainer {
     double finalAngle = Constants.INITIAL_COMPASS_HEADING;
     double angleDifference = finalAngle - initialAngle;
     SmartDashboard.putNumber("chassis/Pre Modification AngleDifference", angleDifference);
-    
-    if(angleDifference > 180) angleDifference += -360;
-    if(angleDifference < -180) angleDifference += 360;
-    
-    SmartDashboard.putNumber("chassis/Post Modification AngleDifference", angleDifference);
-
-    return angleDifference;
-    //*/
-    
+    */    
   }
 
 

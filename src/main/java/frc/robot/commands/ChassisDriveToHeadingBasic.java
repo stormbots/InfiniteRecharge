@@ -62,11 +62,12 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   @Override
   public void initialize() {
 
+    chassis.getPID().reset();
+
 
     chassis.getLeftEncoder().setPosition(0);
     chassis.getRightEncoder().setPosition(0);
     
-    // gyro.reset();
     
     targetBearing = targetBearingSupplier.getAsDouble();
 
@@ -82,8 +83,8 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
   public void execute() {
 
 
-    SmartDashboard.putNumber("Chassis/targetBearing", targetBearing);
-    SmartDashboard.putNumber("Chassis/targetBearingSupplier", targetBearingSupplier.getAsDouble());
+    // SmartDashboard.putNumber("Chassis/targetBearing", targetBearing);
+    // SmartDashboard.putNumber("Chassis/targetBearingSupplier", targetBearingSupplier.getAsDouble());
 
 
     double currentAngle =  gyro.getAngle();
@@ -94,7 +95,7 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
 
     double targetDistance = speedslew.calculate(this.targetDistance);
 
-    double forwardSpeed = FB.fb(targetDistance, distance, 0.4); // TABI 0.4 || PRACTICE 0.
+    double forwardSpeed = FB.fb(targetDistance, distance, 0.5); // TABI 0.4 || PRACTICE 0.4
 
 
     // if(Math.abs(targetBearing - currentAngle) > 20) {
@@ -129,12 +130,12 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
 
     // angleTolerance = Math.copySign(angleTolerance, targetBearing.getAsDouble());
 
-    SmartDashboard.putNumber("Chassis/angle Error", gyro.getAngle() - (initialBearing + targetBearing) );
-    SmartDashboard.putNumber("Chassis/position Error", chassis.getAverageDistance() - targetDistance);
+    // SmartDashboard.putNumber("Chassis/angle Error", gyro.getAngle() - (initialBearing + targetBearing) );
+    // SmartDashboard.putNumber("Chassis/position Error", chassis.getAverageDistance() - targetDistance);
     SmartDashboard.putBoolean("Chassis/Exit Total", ( Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance)
     && ( Clamp.bounded(chassis.getAverageDistance(), targetDistance-distanceTolerance, targetDistance+distanceTolerance) ) ));
 
-    SmartDashboard.putBoolean("Chassis/Exit Angle", Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance));
+    // SmartDashboard.putBoolean("Chassis/Exit Angle", Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance));
 
     return ( Clamp.bounded(gyro.getAngle(), initialBearing+targetBearing-angleTolerance, initialBearing+targetBearing+angleTolerance)
     && ( Clamp.bounded(chassis.getAverageDistance(), targetDistance-distanceTolerance, targetDistance+distanceTolerance) ) );

@@ -58,6 +58,8 @@ public class Robot extends TimedRobot {
     //LiveWindow.disableAllTelemetry();
 
     SmartDashboard.putData(new PowerDistributionPanel());
+    SmartDashboard.putData(robot.navX);
+
   }
 
   /**
@@ -142,6 +144,9 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+
+    // robot.navX.reset();
+
   }
 
   /**

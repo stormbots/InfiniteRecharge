@@ -214,7 +214,7 @@ public class Chassis extends SubsystemBase {
         .setSetpointRange(30)
         ;
 
-        ACCEL_DISTANCE = 0.25;
+        ACCEL_DISTANCE = 0.5;
       break;
 
       default:
@@ -271,6 +271,8 @@ public class Chassis extends SubsystemBase {
     SmartDashboard.putNumber("Chassis/velocityLeft", left.getEncoder().getVelocity());
     SmartDashboard.putNumber("Chassis/velocityRight", right.getEncoder().getVelocity());
     SmartDashboard.putNumber("Chassis/inital compass heading", Constants.INITIAL_COMPASS_HEADING);
+
+
   }
 
 
