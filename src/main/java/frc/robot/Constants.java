@@ -7,13 +7,17 @@
 
 package frc.robot;
 
+import com.stormbots.PiecewiseLerp;
+
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants.  This class should not be used for any other purpose.  All constants should be
- * declared globally (i.e. public static).  Do not put anything functional in this class.
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean constants. This class should not be used for any other
+ * purpose. All constants should be declared globally (i.e. public static). Do
+ * not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
- * constants are needed, to reduce verbosity.
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the constants are needed, to reduce verbosity.
  */
 public class Constants {
     public enum BotName {COMP,PRACTICE,TABI};
@@ -44,12 +48,22 @@ public class Constants {
     /** Height from the floor to the center of the shooter */
     public static double SHOOTER_HEIGHT = 22.0;
 
-
+    public static PiecewiseLerp distanceToRPM;
+      
     /** In case we need to manage robot differences, we can do so here.*/
     public static void Initialize(){
+        /* COMPBOT */
         if(botName==BotName.COMP){
-
-        }else{ //all other bots
+            distanceToRPM =  new PiecewiseLerp(  
+                new double[]{13*12, 15*12, 17*12, 19*12, 21*12, 23*12}, 
+                new double[]{4450,  4700,   5000, 5350,   5650, 6000}
+             );         
+        /* PRACTICEBOT */
+        }else{
+            distanceToRPM =  new PiecewiseLerp(  
+               new double[]{13*12, 15*12, 17*12, 19*12, 21*12, 23*12}, 
+               new double[]{4450,  4700,   5000, 5350,   5650, 6000}
+            );        
         }
     }
 }

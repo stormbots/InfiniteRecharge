@@ -22,6 +22,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Vision extends SubsystemBase {
   public AHRS gyro;
@@ -162,11 +163,7 @@ public class Vision extends SubsystemBase {
   }
   
 
-  PiecewiseLerp distanceToRPM = new PiecewiseLerp(  
-  new double[]{13*12, 15*12, 17*12, 19*12, 21*12, 23*12}, 
-  new double[]{4450,  4700,   5000, 5350,   5650, 6000}
-  );//PRACTICEBOT
   public double getDistanceEmpirical(double distance){
-    return distanceToRPM.getOutputAt(distance);
+    return Constants.distanceToRPM.getOutputAt(distance);
   }
 }
