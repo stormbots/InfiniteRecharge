@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -83,6 +85,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+
   }
 
   @Override
@@ -118,7 +121,6 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("Chassis/compass error", robot.navX.getCompassHeading() - Constants.INITIAL_COMPASS_HEADING);
 
-
   }
 
   @Override
@@ -130,7 +132,6 @@ public class Robot extends TimedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-
   }
 
   /**
@@ -146,7 +147,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().cancelAll();
 
     // robot.navX.reset();
-
+    robot.climber.setMotorIdleModes(IdleMode.kCoast);
   }
 
   /**

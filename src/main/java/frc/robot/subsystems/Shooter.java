@@ -13,6 +13,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
 
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,18 +24,24 @@ public class Shooter extends SubsystemBase {
   /**
    * Creates a new Shooter.
    */
+  
   private final CANSparkMax shooterMotor = new CANSparkMax(11 ,MotorType.kBrushless);
   private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
 
-  MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2)*1.1);
+  MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2));
   MiniPID errorPID = new MiniPID(1/5700.0*1.2,0,0).setOutputLimits(-0.05, 0.5);
   private final SlewRateLimiter feedForwardSlew = new SlewRateLimiter( 1/2.0 ,0);
 
   double targetRPM = 0;
 
-  SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
+  // Not currently in use but may use later
+  // SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
+
+  // Notifier notifier = new Notifier(()->runClosedLoop());
+
+
 
   public Shooter() {
     switch(Constants.botName){
@@ -55,6 +62,8 @@ public class Shooter extends SubsystemBase {
     encoder.setVelocityConversionFactor(2);
 
     if(!SmartDashboard.containsKey("shooter/RMPDebugSet"))SmartDashboard.putNumber("shooter/RMPDebugSet", 1000);
+
+    // notifier.startPeriodic(20);
   }
 
   public void reset() {
@@ -77,12 +86,11 @@ public class Shooter extends SubsystemBase {
       errorOutput = 0.0;
     }
 
-    feedForwardOutput *=2; 
+    
     //TODO Feeder is geared to 1/10th the speed of shooter. Just run it as fast as possible now
     // and we'll be moving it to the Passthrough in a bit.
 
-    feedForwardOutput*=0.5;// Rely more on error feedback because bad calculations
-
+   
     feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
     shooterMotor.set(feedForwardOutput + errorOutput);
     feederMotor.set(feedForwardOutput + errorOutput);

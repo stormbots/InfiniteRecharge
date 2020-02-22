@@ -38,6 +38,12 @@ public class Constants {
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;
 
+    /** Angle the shooter shoots the balls */
+    public static double SHOOTER_ANGLE = 50;
+
+    /** Height from the floor to the center of the shooter */
+    public static double SHOOTER_HEIGHT = 22.0;
+
 
     /** In case we need to manage robot differences, we can do so here.*/
     public static void Initialize(){
