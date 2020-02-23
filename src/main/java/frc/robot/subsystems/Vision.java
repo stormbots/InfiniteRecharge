@@ -42,6 +42,7 @@ public class Vision extends SubsystemBase {
   public Vision(AHRS navX) {
     this.gyro = navX;
 
+    pidTurn = new MiniPID(0,0,0);
     pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
     pidTurn.setP(0.013);
     pidTurn.setI(0.001);
