@@ -50,12 +50,12 @@ public class Robot extends TimedRobot {
     SmartDashboard.setPersistent("Preferences/botName");
     //make sure any robot-specific constants are handled properly.
     Constants.Initialize();
-    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     robot = new RobotContainer();
 
+    Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
 
     //Option to disable default sensor/motor spam on NetworkTables
     //LiveWindow.disableAllTelemetry();
