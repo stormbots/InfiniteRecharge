@@ -7,7 +7,11 @@
 
 package frc.robot.commands;
 
+import static frc.robot.Constants.CHASSIS_TURN_STATIC_FF;
+
 import java.util.function.DoubleSupplier;
+
+import com.stormbots.PiecewiseLerp;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -17,6 +21,14 @@ public class ChassisDriveManual extends CommandBase {
   private final Chassis chassis;
   private DoubleSupplier move;
   private DoubleSupplier turn;
+  private double JS_MIN=0.001;
+  private double TURNFF=CHASSIS_TURN_STATIC_FF;
+
+  //Map our control inputs to corresponding feedforwards 
+  private PiecewiseLerp joystickMap = new PiecewiseLerp(
+    new double[]{-1, -JS_MIN, 0, JS_MIN,  1},
+    new double[]{-1, -TURNFF, 0, TURNFF, 1}
+  );
 
   /**
    * Creates a new ChassisDriveManual.
@@ -44,8 +56,10 @@ public class ChassisDriveManual extends CommandBase {
     double forwardSquared = Math.abs(forwardLinear) * forwardLinear;
     double turnSquared = Math.abs(turnLinear) * turnLinear;
 
+    turnSquared = joystickMap.getOutputAt(turnSquared);
 
-    turnSquared += Math.signum(turnSquared)*0.035;
+    SmartDashboard.putNumber("chassisdrive/turnsquared", turnSquared);
+
 
     chassis.drive.arcadeDrive(
       forwardSquared,
