@@ -28,8 +28,6 @@ public class ChassisVisionTargeting extends CommandBase {
   Vision vision; 
   private AHRS gyro;
 
-  MiniPID pidTurn = new MiniPID(0.015,0,0);
-
   public ChassisVisionTargeting(Vision vision, AHRS navX, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(chassis);
@@ -45,16 +43,10 @@ public class ChassisVisionTargeting extends CommandBase {
     //TODO: We shouldn't need to reset for vision to work right and apparently it'll mess up Zach and his autos
     //gyro.reset();
 
-    pidTurn = chassis.getPID();
+    //pidTurn = chassis.getPID();
 
-    pidTurn.reset();
-    pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
-    pidTurn.setP(0.013);
-    pidTurn.setI(0.001);
-    // pidTurn.setD(0.0015);
-    pidTurn.setMaxIOutput(0.15);
-    pidTurn.setOutputLimits(0.35);
-
+    vision.pidTurn.reset();
+    
     vision.targetPipeline();
     vision.lightsOn();
   }
@@ -63,19 +55,18 @@ public class ChassisVisionTargeting extends CommandBase {
   @Override
   public void execute() {
 
-    if(!vision.isTargetValid())return;
+    if( ! vision.isTargetValid()){
+      chassis.drive.arcadeDrive(0, 0, false);
+      return;
+    }
     
     //Direct vision backup method
-    // double outputTurn = pidTurn.getOutput(0, vision.getTargetHeading());
+    // double outputTurn = pidTurn.getOutput(0, vision.getTargetOffset());
   
     //preferred gyro method
-    double outputTurn = pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
+    double outputTurn = vision.pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
 
     //Add a static feed-forward which makes things much more robust
-    if(Constants.botName!=BotName.TABI){
-      outputTurn += outputTurn>0 ? 0.035 : -0.035;
-    }
-
     chassis.drive.arcadeDrive(0, outputTurn,false);
 
     //TODO Chassis inversion thing! Arcade drive backwards! 
