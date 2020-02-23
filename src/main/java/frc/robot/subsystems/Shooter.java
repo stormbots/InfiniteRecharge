@@ -26,7 +26,6 @@ public class Shooter extends SubsystemBase {
    */
   
   private final CANSparkMax shooterMotor = new CANSparkMax(11 ,MotorType.kBrushless);
-  private final CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
 
 
@@ -46,12 +45,10 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     switch(Constants.botName){
       case COMP:
-        feederMotor.setInverted(true);
       break;
 
       case PRACTICE:
       default:
-        feederMotor.setInverted(true);
       break;
     }
     shooterMotor.setIdleMode(IdleMode.kCoast);
@@ -93,7 +90,7 @@ public class Shooter extends SubsystemBase {
    
     feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
     shooterMotor.set(feedForwardOutput + errorOutput);
-    feederMotor.set(feedForwardOutput + errorOutput);
+    // feederMotor.set(feedForwardOutput + errorOutput);
 
     SmartDashboard.putNumber("shooter/contribFF", feedForwardOutput);
     SmartDashboard.putNumber("shooter/contribPID", errorOutput);

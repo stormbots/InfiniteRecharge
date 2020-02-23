@@ -10,6 +10,7 @@ package frc.robot;
 import java.util.function.DoubleSupplier;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.stormbots.Lerp;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -77,6 +78,7 @@ public class RobotContainer {
   JoystickButton visionAimToTarget = new JoystickButton(driver, 5);
   JoystickButton visionAimToTargetFancy = new JoystickButton(driver, 7);
   JoystickButton shiftButton = new JoystickButton(driver, 6);
+  JoystickButton fineTurning = new JoystickButton(driver, 8);
 
   Joystick controller = new Joystick(1);
   Button intakeButton = new JoystickButton(controller, 1);
@@ -120,14 +122,16 @@ public class RobotContainer {
     visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
     visionAimToTargetFancy.whileHeld(new ChassisVisionTargetingFancy(vision, navX, chassis));
     ;
-    
+    fineTurning.whileHeld(new ChassisDriveManual(() -> driver.getRawAxis(1), () -> 0.5 * driver.getRawAxis(2), chassis));
 
     /* Player 2 normal Buttons */
     intakeButton.whenPressed(new IntakeEngage(intake));
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
-    //shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->1000, shooter));
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    // shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
+    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    // shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
 
     shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
       if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
@@ -135,7 +139,7 @@ public class RobotContainer {
     }, shooter));
     
     shoot.whenPressed(()->passthrough.shoot());
-    loadBallManually.whenPressed(()->passthrough.loadBall());
+    loadBallManually.whenPressed(new InstantCommand(()->passthrough.loadBall(),passthrough));
     eject.whenPressed(new PassthroughEject(passthrough, intake));
 
     /*Player 2 Climb Buttons */

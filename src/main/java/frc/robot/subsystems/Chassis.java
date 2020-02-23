@@ -11,9 +11,11 @@ import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -222,13 +224,19 @@ public class Chassis extends SubsystemBase {
     }
 
     //TODO: Must be removed if running PD controlled chassis, should be controlled better than commenting
-    drive = new DifferentialDrive(left, right);
-
+    // drive = new DifferentialDrive(left, right);
     //Set up the follower motors
-    leftA.follow(left);
-    leftB.follow(left);
-    rightA.follow(right);
-    rightB.follow(right);
+    // leftA.follow(left);
+    // leftB.follow(left);
+    // rightA.follow(right);
+    // rightB.follow(right);
+
+    //Try getting rid of follower setup and do direct writes to all motors
+    drive = new DifferentialDrive(
+      new SpeedControllerGroup(left,leftA,leftB),
+      new SpeedControllerGroup(right,rightA,rightB)
+    );
+
 
     //Configure the stall currents and limits
     int stallCurrent = 150/6;
