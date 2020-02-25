@@ -27,8 +27,6 @@ public class ChassisVisionTargetingFancy extends CommandBase {
   Vision vision; 
   private AHRS gyro;
 
-  MiniPID pidTurn = new MiniPID(0.015,0,0);
-
   Double targetHeading = 0.0;
   private boolean foundValidTarget;
 
@@ -47,16 +45,9 @@ public class ChassisVisionTargetingFancy extends CommandBase {
     //TODO: We shouldn't need to reset for vision to work right and apparently it'll mess up Zach and his autos
     //gyro.reset();
 
-    pidTurn = chassis.getPID();
+    //pidTurn = chassis.getPID();
 
-    pidTurn.reset();
-    pidTurn.setSetpointRange(15); //TODO Find proper value //was 30
-    pidTurn.setP(0.013);
-    pidTurn.setI(0.001);
-    // pidTurn.setD(0.0015);
-    pidTurn.setMaxIOutput(0.15);
-    pidTurn.setOutputLimits(0.35);
-    pidTurn.setF((s,a,e)->{return Math.abs(e)*0.035;/*static FeedForward*/ });
+    vision.pidTurn.reset();
 
     vision.targetPipelineFancy();
     vision.lightsOn();
@@ -76,12 +67,13 @@ public class ChassisVisionTargetingFancy extends CommandBase {
         foundValidTarget = true;
         targetHeading = gyro.getAngle() + NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
       }
+      chassis.drive.arcadeDrive(0, 0, false);
       return;
     }
 
   
     //preferred gyro method
-    double outputTurn = pidTurn.getOutput(gyro.getAngle(), targetHeading);
+    double outputTurn = vision.pidTurn.getOutput(gyro.getAngle(), targetHeading);
     // SmartDashboard.putNumber("vision/FancyTargetAngle",targetHeading);
     // SmartDashboard.putNumber("vision/FancyGyro",gyro.getAngle());
     // SmartDashboard.putNumber("vision/FancyOutput",outputTurn);

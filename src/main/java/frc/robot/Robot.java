@@ -9,6 +9,7 @@ package frc.robot;
 
 import com.revrobotics.CANSparkMax.IdleMode;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -27,6 +28,8 @@ public class Robot extends TimedRobot {
   private Command autonomousCommand;
 
   private RobotContainer robot;
+
+  Compressor compressor = new Compressor();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -55,6 +58,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     robot = new RobotContainer();
 
+    //TODO: move to robotContainer constructor
     Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();
 
     //Option to disable default sensor/motor spam on NetworkTables
@@ -63,6 +67,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(new PowerDistributionPanel());
     SmartDashboard.putData(robot.navX);
 
+    compressor.clearAllPCMStickyFaults();
   }
 
   /**
@@ -79,6 +84,13 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+
+    // SmartDashboard.putBoolean("compressor/CurrentTooHight",compressor.getCompressorCurrentTooHighFault());
+    // SmartDashboard.putBoolean("compressor/CurrentShorted",compressor.getCompressorShortedFault());
+    // SmartDashboard.putBoolean("compressor/CurrentNotConnected",compressor.getCompressorNotConnectedFault());
+    // SmartDashboard.putBoolean("compressor/CurrentShortedSticky",compressor.getCompressorShortedStickyFault());
+    // SmartDashboard.putBoolean("compressor/CurrentNotConnectedSticky",compressor.getCompressorNotConnectedStickyFault());
+    // SmartDashboard.putBoolean("compressor/CurrentTooHightSticky",compressor.getCompressorCurrentTooHighStickyFault());
   }
 
   /**

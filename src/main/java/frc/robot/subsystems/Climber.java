@@ -37,7 +37,7 @@ public class Climber extends SubsystemBase {
   double ARM_LENGTH_2;
   double MAX_ARM_ANGLE;
   double MIN_ARM_ANGLE;
-  double SPOOL_LENGTH;
+  double SPOOL_LENGTH; // TODO: find new spool length
   public double CLIMBER_BASE_HEIGHT;
   public double MAX_HEIGHT;
 
@@ -73,7 +73,7 @@ public class Climber extends SubsystemBase {
       armMotor.setSmartCurrentLimit(20);
       armEncoder.setPositionConversionFactor(90/59.88);
 
-      spoolMotor.setInverted(true);
+      spoolMotor.setInverted(false);
       spoolMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       spoolMotor.setSmartCurrentLimit(20);
       spoolEncoder.setPositionConversionFactor(32/539.0);

@@ -48,6 +48,8 @@ public class Constants {
     /** Height from the floor to the center of the shooter */
     public static double SHOOTER_HEIGHT = 22.0;
 
+    public static double CHASSIS_TURN_STATIC_FF=0.035;
+
     public static PiecewiseLerp distanceToRPM;
       
     /** In case we need to manage robot differences, we can do so here.*/

@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.Clamp;
 import com.stormbots.closedloop.MiniPID;
+import com.stormbots.interp.SinCurve;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -25,12 +26,12 @@ public class Passthrough extends SubsystemBase {
 
   private CANSparkMax motor = new CANSparkMax(9,MotorType.kBrushless);
   public CANEncoder encoder = new CANEncoder(motor);
-  
+  private CANSparkMax feederMotor = new CANSparkMax(10 ,MotorType.kBrushless);
 
   MiniPID pid;
 
   
-  final double BALLLENGTH = 7; //inches
+  final double BALLLENGTH = 6.5; //inches
   double PASSTHROUGHLENGTH = 27; //Placeholder Number, Replace Later  
   double positionOfFirstBall = 0; //positon ahead of the first ball
   double positionOfLastBall = 0; //position behind the last ball
@@ -61,6 +62,7 @@ public class Passthrough extends SubsystemBase {
       .setOutputLimits(0.4);
       ;
       motor.setInverted(false);
+      feederMotor.setInverted(true);
     break;
     case PRACTICE:
       encoder.setPositionConversionFactor(21.25/42.2);
@@ -68,6 +70,7 @@ public class Passthrough extends SubsystemBase {
       .setOutputLimits(0.5);
       ;
       motor.setInverted(false);
+      feederMotor.setInverted(true);
     break;
     case TABI://fallthrough to default
     default:
@@ -154,6 +157,10 @@ public class Passthrough extends SubsystemBase {
           passthroughState = PassthroughState.IDLE; 
         }
         if(intakeSensorLastReading == BLOCKED && intakeSensorReading == NOTBLOCKED) {
+          positionOfLastBall = setpoint;
+          if(numberOfBalls == 0){
+            positionOfFirstBall = positionOfLastBall+BALLLENGTH;
+          }
           numberOfBalls += 1;
         }
       break;
@@ -181,8 +188,19 @@ public class Passthrough extends SubsystemBase {
         output = pid.getOutput(currentPosition, setpoint);
         //Not really needed for now
         //output += output<0 ? -0.04 : 0.04; //add estimated static feed-forward to help with generic system friction
+        
+        //Throttle down if the passthrough snags and tries to overheat
+        output *= SinCurve.scurve(motor.getMotorTemperature(), 40, 50, 1, 0);
+
         motor.set(output);
     }
+    //run feeder
+    if(passthroughState==PassthroughState.SHOOTING){
+      feederMotor.set(1);
+    }else{
+      feederMotor.set(0);
+    }
+
 
     // Save our edge states
     shootSensorLastReading = shootSensorReading;
@@ -215,20 +233,21 @@ public class Passthrough extends SubsystemBase {
     passthroughState = PassthroughState.LOADING;
 
     setpoint = encoder.getPosition() - BALLLENGTH;
-    positionOfLastBall = setpoint;
-    if(numberOfBalls == 0){
-      positionOfFirstBall = positionOfLastBall+BALLLENGTH;
-    }
+    //moved to state machine.
+    // positionOfLastBall = setpoint;
+    // if(numberOfBalls == 0){
+    //   positionOfFirstBall = positionOfLastBall+BALLLENGTH;
+    // }
   }
 
   public void prepareForLoading(){
     setpoint = positionOfLastBall;
   }
 
-  //TODO: This function is probably not needed, but does work
-  // public void prepareForShooting(){
-  //   setpoint = positionOfFirstBall - PASSTHROUGHLENGTH;
-  // } 
+  //Move things back slightly to ensure shooter is clear
+  public void prepareForShooting(){
+    setpoint = positionOfLastBall + 2;
+  } 
 
   /** Dump all the balls out the front */
   public void shoot(){
