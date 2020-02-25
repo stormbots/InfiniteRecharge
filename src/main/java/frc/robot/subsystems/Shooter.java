@@ -70,7 +70,7 @@ public class Shooter extends SubsystemBase {
 
     //gross test values for compression shooting
     sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8, 0);
-    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2));
+    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2);
     sparkMaxPID.setD(0.8*(1/5700.0*7) * 0.390243902439 /10.0);
     //temp
     // sparkMaxPID.setP(0);
