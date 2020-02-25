@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Autos.AutoName;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
@@ -197,61 +198,36 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-    //To help with integration, I expect our auto is going to look like this sequence: 
+    AutoName chosenAuto = AutoName.FULL_NEAR_TRENCH; // do the smartDashboard stuff instead
+
+  switch(chosenAuto) {
+    case SAFETY:
+      return autos.getSafety();
+    case BASIC_FAR_TRENCH:
+      // return 
+    case BASIC_NEAR_TRENCH:
 
 
-    
-    // Command aimAndGetToSpeed = new ParallelCommandGroup(
-    //   new ShooterSetRPM(()->2000, shooter).withTimeout(4),
 
-    // new ChassisDriveToHeadingBasic(0, () -> -35, 3, 0.05, navX, chassis)
-
-    //   // new ChassisVisionTargeting(vision, navX, chassis)
-    //   //   .withTimeout(4)
-    //   //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
-    // );
-
-    // Command fireAtSpeed = new ParallelDeadlineGroup
-    // (
-    //   new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(6),
-    //   new ShooterSetRPM(() -> 2000, shooter).withTimeout(8)
-    // );
-
-    // Command resetPositionAndShooter = new ParallelCommandGroup(
-    //   // new ShooterSetRPM(()->0, shooter).withTimeout(0),
-    //   new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
-    // );
-
-    // Command intakeAndDriveBack = new ParallelCommandGroup(
-    //   new IntakeEngage(intake),
-    //   new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
-    // );
-
-    // Command stopIntakeAndDriveForward = new ParallelCommandGroup(
-    //   new IntakeDisengage(intake),
-    //   new ChassisDriveToHeadingBasic(4, () -> 0, 3, 0.05, navX, chassis)
-    // );
-
-    // // Command disengageIntake = new IntakeDisengage(intake);
-
-    
-    // Command  autoFromTrenchAlignment = new SequentialCommandGroup(
-
-    //   aimAndGetToSpeed, // then
-
-    //   fireAtSpeed, // and then
-
-    //   resetPositionAndShooter, // and then
-
-    //   intakeAndDriveBack, // and then
-      
-    //   stopIntakeAndDriveForward
-    // );
-
-    // autoCommand = autoFromTrenchAlignment;
+    case BASIC_PORT_CENTERED:
 
 
-    // An ExampleCommand will run in autonomous
+
+    case BASIC_RONDE_CENTERED:
+
+
+
+    case FULL_NEAR_TRENCH:
+
+      return autos.trench3BallAuto();
+
+    default: // just do safety
+
+
+  }    
+
+
+
     return autos.shootBalls(120);
   }
 

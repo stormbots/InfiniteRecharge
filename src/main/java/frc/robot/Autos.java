@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
+import frc.robot.commands.ChassisVisionTargetingFancy;
+import frc.robot.commands.IntakeDisengage;
+import frc.robot.commands.IntakeEngage;
 import frc.robot.commands.ShooterSetRPM;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Intake;
@@ -33,7 +36,7 @@ import frc.robot.subsystems.Vision;
  */
 public class Autos {
 
-    public enum AutoName {SAFETY,BASIC,TRENCH};
+    public enum AutoName {SAFETY, BASIC_PORT_CENTERED, BASIC_NEAR_TRENCH, BASIC_FAR_TRENCH, BASIC_RONDE_CENTERED, FULL_NEAR_TRENCH};
 
     private AHRS gyro;
     private Shooter shooter;
@@ -41,6 +44,19 @@ public class Autos {
     private Vision vision;
     private Passthrough passthrough;
     private Chassis chassis;
+
+    
+    private final double nearTrenchFiringAngle = 35; // degrees
+    private final double nearTrenchFiringDistance = 150; // inches
+
+    private final double farTrenchFiringAngle = 35; // degrees
+    private final double farTrenchFiringDistance = 150; // inches
+
+    private final double portCenteredFiringAngle = 35; // degrees
+    private final double portCenteredFiringDistance = 150; // inches
+
+    private final double rondeCenteredFiringAngle = 35; // degrees
+    private final double rondeCenteredFiringDistance = 150; // inches
 
 
     public Autos(AHRS gyro, Shooter shooter, Intake intake, Vision vision, Passthrough passthrough, Chassis chassis) {
@@ -51,6 +67,8 @@ public class Autos {
         this.passthrough = passthrough;
         this.chassis = chassis;
     }
+
+
 
 
     // public Command getAuto(AutoName auto) {
@@ -80,11 +98,15 @@ public class Autos {
     //     }
 
     public Command getSafety() {
-        return new ChassisDriveToHeadingBasic(-1, () -> 0, 3, 0.05, gyro, chassis);
+        return new ChassisDriveToHeadingBasic(-1.5, () -> 0, 3, 0.05, gyro, chassis);
     }
 
 
     public Command turnAndShoot(double targetAngleToPort, double distanceToPort) {
+
+        //alternative vision turning method
+
+        Command turnToTargetWithVision = new ChassisVisionTargetingFancy(vision, gyro, chassis);
 
         Command turnToTarget = new ChassisDriveToHeadingBasic(0, () -> targetAngleToPort, 3, 0.05, gyro, chassis);
 
@@ -92,7 +114,7 @@ public class Autos {
 
 
         Command aimAndSpinUp = new ParallelCommandGroup(
-            turnToTarget,
+            turnToTarget, // turnToTargetWithVision, //
             spinUpShooter
         );
 
@@ -113,6 +135,48 @@ public class Autos {
 
         return rotatingToThenFire;
     };
+
+
+    public Command turnAndShootAndResetAngle(double targetAngleToPort, double distanceToPort) {
+
+        Command recoverAngle = new ChassisDriveToHeadingBasic(0, () -> -gyro.getAngle(), 3, 0.05, gyro, chassis);
+
+
+        Command turnAndShootAndRecover = new SequentialCommandGroup(
+            turnAndShoot(targetAngleToPort, distanceToPort),
+            recoverAngle
+        );
+        
+        return turnAndShootAndRecover;
+
+    }
+
+    public Command turnAndShootAndResetAngleAndDriveBack(double targetAngleToPort, double distanceToPort) {
+        Command driveBack = new ChassisDriveToHeadingBasic(-1.5, () -> 0, 3, 0.05, gyro, chassis);
+
+        Command rotateAndThenFireAndThenResetAngleAndThenFinallyDriveBackwards = new SequentialCommandGroup(
+            turnAndShootAndResetAngle(targetAngleToPort, distanceToPort),
+            driveBack
+        );
+
+        return rotateAndThenFireAndThenResetAngleAndThenFinallyDriveBackwards;
+    }
+
+    public Command getBasicNearTrench() {
+        return turnAndShootAndResetAngleAndDriveBack(nearTrenchFiringAngle, nearTrenchFiringDistance);
+    }
+
+    public Command getBasicFarTrench() {
+        return turnAndShootAndResetAngleAndDriveBack(farTrenchFiringAngle, farTrenchFiringDistance);
+    }
+
+    public Command getBasicPortCentered() {
+        return turnAndShootAndResetAngleAndDriveBack(portCenteredFiringAngle, portCenteredFiringDistance);
+    }
+
+    public Command getBasicRondeCentered() {
+        return turnAndShootAndResetAngleAndDriveBack(rondeCenteredFiringAngle, rondeCenteredFiringDistance);
+    }
 
 
 
@@ -143,6 +207,31 @@ public class Autos {
 
         return firing;
     };
+
+
+
+    public Command trench3BallAuto() {
+        
+        Command intakeAndDriveBack = new ParallelCommandGroup(
+            new IntakeEngage(intake),
+            new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3, 0.05, gyro, chassis)
+        );
+
+        Command disengageAndDriveBack = new ParallelCommandGroup(
+            new IntakeDisengage(intake),
+            new ChassisDriveToHeadingBasic(3, () -> 0, 3, 0.05, gyro, chassis)  
+        );
+
+
+        Command trenchAuto = new SequentialCommandGroup(
+            turnAndShootAndResetAngle(nearTrenchFiringAngle, nearTrenchFiringDistance),
+            intakeAndDriveBack,
+            disengageAndDriveBack
+        );
+
+        return trenchAuto;
+    }
+
 
 
 
