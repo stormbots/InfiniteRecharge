@@ -7,16 +7,12 @@
 
 package frc.robot;
 
-import java.util.function.DoubleSupplier;
-
 import com.kauailabs.navx.frc.AHRS;
-import com.stormbots.Lerp;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -36,7 +32,6 @@ import frc.robot.commands.IntakeEngage;
 import frc.robot.commands.PassthroughEject;
 import frc.robot.commands.PassthroughIdle;
 import frc.robot.commands.ShooterSetRPM;
-import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
@@ -67,6 +62,8 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   private final Spinner spinner = new Spinner();
   private final Vision vision = new Vision(navX);
+
+  private final Autos autos = new Autos(navX, shooter, intake, vision, passthrough, chassis);
   
 
   // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
@@ -107,6 +104,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    navX.reset();
   }
 
   /**
@@ -202,58 +201,58 @@ public class RobotContainer {
 
 
     
-    Command aimAndGetToSpeed = new ParallelCommandGroup(
-      new ShooterSetRPM(()->2000, shooter).withTimeout(4),
+    // Command aimAndGetToSpeed = new ParallelCommandGroup(
+    //   new ShooterSetRPM(()->2000, shooter).withTimeout(4),
 
-    new ChassisDriveToHeadingBasic(0, () -> -35, 3, 0.05, navX, chassis)
+    // new ChassisDriveToHeadingBasic(0, () -> -35, 3, 0.05, navX, chassis)
 
-      // new ChassisVisionTargeting(vision, navX, chassis)
-      //   .withTimeout(4)
-      //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
-    );
+    //   // new ChassisVisionTargeting(vision, navX, chassis)
+    //   //   .withTimeout(4)
+    //   //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
+    // );
 
-    Command fireAtSpeed = new ParallelDeadlineGroup
-    (
-      new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(6),
-      new ShooterSetRPM(() -> 2000, shooter).withTimeout(8)
-    );
+    // Command fireAtSpeed = new ParallelDeadlineGroup
+    // (
+    //   new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(6),
+    //   new ShooterSetRPM(() -> 2000, shooter).withTimeout(8)
+    // );
 
-    Command resetPositionAndShooter = new ParallelCommandGroup(
-      // new ShooterSetRPM(()->0, shooter).withTimeout(0),
-      new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
-    );
+    // Command resetPositionAndShooter = new ParallelCommandGroup(
+    //   // new ShooterSetRPM(()->0, shooter).withTimeout(0),
+    //   new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
+    // );
 
-    Command intakeAndDriveBack = new ParallelCommandGroup(
-      new IntakeEngage(intake),
-      new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
-    );
+    // Command intakeAndDriveBack = new ParallelCommandGroup(
+    //   new IntakeEngage(intake),
+    //   new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
+    // );
 
-    Command stopIntakeAndDriveForward = new ParallelCommandGroup(
-      new IntakeDisengage(intake),
-      new ChassisDriveToHeadingBasic(4, () -> 0, 3, 0.05, navX, chassis)
-    );
+    // Command stopIntakeAndDriveForward = new ParallelCommandGroup(
+    //   new IntakeDisengage(intake),
+    //   new ChassisDriveToHeadingBasic(4, () -> 0, 3, 0.05, navX, chassis)
+    // );
 
-    // Command disengageIntake = new IntakeDisengage(intake);
+    // // Command disengageIntake = new IntakeDisengage(intake);
 
     
-    Command  autoFromTrenchAlignment = new SequentialCommandGroup(
+    // Command  autoFromTrenchAlignment = new SequentialCommandGroup(
 
-      aimAndGetToSpeed, // then
+    //   aimAndGetToSpeed, // then
 
-      fireAtSpeed, // and then
+    //   fireAtSpeed, // and then
 
-      resetPositionAndShooter, // and then
+    //   resetPositionAndShooter, // and then
 
-      intakeAndDriveBack, // and then
+    //   intakeAndDriveBack, // and then
       
-      stopIntakeAndDriveForward
-    );
+    //   stopIntakeAndDriveForward
+    // );
 
-    autoCommand = autoFromTrenchAlignment;
+    // autoCommand = autoFromTrenchAlignment;
 
 
     // An ExampleCommand will run in autonomous
-    return autoFromTrenchAlignment;
+    return autos.shootBalls(120);
   }
 
   // public Command turn(DoubleSupplier targetAngle) {
@@ -276,10 +275,10 @@ public class RobotContainer {
   // }
 
 
-  public double calculateAngleToInitialCompassBearing() {
+  // public double calculateAngleToInitialCompassBearing() {
 
     //Valid basically as long as we never reset the navx's gyro
-    return 0 - navX.getAngle();
+    // return 0 - navX.getAngle();
 
     /* TODO: We may or may not need this code, leave it in here for now
     //Does not work if the gyro is un-calibrated.
@@ -288,7 +287,7 @@ public class RobotContainer {
     double angleDifference = finalAngle - initialAngle;
     SmartDashboard.putNumber("chassis/Pre Modification AngleDifference", angleDifference);
     */    
-  }
+  // }
 
 
 
