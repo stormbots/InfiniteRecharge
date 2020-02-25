@@ -180,7 +180,11 @@ public class Chassis extends SubsystemBase {
 
       case PRACTICE:
         left.setInverted(true);
+        leftA.setInverted(true);
+        leftB.setInverted(true);
         right.setInverted(true);
+        rightA.setInverted(true);
+        rightB.setInverted(true);
 
         left.getEncoder().setPositionConversionFactor(7.3914 / 287.4546);
         right.getEncoder().setPositionConversionFactor(7.3914 / 287.4546);
@@ -205,7 +209,11 @@ public class Chassis extends SubsystemBase {
 
       case COMP:
         left.setInverted(true);
+        leftA.setInverted(true);
+        leftB.setInverted(true);
         right.setInverted(true);
+        rightA.setInverted(true);
+        rightB.setInverted(true);
         left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
         right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
 
