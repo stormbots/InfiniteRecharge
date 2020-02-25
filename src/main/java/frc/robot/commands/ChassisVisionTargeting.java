@@ -8,14 +8,12 @@
 package frc.robot.commands;
 
 import com.kauailabs.navx.frc.AHRS;
-import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.Constants.BotName;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Vision;
 
@@ -55,7 +53,7 @@ public class ChassisVisionTargeting extends CommandBase {
   @Override
   public void execute() {
 
-    if( ! vision.isTargetValid()){
+    if( vision.isTargetValid()==false){
       chassis.drive.arcadeDrive(0, 0, false);
       return;
     }
@@ -72,6 +70,7 @@ public class ChassisVisionTargeting extends CommandBase {
     //TODO Chassis inversion thing! Arcade drive backwards! 
     //keep an eye out for when it's fixed or not working - may need a "-"
     SmartDashboard.putNumber("vision/AimingOutput", outputTurn);
+    SmartDashboard.putNumber("vision/Gyro Angle", gyro.getAngle());
    
   }
 
