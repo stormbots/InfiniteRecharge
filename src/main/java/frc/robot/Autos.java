@@ -11,6 +11,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
@@ -36,7 +37,8 @@ import frc.robot.subsystems.Vision;
  */
 public class Autos {
 
-    public enum AutoName {SAFETY, BASIC_PORT_CENTERED, BASIC_NEAR_TRENCH, BASIC_FAR_TRENCH, BASIC_RONDE_CENTERED, FULL_NEAR_TRENCH};
+    public enum AutoName {SAFETY, BASIC_PORT_CENTERED, BASIC_NEAR_TRENCH, BASIC_FAR_TRENCH, BASIC_RONDE_CENTERED, FULL_NEAR_TRENCH, 
+                          FULL_CENTERED_RONDE};
 
     private AHRS gyro;
     private Shooter shooter;
@@ -46,17 +48,20 @@ public class Autos {
     private Chassis chassis;
 
     
-    private final double nearTrenchFiringAngle = 35; // degrees
-    private final double nearTrenchFiringDistance = 150; // inches
+    private final double nearTrenchFiringAngle = -35; // degrees // also incorrect
+    private final double nearTrenchFiringDistance = 170; // inches
 
-    private final double farTrenchFiringAngle = 35; // degrees
-    private final double farTrenchFiringDistance = 150; // inches
+    private final double farTrenchFiringAngle = 60; // degrees
+    private final double farTrenchFiringDistance = 210; // inches
 
     private final double portCenteredFiringAngle = 35; // degrees
     private final double portCenteredFiringDistance = 150; // inches
 
     private final double rondeCenteredFiringAngle = 35; // degrees
     private final double rondeCenteredFiringDistance = 150; // inches
+
+    private final double rondeAfterPickupFiringAngle = 35; // degrees
+    private final double rondeAfterPickupFiringDistance = 210; // inches
 
 
     public Autos(AHRS gyro, Shooter shooter, Intake intake, Vision vision, Passthrough passthrough, Chassis chassis) {
@@ -106,25 +111,27 @@ public class Autos {
 
         //alternative vision turning method
 
-        Command turnToTargetWithVision = new ChassisVisionTargetingFancy(vision, gyro, chassis);
+        // Command turnToTargetWithVision = new ChassisVisionTargetingFancy(vision, gyro, chassis).withTimeout(3);
 
         Command turnToTarget = new ChassisDriveToHeadingBasic(0, () -> targetAngleToPort, 3, 0.05, gyro, chassis);
 
-        Command spinUpShooter = new ShooterSetRPM(() -> vision.getDistanceToRPMEmpirical(distanceToPort), shooter).withTimeout(2);
+        Command spinUpShooter1 = new ShooterSetRPM(() -> vision.getDistanceToRPMEmpirical(distanceToPort), shooter).withTimeout(2);
 
 
         Command aimAndSpinUp = new ParallelCommandGroup(
             turnToTarget, // turnToTargetWithVision, //
-            spinUpShooter
+            spinUpShooter1
         );
 
 
         Command shoot = new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(4);
 
+        Command spinUpShooter2 = new ShooterSetRPM(() -> vision.getDistanceToRPMEmpirical(distanceToPort), shooter).withTimeout(2);
+
 
         Command fireAtSpeed = new ParallelCommandGroup(
             shoot,
-            spinUpShooter
+            spinUpShooter2
         );
 
 
@@ -135,6 +142,30 @@ public class Autos {
 
         return rotatingToThenFire;
     };
+
+        public Command turnAndShootHardSet(double targetAngleToPort, double distanceToPort) {
+
+            Command turnToTarget = new ChassisDriveToHeadingBasic(0, () -> targetAngleToPort, 3, 0.05, gyro, chassis);
+
+            Command spinUpShooter = new ShooterSetRPM(() -> vision.getDistanceToRPMEmpirical(distanceToPort), shooter).withTimeout(2);
+
+            Command shoot = new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(4);
+
+
+            Command turnThenShoot = new SequentialCommandGroup(
+                turnToTarget,
+                shoot  
+            );
+
+            Command parallelSpinUpAndTurnThenShoot = new ParallelDeadlineGroup(
+                turnThenShoot,
+                spinUpShooter
+            );
+
+            return parallelSpinUpAndTurnThenShoot;
+
+        }
+
 
 
     public Command turnAndShootAndResetAngle(double targetAngleToPort, double distanceToPort) {
@@ -209,17 +240,16 @@ public class Autos {
     };
 
 
-
     public Command trench3BallAuto() {
         
-        Command intakeAndDriveBack = new ParallelCommandGroup(
-            new IntakeEngage(intake),
-            new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3, 0.05, gyro, chassis)
+        Command intakeAndDriveBack = new ParallelDeadlineGroup(
+            new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3, 0.05, gyro, chassis),
+            new IntakeEngage(intake)
         );
 
-        Command disengageAndDriveBack = new ParallelCommandGroup(
-            new IntakeDisengage(intake),
-            new ChassisDriveToHeadingBasic(3, () -> 0, 3, 0.05, gyro, chassis)  
+        Command disengageAndDriveBack = new ParallelDeadlineGroup(
+            new ChassisDriveToHeadingBasic(3, () -> 0, 3, 0.05, gyro, chassis),
+            new IntakeDisengage(intake)
         );
 
 
@@ -230,6 +260,34 @@ public class Autos {
         );
 
         return trenchAuto;
+        
+    }  
+
+    
+    public Command ronde3BallAuto() {
+
+        Command intakeAndDriveBack = new ParallelDeadlineGroup(
+            new ChassisDriveToHeadingBasic(-2, () -> 0, 3, 0.05, gyro, chassis), //also needs good distance
+            new IntakeEngage(intake)
+        );
+
+
+        Command turnAndDriveBackAndTurn = new SequentialCommandGroup( //TODO: Find/make values for angle/distances Rendezvous
+            new ChassisDriveToHeadingBasic(-1.5, () -> 45, 3, 0.05, gyro, chassis), //currently guesses on angles/distances
+            new ChassisDriveToHeadingBasic(0, () -> -45, 3, 0.05, gyro, chassis)
+        );
+
+        
+        Command ronde3Ball = new SequentialCommandGroup(
+            turnAndShootHardSet(rondeCenteredFiringAngle, rondeCenteredFiringDistance),
+            intakeAndDriveBack,
+            turnAndDriveBackAndTurn,
+            new IntakeDisengage(intake),
+            turnAndShootAndResetAngleAndDriveBack(rondeAfterPickupFiringAngle, rondeAfterPickupFiringDistance)
+        );
+
+        return ronde3Ball;
+
     }
 
 

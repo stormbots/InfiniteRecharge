@@ -214,8 +214,12 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);
         rightA.setInverted(true);
         rightB.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
-        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        // left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        // right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        left.getEncoder().setPositionConversionFactor(1); // Practice Bot stand ins, need to be verified yesterday
+        right.getEncoder().setPositionConversionFactor(1); // Practice Bot stand ins, need to be verified yesterday
+        left.getEncoder().setVelocityConversionFactor(1); // Practice Bot stand ins, need to be verified yesterday
+        right.getEncoder().setVelocityConversionFactor(1); // Practice Bot stand ins, need to be verified yesterday
 
         turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)

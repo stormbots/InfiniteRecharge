@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -128,9 +129,11 @@ public class RobotContainer {
     intakeButton.whenPressed(new IntakeEngage(intake));
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
+
+
     // shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
     // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->{return (double)SmartDashboard.getNumber("shooter/RMPDebugSet", 1000);}, shooter));
     // shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
 
     shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
@@ -200,35 +203,32 @@ public class RobotContainer {
 
     AutoName chosenAuto = AutoName.FULL_NEAR_TRENCH; // do the smartDashboard stuff instead
 
-  switch(chosenAuto) {
+    switch(chosenAuto) {
     case SAFETY:
       return autos.getSafety();
+
     case BASIC_FAR_TRENCH:
-      // return 
+      // return autos.getBasicFarTrench();
+
     case BASIC_NEAR_TRENCH:
-
-
+      return autos.getBasicNearTrench();
 
     case BASIC_PORT_CENTERED:
-
-
+      // return autos.getBasicPortCentered();
 
     case BASIC_RONDE_CENTERED:
-
-
+      // return autos.getBasicRondeCentered();
 
     case FULL_NEAR_TRENCH:
-
       return autos.trench3BallAuto();
+    
+    case FULL_CENTERED_RONDE:
+      return autos.ronde3BallAuto();
 
     default: // just do safety
+      return autos.getSafety();
+    }
 
-
-  }    
-
-
-
-    return autos.shootBalls(120);
   }
 
   // public Command turn(DoubleSupplier targetAngle) {
