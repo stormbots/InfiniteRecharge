@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -60,7 +61,7 @@ public class RobotContainer {
   // private final ADIS16448_IMU gyro = new ADIS16448_IMU();
   public final AHRS navX = new AHRS(SPI.Port.kMXP);
 
-  private final Chassis chassis = new Chassis();
+  public Chassis chassis = new Chassis();
   public final Climber climber = new Climber();
   private final Intake intake = new Intake();
   private final Passthrough passthrough = new Passthrough();
@@ -82,8 +83,8 @@ public class RobotContainer {
 
   Joystick controller = new Joystick(1);
   Button intakeButton = new JoystickButton(controller, 1);
-  Button shooterSpinCalculatedSpeed = new JoystickButton(controller, 2);//TODO: Implement properly
-  Button shooterSpinDefaultSpeed = new JoystickButton(controller, 3);
+  Button shooterSpinCalculatedSpeed = new JoystickButton(controller, 3);//TODO: Implement properly
+  Button shooterSpinDefaultSpeed = new JoystickButton(controller, 2);
   JoystickButton loadBallManually = new JoystickButton(controller, 4);//backup button: Doesn't need to be used much
   JoystickButton shoot = new JoystickButton(controller, 5);
   JoystickButton eject = new JoystickButton(controller, 6);
@@ -128,10 +129,15 @@ public class RobotContainer {
     intakeButton.whenPressed(new IntakeEngage(intake));
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
-    // shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
-    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
-    // shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
+    shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
+    shooterSpinDefaultSpeed.whileHeld(new ConditionalCommand(
+      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), shooter),
+      new InstantCommand( ()->{} ),
+      ()->{return shooter.isOnTarget();}
+    ));
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
+    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
 
     shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
       if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 

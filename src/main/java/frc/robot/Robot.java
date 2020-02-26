@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
   private RobotContainer robot;
 
   Compressor compressor = new Compressor();
+  PowerDistributionPanel pdp = new PowerDistributionPanel();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -85,12 +86,7 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    // SmartDashboard.putBoolean("compressor/CurrentTooHight",compressor.getCompressorCurrentTooHighFault());
-    // SmartDashboard.putBoolean("compressor/CurrentShorted",compressor.getCompressorShortedFault());
-    // SmartDashboard.putBoolean("compressor/CurrentNotConnected",compressor.getCompressorNotConnectedFault());
-    // SmartDashboard.putBoolean("compressor/CurrentShortedSticky",compressor.getCompressorShortedStickyFault());
-    // SmartDashboard.putBoolean("compressor/CurrentNotConnectedSticky",compressor.getCompressorNotConnectedStickyFault());
-    // SmartDashboard.putBoolean("compressor/CurrentTooHightSticky",compressor.getCompressorCurrentTooHighStickyFault());
+    //SmartDashboard.putNumber("compressor/amps", pdp.);
   }
 
   /**
@@ -98,13 +94,20 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-
+    robot.chassis.setMotorIdleModes(IdleMode.kCoast);
   }
 
   @Override
   public void disabledPeriodic() {
 
     SmartDashboard.putNumber("Chassis/COMPASS HEADING", robot.navX.getCompassHeading());
+    SmartDashboard.putBoolean("compressor/CurrentTooHight",compressor.getCompressorCurrentTooHighFault());
+    SmartDashboard.putBoolean("compressor/CurrentShorted",compressor.getCompressorShortedFault());
+    SmartDashboard.putBoolean("compressor/CurrentNotConnected",compressor.getCompressorNotConnectedFault());
+    SmartDashboard.putBoolean("compressor/CurrentShortedSticky",compressor.getCompressorShortedStickyFault());
+    SmartDashboard.putBoolean("compressor/CurrentNotConnectedSticky",compressor.getCompressorNotConnectedStickyFault());
+    SmartDashboard.putBoolean("compressor/CurrentTooHightSticky",compressor.getCompressorCurrentTooHighStickyFault());
+    
 
   }
 
@@ -115,6 +118,7 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     
     Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();  
+    robot.chassis.setMotorIdleModes(IdleMode.kBrake);
 
     robot.navX.reset();
 
@@ -138,6 +142,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    robot.chassis.setMotorIdleModes(IdleMode.kBrake);
+
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -161,6 +167,7 @@ public class Robot extends TimedRobot {
 
     // robot.navX.reset();
     robot.climber.setMotorIdleModes(IdleMode.kCoast);
+    robot.climber.enable = false;
   }
 
   /**

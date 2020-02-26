@@ -35,7 +35,7 @@ public class SpinSpoolNegative extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    climber.disable = true;
+    climber.enable = false;
   }
 
   // Called every time the scheduler runs while the command is scheduled.

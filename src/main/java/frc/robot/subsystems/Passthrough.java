@@ -190,13 +190,15 @@ public class Passthrough extends SubsystemBase {
         //output += output<0 ? -0.04 : 0.04; //add estimated static feed-forward to help with generic system friction
         
         //Throttle down if the passthrough snags and tries to overheat
-        output *= SinCurve.scurve(motor.getMotorTemperature(), 40, 50, 1, 0);
+        output *= SinCurve.scurve(motor.getMotorTemperature(), 80, 100, 1, 0);
 
         motor.set(output);
     }
     //run feeder
     if(passthroughState==PassthroughState.SHOOTING){
-      //feederMotor.set(1);
+      feederMotor.set(1);
+    }else if(passthroughState==PassthroughState.EJECTING){
+      feederMotor.set(-0.5);
     }else{
       feederMotor.set(0);
     }
@@ -220,6 +222,7 @@ public class Passthrough extends SubsystemBase {
     SmartDashboard.putBoolean("pt/sensorRawIntake", intakeSensor.get());
     SmartDashboard.putBoolean("pt/sensorRawReady", readySensor.get());
     SmartDashboard.putNumber("pt/numBalls", numberOfBalls);
+    SmartDashboard.putNumber("pt/temp", motor.getMotorTemperature());
     // SmartDashboard.putBoolean("pt/sensorBackOfQueue", intakeSensor.get());
     // SmartDashboard.putBoolean("pt/sensorShooter", shootSensor.get());
 
@@ -246,7 +249,7 @@ public class Passthrough extends SubsystemBase {
 
   //Move things back slightly to ensure shooter is clear
   public void prepareForShooting(){
-    setpoint = positionOfLastBall + 2;
+    setpoint = positionOfLastBall + 1;
   } 
 
   /** Dump all the balls out the front */

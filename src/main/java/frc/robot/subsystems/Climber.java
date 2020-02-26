@@ -50,7 +50,7 @@ public class Climber extends SubsystemBase {
   SlewRateLimiter climbSlew = new SlewRateLimiter(1,0);
 
   /**Disables climber output for use with debug commands to rewind motors*/
-  public boolean disable = false;
+  public boolean enable = false;
   
   public Climber() {
     System.out.print("Initializing Climber");
@@ -63,15 +63,18 @@ public class Climber extends SubsystemBase {
       MAX_ARM_ANGLE = 89.0;
       MIN_ARM_ANGLE = 0.0;
     
-      SPOOL_LENGTH = 38.0;
+      SPOOL_LENGTH = 22.75*2;
       CLIMBER_BASE_HEIGHT = 24.5;
-      MAX_HEIGHT=SPOOL_LENGTH+CLIMBER_BASE_HEIGHT;
+      MAX_HEIGHT=48+CLIMBER_BASE_HEIGHT;
 
       //Configure motor setup
       armMotor.setInverted(true);
       armMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
-      armMotor.setSmartCurrentLimit(20);
-      armEncoder.setPositionConversionFactor(90/59.88);
+      armMotor.setSmartCurrentLimit(60);
+      armMotor.setSmartCurrentLimit(60, 60);
+      armEncoder.setPositionConversionFactor(45/15.714277);
+      // armEncoder.setPositionConversionFactor(1);
+
 
       spoolMotor.setInverted(false);
       spoolMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
@@ -84,11 +87,11 @@ public class Climber extends SubsystemBase {
       hookEncoder.setPositionConversionFactor(180/38.666);
       
       armEncoder.setPosition(0.0);
-      //spoolEncoder.setPosition(0.0);
+      spoolEncoder.setPosition(0.0);
       hookEncoder.setPosition(0.0);
 
-      spoolPID = new MiniPID(1/12.0, 0, 0).setSetpoint(12);
-      climbPID = new MiniPID(1/12.0, 0, 0).setSetpoint(12);
+      spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
+      climbPID = new MiniPID(1/12.0, 0.02/50.0, 0).setSetpointRange(12);
     break;
     case PRACTICE:
     //fallthrough to default
@@ -107,7 +110,7 @@ public class Climber extends SubsystemBase {
       //Configure motors and scaling
       armMotor.setInverted(true);
       armMotor.setIdleMode(IdleMode.kBrake);
-      armMotor.setSmartCurrentLimit(20);
+      armMotor.setSmartCurrentLimit(40);
       armEncoder.setPositionConversionFactor(90/65.5);
 
       spoolMotor.setInverted(true);
@@ -183,11 +186,14 @@ public class Climber extends SubsystemBase {
     // setspoolheight()
     // climbheight(spool.getheight())
     double armTargetHeight = getSpoolHeight();
+    armTargetHeight = targetHeight;
 
-    double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
+    // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
+    double armOutput = 0;
+    armOutput += climbPID.getOutput(getArmHeight(), targetHeight);
     //FB based close loop
-    armTargetHeight = MathUtil.clamp(armTargetHeight,0,80);
-    armOutput = FB.fb(armTargetHeight, armEncoder.getPosition(), 0.07);
+    armOutput = FB.fb(armTargetHeight, getArmHeight(), 0.09);
+    // armOutput += 0.1* Math.cos(armEncoder.getPosition());
     armOutput = climbSlew.calculate(armOutput);
 
     double hookOutput = 0;
@@ -195,14 +201,19 @@ public class Climber extends SubsystemBase {
     hookOutput = Clamp.clamp(hookOutput, -0.3,0.3); //Not safety: Low output power is desirable for hook
 
     //TODO Remove/adjust safety clamps to appropriate values
-    spoolOutput = MathUtil.clamp(spoolOutput, -0.3, 0.3);
-    armOutput = MathUtil.clamp(armOutput, -0.1, 0.1);
+    //spoolOutput = MathUtil.clamp(spoolOutput, -0.3, 0.3);
+    armOutput = MathUtil.clamp(armOutput, -0.05, 1.0);
 
-    if(!disable){
+    if(enable){
       //TODO : Enable and test climber
-      //spoolMotor.set(spoolOutput);
-      //armMotor.set(armOutput);
-      //hookMotor.set(hookOutput);
+      spoolMotor.set(spoolOutput);
+      armMotor.set(armOutput);
+      hookMotor.set(hookOutput);
+    }
+    else{
+      spoolMotor.set(0);
+      armMotor.set(0);
+      hookMotor.set(0);
     }
 
     //Update SmartDashbaord
@@ -218,8 +229,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("climb/hookAngle", hookEncoder.getPosition());
     SmartDashboard.putNumber("climb/hookAmps", hookMotor.getOutputCurrent());
     SmartDashboard.putNumber("climb/spooloutput", spoolMotor.get());
+    SmartDashboard.putNumber("climb/armoutputRaw", armOutput);
     SmartDashboard.putNumber("climb/armoutput", armMotor.get());
-
-
    }
 }
