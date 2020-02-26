@@ -49,7 +49,7 @@ public class Vision extends SubsystemBase {
     // pidTurn.setD(0.0015);
     pidTurn.setMaxIOutput(0.15);
     pidTurn.setOutputLimits(0.35);
-    pidTurn.setF((s,a,e)->{return Math.abs(e)*0.035;/*static FeedForward*/ });
+    pidTurn.setF((s,a,e)->{return Math.signum(e)*0.035;/*static FeedForward*/ });
 
     table = NetworkTableInstance.getDefault().getTable("limelight");
     tx = table.getEntry("tx");
@@ -64,10 +64,13 @@ public class Vision extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // post to smart dashboard periodically
+    SmartDashboard.putBoolean("vision/targetValid", isTargetValid());
     SmartDashboard.putNumber("vision/Distance to Target", getDistance());
     SmartDashboard.putNumber("vision/Gyro Current", gyro.getAngle());
     SmartDashboard.putNumber("vision/Gyro Target", getTargetHeading());
     SmartDashboard.putNumber("vision/rpmForDistance", getDistanceToRPMEmpirical(getDistance()));
+
+    SmartDashboard.putNumber("vision/xOffset", tx.getDouble(0.0));
 
     // SmartDashboard.putNumber("vision/rpm(13)", getRPMForDistance(12*13));
     // SmartDashboard.putNumber("vision/rpm(15)", getRPMForDistance(12*15));
@@ -110,7 +113,7 @@ public class Vision extends SubsystemBase {
   }
 
   public boolean isTargetValid(){
-    if( tv.getDouble(0.0)<1 == false ) return false;
+    if( tv.getDouble(0.0)<1 ) return false;
 
     // read values periodically
     // if (ta.getDouble(0.0) < 0.5 && ts.getDouble(0.0) >= -120 && ts.getDouble(0.0) <= -60) {

@@ -37,8 +37,9 @@ public class Constants {
     public static double CAMERA_MOUNT_HEIGHT = 16.25;
 
     /**Mount tilt back, in degrees*/
+    //what? public static double CAMERA_MOUNT_ANGLE = 27.69; //13.64 prev
     public static double CAMERA_MOUNT_ANGLE = 13.64;
-  
+    
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;
 
