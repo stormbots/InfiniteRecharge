@@ -129,8 +129,8 @@ public class RobotContainer {
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
     // shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
-    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
+    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
     // shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
 
     shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{

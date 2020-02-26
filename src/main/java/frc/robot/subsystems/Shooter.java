@@ -8,7 +8,10 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+import com.revrobotics.CANPIDController.ArbFFUnits;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.closedloop.MiniPID;
@@ -27,6 +30,8 @@ public class Shooter extends SubsystemBase {
   
   private final CANSparkMax shooterMotor = new CANSparkMax(11 ,MotorType.kBrushless);
   private final CANEncoder encoder = new CANEncoder(shooterMotor);
+  private final CANPIDController sparkMaxPID = new CANPIDController(shooterMotor);
+
 
 
   MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2));
@@ -36,7 +41,7 @@ public class Shooter extends SubsystemBase {
   double targetRPM = 0;
 
   // Not currently in use but may use later
-  // SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.154,0.0425,0.0202);
+  SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.162,0.0641,0.0296);
 
   // Notifier notifier = new Notifier(()->runClosedLoop());
 
@@ -51,8 +56,32 @@ public class Shooter extends SubsystemBase {
       default:
       break;
     }
-    shooterMotor.setIdleMode(IdleMode.kCoast);
+
+    //old values
+    //kU values
+    // sparkMaxPID.setFF(1/(5700.0*1.9), 0);
+    // sparkMaxPID.setP(1/5700.0*7, 0);
+    
+    // sparkMaxPID.setP(0.8*(1/5700.0*7));
+    // sparkMaxPID.setD((1/5700.0*7) * 0.390243902439 /10.0);
+
+    //gross test values for compression shooting
+    sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8, 0);
+    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2);
+    sparkMaxPID.setD(0.8*(1/5700.0*7) * 0.390243902439 /10.0);
+    //temp
+    // sparkMaxPID.setP(0);
+    // sparkMaxPID.setD(0);
+
+    
+
+    // sparkMaxPID.setOutputRange(0, 1, 0);
+    
+
+
+    shooterMotor.setIdleMode(IdleMode.kBrake);
     shooterMotor.setOpenLoopRampRate(0.1);
+
 
     encoder.setPosition(0);
     encoder.setPositionConversionFactor(2);
@@ -105,8 +134,9 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
 
-    runClosedLoop();
-
+    //runClosedLoop();
+    //sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0, feedForward.calculate(targetRPM)/12.0, ArbFFUnits.kPercentOut);
+    sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0);
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
     SmartDashboard.putNumber("shooter/amps", shooterMotor.getOutputCurrent());

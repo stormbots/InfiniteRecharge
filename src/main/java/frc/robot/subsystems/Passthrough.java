@@ -31,7 +31,7 @@ public class Passthrough extends SubsystemBase {
   MiniPID pid;
 
   
-  final double BALLLENGTH = 6.5; //inches
+  final double BALLLENGTH = 6.8; //inches
   double PASSTHROUGHLENGTH = 27; //Placeholder Number, Replace Later  
   double positionOfFirstBall = 0; //positon ahead of the first ball
   double positionOfLastBall = 0; //position behind the last ball
@@ -196,7 +196,7 @@ public class Passthrough extends SubsystemBase {
     }
     //run feeder
     if(passthroughState==PassthroughState.SHOOTING){
-      feederMotor.set(1);
+      //feederMotor.set(1);
     }else{
       feederMotor.set(0);
     }
