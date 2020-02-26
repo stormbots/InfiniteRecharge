@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
 
   private RobotContainer robot;
 
-  Compressor compressor = new Compressor();
+  // Compressor compressor = new Compressor();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -67,7 +67,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(new PowerDistributionPanel());
     SmartDashboard.putData(robot.navX);
 
-    compressor.clearAllPCMStickyFaults();
+    // compressor.clearAllPCMStickyFaults();
   }
 
   /**
