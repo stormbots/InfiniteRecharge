@@ -75,6 +75,7 @@ public class Climber extends SubsystemBase {
       // armEncoder.setPositionConversionFactor(1);
 
 
+      //INVERSION == FALSE IF SPOOLED SO LONG SIDE IS TOWARD SHOOTER
       spoolMotor.setInverted(false);
       spoolMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       spoolMotor.setSmartCurrentLimit(20);
