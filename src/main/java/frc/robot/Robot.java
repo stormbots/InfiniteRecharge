@@ -167,6 +167,7 @@ public class Robot extends TimedRobot {
 
     // robot.navX.reset();
     robot.climber.setMotorIdleModes(IdleMode.kCoast);
+    robot.climber.setHeight(robot.climber.CLIMBER_BASE_HEIGHT);
     robot.climber.enable = false;
   }
 
