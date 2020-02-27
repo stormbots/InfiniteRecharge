@@ -19,14 +19,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.Autos.AutoName;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
@@ -131,12 +129,7 @@ public class RobotContainer {
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
     shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
-    shooterSpinDefaultSpeed.whileHeld(new ConditionalCommand(
-      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), shooter),
-      new InstantCommand( ()->{} ),
-      ()->{return shooter.isOnTarget();}
-    ));
-    shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(20*12), shooter));
+    shooterSpinDefaultSpeed.whileHeld( new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), shooter) );
     // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
     shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
 
@@ -145,7 +138,15 @@ public class RobotContainer {
       else { return 1000;}
     }, shooter));
     
-    shoot.whenPressed(()->passthrough.shoot());
+    //conditional
+    shoot.whileHeld(new ConditionalCommand(
+      new InstantCommand( ()->passthrough.shoot() ),
+      new InstantCommand( ()->{} ), 
+      ()->{return shooter.isOnTarget();}
+    ));
+
+
+
     loadBallManually.whenPressed(new InstantCommand(()->passthrough.loadBall(),passthrough));
     eject.whenPressed(new PassthroughEject(passthrough, intake));
 
