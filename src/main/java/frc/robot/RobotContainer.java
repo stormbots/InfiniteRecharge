@@ -7,16 +7,12 @@
 
 package frc.robot;
 
-import java.util.function.DoubleSupplier;
-
 import com.kauailabs.navx.frc.AHRS;
-import com.stormbots.Lerp;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -25,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ChassisDriveManual;
@@ -37,7 +34,6 @@ import frc.robot.commands.IntakeEngage;
 import frc.robot.commands.PassthroughEject;
 import frc.robot.commands.PassthroughIdle;
 import frc.robot.commands.ShooterSetRPM;
-import frc.robot.commands.SpinSpoolPositive;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.Chassis.Gear;
 import frc.robot.subsystems.Climber;
@@ -204,8 +200,79 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
 
-    //To help with integration, I expect our auto is going to look like this sequence: 
+    //Super basic get off the line
+    // autos.buildSpinupAndShoot()
+    // .andThen(()->shooter.setRPM(0))
+    // .andThen(new ChassisDriveToHeadingBasic(1.5, ()->0, 3,0.05, navX, chassis))
+    // ;
 
+ 
+    Command fireCenteredAndDriveForward = 
+    new ChassisDriveToHeadingBasic(0, ()->0, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(110))//Estimated Guess of distance
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(1.2, ()->0, 3, 0.05, navX, chassis))
+    ;
+    
+    
+    Command fullPortAuto = autos.buildSpinupAndShoot(103)
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-2.35, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(1.5, ()->0, 3, 0.05, navX, chassis))
+    // .andThen(autos.buildSpinupAndShoot())
+    // .andThen(()->shooter.setRPM(0))
+    ;
+
+
+
+
+    Command fullRondeAuto = new ChassisDriveToHeadingBasic(0, ()->20, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(120))
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-1.65, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->37, 3, 0.05, navX, chassis))
+    .andThen(new ChassisDriveToHeadingBasic(-1.2, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-21, 3, 0.05, navX, chassis))
+    // .andThen(autos.buildSpinupAndShoot())
+    // .andThen(()->shooter.setRPM(0))
+    ;
+
+    //Far
+    Command fullFarTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->70, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(145))//Estimated Guess of distance
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-4.17, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(3, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->56, 3, 0.05, navX, chassis))
+    // .andThen(autos.buildSpinupAndShoot())
+    // .andThen(()->shooter.setRPM(0))
+    ;
+
+
+    //Near
+    Command fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-32, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(130))
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-4.17, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(3, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
+    // .andThen(autos.buildSpinupAndShoot())
+    // .andThen(()->shooter.setRPM(0))
+    ;
+
+
+    if(true) return fullFarTrenchRunAuto;
 
     
     Command aimAndGetToSpeed = new ParallelCommandGroup(
@@ -298,7 +365,31 @@ public class RobotContainer {
 
 
 
-  
+  public Autos autos = new Autos();
+  public class Autos{
+
+    //This one's special: Because we may shoot multiple times, it's easier to just build it here and return it. 
+    // All other movements are mostly one off or simple, so we don't need to do much.
+    public ParallelDeadlineGroup buildSpinupAndShoot(double targetDistance){
+      return    
+      new ParallelDeadlineGroup(
+        new SequentialCommandGroup(
+          new WaitCommand(0.02),
+          new RunCommand(()->{}).withInterrupt(()->shooter.isOnTarget()).withTimeout(3),
+          new InstantCommand(()->passthrough.shoot()),
+          new WaitCommand(0.1),
+          new RunCommand(()->{}).withInterrupt(()->passthrough.isOnTarget(1))
+        ),
+        new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(targetDistance),shooter)
+        //Distances for RPM 
+        //130 near tennch
+        //103 port
+        //120 ronde
+      );
+
+    }
+
+  }
 
 
 }

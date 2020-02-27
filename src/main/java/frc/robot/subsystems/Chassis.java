@@ -95,8 +95,8 @@ public class Chassis extends SubsystemBase {
         right = new CANSparkMax(4,MotorType.kBrushless);
         rightA = new CANSparkMax(5,MotorType.kBrushless);
         rightB = new CANSparkMax(6,MotorType.kBrushless);
-        LEFT_INVERSION = -1;
-        RIGHT_INVERSION = 1;
+        LEFT_INVERSION = 1;
+        RIGHT_INVERSION = -1;
       break;
       case TABI: 
         left = new CANSparkMax(1,MotorType.kBrushless);
@@ -214,8 +214,8 @@ public class Chassis extends SubsystemBase {
         right.setInverted(true);
         rightA.setInverted(true);
         rightB.setInverted(true);
-        left.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
-        right.getEncoder().setPositionConversionFactor(Math.PI*6*Constants.INCHES_TO_METERS*(1/18.75));
+        left.getEncoder().setPositionConversionFactor(5.423 / 173.04);
+        right.getEncoder().setPositionConversionFactor(5.423 / 173.04);
 
         turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)

@@ -66,8 +66,9 @@ public class Constants {
         }else{
             distanceToRPM =  new PiecewiseLerp(  
                new double[]{13*12, 15*12, 17*12, 19*12, 21*12, 23*12}, 
-               new double[]{4450,  4700,   5000, 5350,   5650, 6000}
-            );        
+            //    new double[]{4450,  4700,   5000, 5350,   5650, 6000}//actual values
+               new double[]{1000,  1200,   1400, 1400,   2000, 2000}//plz be quiet
+            );         
         }
     }
 }
