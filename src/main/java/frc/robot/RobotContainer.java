@@ -13,19 +13,16 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Autos.AutoName;
 import frc.robot.commands.ChassisDriveManual;
-import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
 import frc.robot.commands.ChassisVisionTargetingFancy;
 import frc.robot.commands.ClimbManual;
@@ -162,8 +159,24 @@ public class RobotContainer {
     /*Debug Buttons */ //TODO: Remove these before competitions
     // tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
     // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
+    configAutoSelector();
   }
 
+  SendableChooser<Command> autoChooser = new SendableChooser<>();
+  SendableChooser<Boolean> limelightInAuto = new SendableChooser<>();
+
+  public void configAutoSelector(){
+    autoChooser.setDefaultOption("Basic", new WaitCommand(0));
+    autoChooser.setDefaultOption("LeftMostPos", new WaitCommand(0));
+    autoChooser.addOption("LeftRendevous", new WaitCommand(0));
+    autoChooser.setDefaultOption("RightRendevous", new WaitCommand(0));
+    autoChooser.addOption("RightMostPos", new WaitCommand(0));
+    SmartDashboard.putData("autos/position", autoChooser);
+    
+    limelightInAuto.setDefaultOption("No", false);
+    limelightInAuto.addOption("Yes", true);
+    SmartDashboard.putData("autos/limelight", limelightInAuto);
+  }
   /** 
    * Set up default commands
    */
