@@ -14,6 +14,7 @@ import com.revrobotics.ControlType;
 import com.revrobotics.CANPIDController.ArbFFUnits;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.stormbots.Clamp;
 import com.stormbots.closedloop.MiniPID;
 
 import edu.wpi.first.wpilibj.Notifier;
@@ -101,6 +102,10 @@ public class Shooter extends SubsystemBase {
     this.targetRPM = rpm;
   }
 
+  public boolean isOnTarget(){
+    return Clamp.bounded(targetRPM, encoder.getVelocity()-100, encoder.getVelocity()+100);
+  }
+
   private void runClosedLoop() {
     double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM) ;
     double errorOutput = errorPID.getOutput(encoder.getVelocity(), targetRPM);
@@ -143,5 +148,7 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("shooter/positons", encoder.getPosition());
     SmartDashboard.putNumber("shooter/appliedOutput", shooterMotor.getAppliedOutput());
     SmartDashboard.putNumber("shooter/outputCurrent", shooterMotor.getOutputCurrent());
+    SmartDashboard.putNumber("shooter/targetRPM", targetRPM);
+    
   }
 }

@@ -324,4 +324,8 @@ public class Chassis extends SubsystemBase {
     return turningPID;
   }
 
+  public void setMotorIdleModes(IdleMode mode){
+    left.setIdleMode(mode);
+    right.setIdleMode(mode);
+  }
 }

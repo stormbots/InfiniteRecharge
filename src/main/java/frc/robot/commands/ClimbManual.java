@@ -46,7 +46,6 @@ public class ClimbManual extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    climber.setMotorIdleModes(IdleMode.kBrake);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -59,6 +58,9 @@ public class ClimbManual extends CommandBase {
     //ensure operator and/or game timer allows this to run
     if(enableOperator.getAsBoolean()==false)return;
 
+    climber.enable=true;
+    climber.setMotorIdleModes(IdleMode.kBrake);
+
     double height = Lerp.lerp(joystickValue.getAsDouble(), 1, -1, climber.CLIMBER_BASE_HEIGHT, climber.MAX_HEIGHT );
     climber.setHeight(height);
     SmartDashboard.putNumber("climb/joystickTargetHeight", height);
@@ -67,7 +69,6 @@ public class ClimbManual extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    climber.setMotorIdleModes(IdleMode.kCoast); //TODO: delete me
 
   }
 

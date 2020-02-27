@@ -11,6 +11,7 @@ import static frc.robot.Constants.CHASSIS_TURN_STATIC_FF;
 
 import java.util.function.DoubleSupplier;
 
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.stormbots.PiecewiseLerp;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

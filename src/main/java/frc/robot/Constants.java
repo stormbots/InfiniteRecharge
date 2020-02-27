@@ -38,7 +38,7 @@ public class Constants {
 
     /**Mount tilt back, in degrees*/
     //what? public static double CAMERA_MOUNT_ANGLE = 27.69; //13.64 prev
-    public static double CAMERA_MOUNT_ANGLE = 13.64;
+    public static double CAMERA_MOUNT_ANGLE = 27.69;
     
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;
@@ -58,8 +58,9 @@ public class Constants {
         /* COMPBOT */
         if(botName==BotName.COMP){
             distanceToRPM =  new PiecewiseLerp(  
-                new double[]{13*12, 15*12, 17*12, 19*12, 21*12, 23*12}, 
-                new double[]{4450,  4700,   5000, 5350,   5650, 6000}
+                new double[]{0,    9*12,  10*12,  11*12, 12*12, 15*12, 17*12, 19*12, 21*12, 30*12}, 
+                new double[]{6500, 6000,  5850,   5800,  5850,   5800, 5900,  6000,   6200, 6500}
+                //NOTE: End values are just to constrain the system, and are not viable shot values
              );         
         /* PRACTICEBOT */
         }else{
