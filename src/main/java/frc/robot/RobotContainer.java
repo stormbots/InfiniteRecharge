@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -24,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Autos.AutoName;
 import frc.robot.commands.ChassisDriveManual;
 import frc.robot.commands.ChassisDriveToHeadingBasic;
 import frc.robot.commands.ChassisVisionTargeting;
@@ -104,6 +107,8 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+
+    navX.reset();
   }
 
   /**
@@ -161,8 +166,24 @@ public class RobotContainer {
     /*Debug Buttons */ //TODO: Remove these before competitions
     // tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
     // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
+    configAutoSelector();
   }
 
+  SendableChooser<Command> autoChooser = new SendableChooser<>();
+  SendableChooser<Boolean> limelightInAuto = new SendableChooser<>();
+
+  public void configAutoSelector(){
+    autoChooser.setDefaultOption("Basic", new WaitCommand(0));
+    autoChooser.setDefaultOption("LeftMostPos", new WaitCommand(0));
+    autoChooser.addOption("LeftRendevous", new WaitCommand(0));
+    autoChooser.setDefaultOption("RightRendevous", new WaitCommand(0));
+    autoChooser.addOption("RightMostPos", new WaitCommand(0));
+    SmartDashboard.putData("autos/position", autoChooser);
+    
+    limelightInAuto.setDefaultOption("No", false);
+    limelightInAuto.addOption("Yes", true);
+    SmartDashboard.putData("autos/limelight", limelightInAuto);
+  }
   /** 
    * Set up default commands
    */
@@ -272,97 +293,9 @@ public class RobotContainer {
     ;
 
 
-    if(true) return fullFarTrenchRunAuto;
-
+     return fullFarTrenchRunAuto;
     
-    Command aimAndGetToSpeed = new ParallelCommandGroup(
-      new ShooterSetRPM(()->2000, shooter).withTimeout(4),
-
-    new ChassisDriveToHeadingBasic(0, () -> -35, 3, 0.05, navX, chassis)
-
-      // new ChassisVisionTargeting(vision, navX, chassis)
-      //   .withTimeout(4)
-      //   .withInterrupt( ()->{ return Math.abs(vision.getTargetHeading())<4; } )
-    );
-
-    Command fireAtSpeed = new ParallelDeadlineGroup
-    (
-      new RunCommand(()->passthrough.shoot(),passthrough).withInterrupt(()->passthrough.isOnTarget(4)).withTimeout(6),
-      new ShooterSetRPM(() -> 2000, shooter).withTimeout(8)
-    );
-
-    Command resetPositionAndShooter = new ParallelCommandGroup(
-      // new ShooterSetRPM(()->0, shooter).withTimeout(0),
-      new ChassisDriveToHeadingBasic(0, () -> -navX.getAngle(), 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis) // the turn back to straight
-    );
-
-    Command intakeAndDriveBack = new ParallelCommandGroup(
-      new IntakeEngage(intake),
-      new ChassisDriveToHeadingBasic(-4.17, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis)
-    );
-
-    Command stopIntakeAndDriveForward = new ParallelCommandGroup(
-      new IntakeDisengage(intake),
-      new ChassisDriveToHeadingBasic(4, () -> 0, 3, 0.05, navX, chassis)
-    );
-
-    // Command disengageIntake = new IntakeDisengage(intake);
-
-    
-    Command  autoFromTrenchAlignment = new SequentialCommandGroup(
-
-      aimAndGetToSpeed, // then
-
-      fireAtSpeed, // and then
-
-      resetPositionAndShooter, // and then
-
-      intakeAndDriveBack, // and then
-      
-      stopIntakeAndDriveForward
-    );
-
-    autoCommand = autoFromTrenchAlignment;
-
-
-    // An ExampleCommand will run in autonomous
-    return autoFromTrenchAlignment;
   }
-
-  // public Command turn(DoubleSupplier targetAngle) {
-  //   return new ChassisDriveToHeadingBasic(0, targetAngle, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
-  // }
-
-  // public Command driveForward(double driveDistance) {
-  //   return new ChassisDriveToHeadingBasic(driveDistance, () -> 0, 3 /*Degrees*/, 0.05 /*Meters*/, navX, chassis);
-  // }
-
-  // public double calculateAngleFromHome() {
-  //   return calculateTargetAngle(navX.getCompassHeading(), Constants.INITIAL_COMPASS_HEADING);
-  // }
-
-  // public double calculateTargetAngle(double startAngle, double finalAngle) {
-  //   double angleDifference = finalAngle - startAngle;
-  //   if(angleDifference <= 0) return 360 + angleDifference;
-  //   if(angleDifference <= 180) return angleDifference;
-  //   else return 360 - angleDifference;
-  // }
-
-
-  public double calculateAngleToInitialCompassBearing() {
-
-    //Valid basically as long as we never reset the navx's gyro
-    return 0 - navX.getAngle();
-
-    /* TODO: We may or may not need this code, leave it in here for now
-    //Does not work if the gyro is un-calibrated.
-    double initialAngle = navX.getCompassHeading();
-    double finalAngle = Constants.INITIAL_COMPASS_HEADING;
-    double angleDifference = finalAngle - initialAngle;
-    SmartDashboard.putNumber("chassis/Pre Modification AngleDifference", angleDifference);
-    */    
-  }
-
 
 
   public Autos autos = new Autos();

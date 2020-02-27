@@ -47,7 +47,7 @@ public class Climber extends SubsystemBase {
   MiniPID spoolPID = new MiniPID(0.0, 0, 0);
   MiniPID climbPID = new MiniPID(0.0,0,0);
  
-  SlewRateLimiter climbSlew = new SlewRateLimiter(1,0);
+  SlewRateLimiter climbSlew = new SlewRateLimiter(5,0);
 
   /**Disables climber output for use with debug commands to rewind motors*/
   public boolean enable = false;
@@ -63,19 +63,19 @@ public class Climber extends SubsystemBase {
       MAX_ARM_ANGLE = 89.0;
       MIN_ARM_ANGLE = 0.0;
     
-      SPOOL_LENGTH = 22.75*2;
+      SPOOL_LENGTH = 25*2;
       CLIMBER_BASE_HEIGHT = 24.5;
-      MAX_HEIGHT=48+CLIMBER_BASE_HEIGHT;
+      MAX_HEIGHT=48+CLIMBER_BASE_HEIGHT+24;
 
       //Configure motor setup
       armMotor.setInverted(true);
       armMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
-      armMotor.setSmartCurrentLimit(60);
-      armMotor.setSmartCurrentLimit(60, 60);
+      armMotor.setSmartCurrentLimit(80);
       armEncoder.setPositionConversionFactor(45/15.714277);
       // armEncoder.setPositionConversionFactor(1);
 
 
+      //INVERSION == FALSE IF SPOOLED SO LONG SIDE IS TOWARD SHOOTER
       spoolMotor.setInverted(false);
       spoolMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       spoolMotor.setSmartCurrentLimit(20);
@@ -91,7 +91,7 @@ public class Climber extends SubsystemBase {
       hookEncoder.setPosition(0.0);
 
       spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
-      climbPID = new MiniPID(1/12.0, 0.02/50.0, 0).setSetpointRange(12);
+      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setSetpointRange(12);
     break;
     case PRACTICE:
     //fallthrough to default
@@ -181,7 +181,8 @@ public class Climber extends SubsystemBase {
   public void periodic() {
     targetHeight = Clamp.clamp(targetHeight, CLIMBER_BASE_HEIGHT, MAX_HEIGHT);
     /* Height stuff */
-    double spoolOutput = spoolPID.getOutput(getSpoolHeight(), targetHeight);
+    double spoolTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, CLIMBER_BASE_HEIGHT + SPOOL_LENGTH);
+    double spoolOutput = spoolPID.getOutput(getSpoolHeight(),spoolTargetHeight);
    
     // setspoolheight()
     // climbheight(spool.getheight())
@@ -192,9 +193,10 @@ public class Climber extends SubsystemBase {
     double armOutput = 0;
     armOutput += climbPID.getOutput(getArmHeight(), targetHeight);
     //FB based close loop
-    armOutput = FB.fb(armTargetHeight, getArmHeight(), 0.09);
-    // armOutput += 0.1* Math.cos(armEncoder.getPosition());
-    armOutput = climbSlew.calculate(armOutput);
+    // armOutput += FB.fb(armTargetHeight, getArmHeight(), 0.09);
+    armOutput += 0.2* Math.cos(Math.toRadians(armEncoder.getPosition()));
+    // armOutput = climbSlew.calculate(armOutput);
+    armOutput = MathUtil.clamp(armOutput, -0.05, 1.0);
 
     double hookOutput = 0;
     hookOutput = FB.fb(hookTargetAngle,hookEncoder.getPosition(),0.04);
@@ -202,7 +204,7 @@ public class Climber extends SubsystemBase {
 
     //TODO Remove/adjust safety clamps to appropriate values
     //spoolOutput = MathUtil.clamp(spoolOutput, -0.3, 0.3);
-    armOutput = MathUtil.clamp(armOutput, -0.05, 1.0);
+    // armOutput = MathUtil.clamp(armOutput, -0.05, 0.1);
 
     if(enable){
       //TODO : Enable and test climber

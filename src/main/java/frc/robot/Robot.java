@@ -68,7 +68,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(new PowerDistributionPanel());
     SmartDashboard.putData(robot.navX);
 
-    compressor.clearAllPCMStickyFaults();
+    // compressor.clearAllPCMStickyFaults();
   }
 
   /**
@@ -167,6 +167,7 @@ public class Robot extends TimedRobot {
 
     // robot.navX.reset();
     robot.climber.setMotorIdleModes(IdleMode.kCoast);
+    robot.climber.setHeight(robot.climber.CLIMBER_BASE_HEIGHT);
     robot.climber.enable = false;
   }
 
