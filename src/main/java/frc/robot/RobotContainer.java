@@ -107,6 +107,10 @@ public class RobotContainer {
     configureButtonBindings();
 
     navX.reset();
+
+    buildAutoCommands();
+
+    configAutoSelector();
   }
 
   /**
@@ -167,24 +171,9 @@ public class RobotContainer {
     /*Debug Buttons */ //TODO: Remove these before competitions
     // tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
     // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
-    configAutoSelector();
   }
 
-  SendableChooser<Command> autoChooser = new SendableChooser<>();
-  SendableChooser<Boolean> limelightInAuto = new SendableChooser<>();
-
-  public void configAutoSelector(){
-    autoChooser.setDefaultOption("Basic", new WaitCommand(0));
-    autoChooser.setDefaultOption("LeftMostPos", new WaitCommand(0));
-    autoChooser.addOption("LeftRendevous", new WaitCommand(0));
-    autoChooser.setDefaultOption("RightRendevous", new WaitCommand(0));
-    autoChooser.addOption("RightMostPos", new WaitCommand(0));
-    SmartDashboard.putData("autos/position", autoChooser);
-    
-    limelightInAuto.setDefaultOption("No", false);
-    limelightInAuto.addOption("Yes", true);
-    SmartDashboard.putData("autos/limelight", limelightInAuto);
-  }
+  
   /** 
    * Set up default commands
    */
@@ -215,12 +204,41 @@ public class RobotContainer {
     
   }
 
+
+  SendableChooser<Command> autoChooser = new SendableChooser<>();
+  SendableChooser<Boolean> limelightInAuto = new SendableChooser<>();
+
+  public void configAutoSelector(){
+    autoChooser.setDefaultOption("Basic", fireCenteredAndDriveForward);
+    autoChooser.setDefaultOption("FarTrench", fullFarTrenchRunAuto);
+    autoChooser.addOption("NearTrench", fullTrenchRunAuto);
+    autoChooser.setDefaultOption("Rondezvous", fullRondeAuto);
+    autoChooser.addOption("Port", fullPortAuto);
+    SmartDashboard.putData("autos/position", autoChooser);
+    
+    limelightInAuto.setDefaultOption("No", false);
+    limelightInAuto.addOption("Yes", true);
+    SmartDashboard.putData("autos/limelight", limelightInAuto);    
+  }
+
+
+  Command fireCenteredAndDriveForward;
+  Command fullFarTrenchRunAuto;
+  Command fullTrenchRunAuto;
+  Command fullRondeAuto;
+  Command fullPortAuto;
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    //get values from dashboard
+    return autoChooser.getSelected();
+  }
+
+  public void buildAutoCommands() {
 
     //Super basic get off the line
     // autos.buildSpinupAndShoot()
@@ -229,7 +247,7 @@ public class RobotContainer {
     // ;
 
  
-    Command fireCenteredAndDriveForward = 
+    fireCenteredAndDriveForward = 
     new ChassisDriveToHeadingBasic(0, ()->0, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(110))//Estimated Guess of distance
     .andThen(()->shooter.setRPM(0))
@@ -237,7 +255,7 @@ public class RobotContainer {
     ;
     
     
-    Command fullPortAuto = autos.buildSpinupAndShoot(103)
+    fullPortAuto = autos.buildSpinupAndShoot(103)
     .andThen(()->shooter.setRPM(0))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
     .andThen(new ChassisDriveToHeadingBasic(-2.35, ()->0, 3, 0.05, navX, chassis))
@@ -250,7 +268,7 @@ public class RobotContainer {
 
 
 
-    Command fullRondeAuto = new ChassisDriveToHeadingBasic(0, ()->20, 3, 0.05, navX, chassis)
+    fullRondeAuto = new ChassisDriveToHeadingBasic(0, ()->20, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(120))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
@@ -265,7 +283,7 @@ public class RobotContainer {
     ;
 
     //Far
-    Command fullFarTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->70, 3, 0.05, navX, chassis)
+    fullFarTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->70, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(145))//Estimated Guess of distance
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
@@ -280,7 +298,7 @@ public class RobotContainer {
 
 
     //Near
-    Command fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-32, 3, 0.05, navX, chassis)
+    fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-32, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(130))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
@@ -292,9 +310,6 @@ public class RobotContainer {
     // .andThen(autos.buildSpinupAndShoot())
     // .andThen(()->shooter.setRPM(0))
     ;
-
-
-     return fullFarTrenchRunAuto;
     
   }
 
