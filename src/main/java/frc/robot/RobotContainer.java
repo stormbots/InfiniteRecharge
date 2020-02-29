@@ -195,6 +195,12 @@ public class RobotContainer {
     /*Debug Buttons */ //TODO: Remove these before competitions
     // tempClimbSpoolPositive.whileHeld(new SpinSpoolPositive(climber));
     // tempClimbSpoolNegative.whileHeld(new SpinSpoolNegative(climber));
+
+
+    climbEnable.whileHeld(
+      new ClimbManual(()->climbEnable.get(),()->controller.getRawAxis(3),climber)
+    );
+
   }
 
   
@@ -213,9 +219,9 @@ public class RobotContainer {
     );
 
     //TODO This should also only activate near end of a match eventually
-    climber.setDefaultCommand(
-      new ClimbManual(()->climbEnable.get(),()->controller.getRawAxis(3),climber)
-    );
+    // climber.setDefaultCommand(
+    //   new ClimbManual(()->climbEnable.get(),()->controller.getRawAxis(3),climber)
+    // );
 
     //Ensure that after vision is used, it returns to Driver view
     vision.setDefaultCommand( new FunctionalCommand(

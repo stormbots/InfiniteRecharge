@@ -120,6 +120,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
+    robot.climber.resetEncoders();
     
     Constants.INITIAL_COMPASS_HEADING = robot.navX.getCompassHeading();  
     robot.chassis.setMotorIdleModes(IdleMode.kBrake);
@@ -147,6 +148,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     robot.chassis.setMotorIdleModes(IdleMode.kBrake);
+
+    robot.climber.resetEncoders();
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

@@ -47,7 +47,8 @@ public class Climber extends SubsystemBase {
 
   MiniPID spoolPID = new MiniPID(0.0, 0, 0);
   MiniPID climbPID = new MiniPID(0.0,0,0);
- 
+  MiniPID hookPID = new MiniPID(0.0,0,0); 
+
   SlewRateLimiter climbSlew = new SlewRateLimiter(5,0);
 
   /**Disables climber output for use with debug commands to rewind motors*/
@@ -95,7 +96,9 @@ public class Climber extends SubsystemBase {
       hookEncoder.setPosition(0.0);
 
       spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
-      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setSetpoint(36);//May need higher P or I
+      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0);//.setSetpointRange(36);//May need higher P or I
+      hookPID = new MiniPID(0.2/40.0, 0, 0);
+
     break;
     case PRACTICE:
     //fallthrough to default
@@ -179,14 +182,21 @@ public class Climber extends SubsystemBase {
     return (Math.sin(theta) * ARM_LENGTH_1) + (Math.sin(theta) * ARM_LENGTH_2) + CLIMBER_BASE_HEIGHT;
   }
 
+  public void resetEncoders() {
+    spoolEncoder.setPosition(0);
+    armEncoder.setPosition(0);
+    hookEncoder.setPosition(0);
+  }
 
+  SlewRateLimiter targetSlew = new SlewRateLimiter(12);
   /*********** Periodic Stuff ********* */
   @Override
   public void periodic() {
     targetHeight = Clamp.clamp(targetHeight, CLIMBER_BASE_HEIGHT, MAX_HEIGHT);
+    targetHeight = targetSlew.calculate(targetHeight);
     /* Height stuff */
     double spoolTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, CLIMBER_BASE_HEIGHT + SPOOL_LENGTH);
-    spoolTargetHeight = MathUtil.clamp(spoolTargetHeight, getArmHeight()+6, getArmHeight()+12);
+    // spoolTargetHeight = MathUtil.clamp(spoolTargetHeight, getArmHeight()+6, getArmHeight()+12);
     double spoolOutput = spoolPID.getOutput(getSpoolHeight(),spoolTargetHeight);
     
     //spoolOutput = Lerp.lerp(spoolOutput, 0.0, inMax, 0.0, MAX_HEIGHT);//??? why tho
@@ -196,6 +206,7 @@ public class Climber extends SubsystemBase {
     // setspoolheight()
     // climbheight(spool.getheight())
     double armTargetHeight = getSpoolHeight()-6;
+    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-3);
     // armTargetHeight = targetHeight;
 
     // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
@@ -212,7 +223,8 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("armpid/outputTotal", armOutput);
 
     double hookOutput = 0;
-    hookOutput = FB.fb(hookTargetAngle,hookEncoder.getPosition(),0.04);
+    // hookOutput = FB.fb(hookTargetAngle,hookEncoder.getPosition(),0.2); //janky and flops about
+    hookOutput = hookPID.getOutput(hookEncoder.getPosition(), hookTargetAngle);
     hookOutput = Clamp.clamp(hookOutput, -0.4,0.4); //Not safety: Low output power is desirable for hook
 
     //TODO Remove/adjust safety clamps to appropriate values
