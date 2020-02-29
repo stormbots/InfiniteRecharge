@@ -52,6 +52,8 @@ public class Constants {
     public static double CHASSIS_TURN_STATIC_FF=0.035;
 
     public static PiecewiseLerp distanceToRPM;
+
+    public static double shotFudgeFactor = 1 + (7500.0/6000.0);
       
     /** In case we need to manage robot differences, we can do so here.*/
     public static void Initialize(){
@@ -70,5 +72,9 @@ public class Constants {
                new double[]{1000,  1200,   1400, 1400,   2000, 2000}//plz be quiet
             );         
         }
+        for(int i=0;i < distanceToRPM.inputs.length;i++) distanceToRPM.inputs[i]*=shotFudgeFactor;
+        for(int i=0;i < distanceToRPM.outputs.length;i++) distanceToRPM.outputs[i]*=shotFudgeFactor;
+
+
     }
 }

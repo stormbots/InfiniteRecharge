@@ -107,6 +107,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putBoolean("compressor/CurrentShortedSticky",compressor.getCompressorShortedStickyFault());
     SmartDashboard.putBoolean("compressor/CurrentNotConnectedSticky",compressor.getCompressorNotConnectedStickyFault());
     SmartDashboard.putBoolean("compressor/CurrentTooHightSticky",compressor.getCompressorCurrentTooHighStickyFault());
+
+    SmartDashboard.putData(robot.navX);
+
+    robot.vision.driverPipeline();
     
 
   }

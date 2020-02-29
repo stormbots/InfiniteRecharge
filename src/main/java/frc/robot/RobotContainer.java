@@ -64,7 +64,7 @@ public class RobotContainer {
   private final Passthrough passthrough = new Passthrough();
   private final Shooter shooter = new Shooter();
   private final Spinner spinner = new Spinner();
-  private final Vision vision = new Vision(navX);
+  public final Vision vision = new Vision(navX);
   
 
   // private final ExampleCommand autoCommand = new ExampleCommand(exampleSubsystem);
@@ -87,10 +87,13 @@ public class RobotContainer {
   JoystickButton eject = new JoystickButton(controller, 6);
 
   Button climbEnable = new JoystickButton(controller, 7);
-  Button climbHookRetract = new JoystickButton(controller, 8);
-  Button climbHookGrab = new JoystickButton(controller,9);
-  Button climbTranslateRight = new JoystickButton(controller, 10);
-  Button climbTranslateSideways = new JoystickButton(controller, 11);
+  Button climbHookRetract = new JoystickButton(controller, 9);
+  Button climbHookGrab = new JoystickButton(controller,8);
+  Button lowGoalShoot = new JoystickButton(controller, 10);
+
+  //Debug 
+  // Button climbTranslateRight = new JoystickButton(controller, 10);
+  // Button climbTranslateSideways = new JoystickButton(controller, 11);
 
   //DEBUG: Will need to be removed soon
   //Button tempClimbSpoolPositive = new JoystickButton(controller, 12);
@@ -126,28 +129,48 @@ public class RobotContainer {
     visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
     visionAimToTargetFancy.whileHeld(new ChassisVisionTargetingFancy(vision, navX, chassis));
     ;
-    fineTurning.whileHeld(new ChassisDriveManual(() -> driver.getRawAxis(1), () -> 0.5 * driver.getRawAxis(2), chassis));
+    //Zach wanted to have 75% output on forward
+    fineTurning.whileHeld(new ChassisDriveManual(() -> 0.75 * driver.getRawAxis(1), () -> 0.5 * driver.getRawAxis(2), chassis));
 
     /* Player 2 normal Buttons */
     intakeButton.whenPressed(new IntakeEngage(intake));
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
     shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
-    shooterSpinDefaultSpeed.whileHeld( new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), shooter) );
-    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
-    shooterSpinDefaultSpeed.whenReleased(()->passthrough.prepareForLoading());
+    // shooterSpinDefaultSpeed.whileHeld( 
+      // new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), false, shooter) 
+      // );
+      shooterSpinDefaultSpeed.whenPressed( 
+        new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), false, shooter) 
+      );
+      shooterSpinDefaultSpeed.whenReleased( 
+        new ShooterSetRPM( ()->0, shooter).withTimeout(1.5)
+        );
+      // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    shooterSpinDefaultSpeed.whenReleased(()->passthrough.reset());
 
-    shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
-      if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
-      else { return 1000;}
-    }, shooter));
+    shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
+    //shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
+      //if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
+      //else { return 1000;}
+    //}, shooter));
+    shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
+    shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
+
     
-    //conditional
-    shoot.whileHeld(new ConditionalCommand(
-      new InstantCommand( ()->passthrough.shoot() ),
-      new InstantCommand( ()->{} ), 
-      ()->{return shooter.isOnTarget();}
-    ));
+    lowGoalShoot.whenPressed(()->passthrough.prepareForShooting());
+    lowGoalShoot.whileHeld(new ShooterSetRPM(()->1000, shooter));
+    lowGoalShoot.whenReleased(()->passthrough.reset());
+
+    // conditional
+    // shoot.whileHeld(new RunCommand( ()->{
+    //   if(shooter.isOnTarget() && shooter.getRPM() > 500)passthrough.shoot();
+    // }));
+    //   new InstantCommand( ()->passthrough.shoot() ),
+    //   new InstantCommand( ()->{} ), 
+    //   ()->{return shooter.isOnTarget() && shooter.getRPM() > 500;}
+    // ));
+    shoot.whileHeld(()-> passthrough.shoot());
 
 
 
@@ -162,7 +185,8 @@ public class RobotContainer {
     });
     climbHookGrab.whenPressed(()->{
       if(!climbEnable.get())return;
-      climber.setHookAngle(180);
+      climber.setHookAngle(250);//Hook angle thinks that this is 175 degrees i think, but it is about 180 (- some for safety)
+      //Looks to be magnitutude of 10 off
     });
     //TODO: Not implemented in hardware yet
     // translationMoveForwards.whenPressed(new ClimberSetTranslation(()->0.2, climber));
@@ -201,6 +225,8 @@ public class RobotContainer {
       ()->false,
       vision
     ));
+
+    shooter.setDefaultCommand(new ShooterSetRPM( ()->0, shooter));
     
   }
 
@@ -219,7 +245,10 @@ public class RobotContainer {
     limelightInAuto.setDefaultOption("No", false);
     limelightInAuto.addOption("Yes", true);
     SmartDashboard.putData("autos/limelight", limelightInAuto);    
+
   }
+
+  //-25.5 trenchnear
 
 
   Command fireCenteredAndDriveForward;
@@ -298,14 +327,14 @@ public class RobotContainer {
 
 
     //Near
-    fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-32, 3, 0.05, navX, chassis)
+    fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-25.5, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(130))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
-    .andThen(new ChassisDriveToHeadingBasic(-4.17, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
+    .andThen(new ChassisDriveToHeadingBasic(-4.67, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
     .andThen(new IntakeDisengage(intake).withTimeout(0.02))
-    .andThen(new ChassisDriveToHeadingBasic(3, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
+    .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
     // .andThen(autos.buildSpinupAndShoot())
     // .andThen(()->shooter.setRPM(0))

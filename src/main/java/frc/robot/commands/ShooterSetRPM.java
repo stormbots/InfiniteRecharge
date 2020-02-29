@@ -29,10 +29,22 @@ public class ShooterSetRPM extends CommandBase {
    */
    DoubleSupplier targetRPM ;
 
-  public ShooterSetRPM(DoubleSupplier targetRPM, Shooter shooter) {
+  private boolean zeroOnExit;
+
+   public ShooterSetRPM(DoubleSupplier targetRPM, Shooter shooter) {
+    this.shooter = shooter;
+    this.targetRPM = targetRPM;
+    this.zeroOnExit = true;
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(shooter);
+  }
+
+  public ShooterSetRPM(DoubleSupplier targetRPM, boolean zeroOnExit, Shooter shooter) {
     this.shooter = shooter;
     this.targetRPM = targetRPM;
     // Use addRequirements() here to declare subsystem dependencies.
+    this.zeroOnExit = zeroOnExit;
+
     addRequirements(shooter);
   }
 
@@ -51,7 +63,7 @@ public class ShooterSetRPM extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.setRPM(0);
+    if(zeroOnExit) shooter.setRPM(0);
   }
 
   // Returns true when the command should end.

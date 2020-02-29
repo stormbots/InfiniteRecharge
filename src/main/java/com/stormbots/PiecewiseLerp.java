@@ -4,8 +4,8 @@ package com.stormbots;
 
 public class PiecewiseLerp{
 
-    double[] inputs;
-    double[] outputs;
+    public double[] inputs;
+    public double[] outputs;
 
     public PiecewiseLerp(double[] inputs, double[] outputs){
         this.inputs = inputs;

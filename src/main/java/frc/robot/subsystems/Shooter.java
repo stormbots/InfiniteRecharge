@@ -35,14 +35,14 @@ public class Shooter extends SubsystemBase {
 
 
 
-  MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2));
-  MiniPID errorPID = new MiniPID(1/5700.0*1.2,0,0).setOutputLimits(-0.05, 0.5);
+  // MiniPID feedForwardPID = new MiniPID(0,0,0,1/(5700.0*2));
+  // MiniPID errorPID = new MiniPID(1/5700.0*1.2,0,0).setOutputLimits(-0.05, 0.5);
   private final SlewRateLimiter feedForwardSlew = new SlewRateLimiter( 1/2.0 ,0);
 
   double targetRPM = 0;
 
   // Not currently in use but may use later
-  SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.162,0.0641,0.0296);
+  // SimpleMotorFeedforward feedForward = new SimpleMotorFeedforward(0.162,0.0641,0.0296);
 
   // Notifier notifier = new Notifier(()->runClosedLoop());
 
@@ -68,15 +68,18 @@ public class Shooter extends SubsystemBase {
 
     //gross test values for compression shooting
     sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8, 0);
-    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2);
+    //sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2); //tested pre comp
+    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2 * 0.75 );
     sparkMaxPID.setD(0.8*(1/5700.0*7) * 0.390243902439 /10.0);
     //temp
     // sparkMaxPID.setP(0);
     // sparkMaxPID.setD(0);
 
-    
+    shooterMotor.setClosedLoopRampRate(0.5);
 
     // sparkMaxPID.setOutputRange(0, 1, 0);
+
+    shooterMotor.setSmartCurrentLimit(45);
     
 
 
@@ -94,54 +97,64 @@ public class Shooter extends SubsystemBase {
   }
 
   public void reset() {
-    feedForwardPID.reset();
-    errorPID.reset();
+    // feedForwardPID.reset();
+    // errorPID.reset();
+    shooterMotor.clearFaults();
   }
 
   public void setRPM(double rpm){
     this.targetRPM = rpm;
   }
 
+  public double getRPM() {
+    return encoder.getVelocity();
+  }
+
   public boolean isOnTarget(){
     return Clamp.bounded(targetRPM, encoder.getVelocity()-100, encoder.getVelocity()+100);
   }
 
-  private void runClosedLoop() {
-    double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM) ;
-    double errorOutput = errorPID.getOutput(encoder.getVelocity(), targetRPM);
+  // private void runClosedLoop() {
+  //   double feedForwardOutput = feedForwardPID.getOutput(encoder.getVelocity(), targetRPM) ;
+  //   double errorOutput = errorPID.getOutput(encoder.getVelocity(), targetRPM);
 
 
-    // double feedForwardOutput = feedForward.calculate(targetRPM,0.0202);//todo: Accelleration
+  //   // double feedForwardOutput = feedForward.calculate(targetRPM,0.0202);//todo: Accelleration
 
-    if (encoder.getVelocity() < targetRPM*.5) {
-      errorOutput = 0.0;
-    }
+  //   if (encoder.getVelocity() < targetRPM*.5) {
+  //     errorOutput = 0.0;
+  //   }
 
     
-    //TODO Feeder is geared to 1/10th the speed of shooter. Just run it as fast as possible now
-    // and we'll be moving it to the Passthrough in a bit.
+  //   //TODO Feeder is geared to 1/10th the speed of shooter. Just run it as fast as possible now
+  //   // and we'll be moving it to the Passthrough in a bit.
 
    
-    feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
-    shooterMotor.set(feedForwardOutput + errorOutput);
-    // feederMotor.set(feedForwardOutput + errorOutput);
+  //   feedForwardOutput = feedForwardSlew.calculate(feedForwardOutput);
+  //   shooterMotor.set(feedForwardOutput + errorOutput);
+  //   // feederMotor.set(feedForwardOutput + errorOutput);
 
-    SmartDashboard.putNumber("shooter/contribFF", feedForwardOutput);
-    SmartDashboard.putNumber("shooter/contribPID", errorOutput);
+  //   SmartDashboard.putNumber("shooter/contribFF", feedForwardOutput);
+  //   SmartDashboard.putNumber("shooter/contribPID", errorOutput);
 
-  }
+  // }
 
   //public void setMotorSpeed(double speed) {
   //  shooterMotor.set(speed);
   //}
 
 
+  SlewRateLimiter rpmslew = new SlewRateLimiter(6000/2.0);
   @Override
   public void periodic() {
 
     //runClosedLoop();
     //sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0, feedForward.calculate(targetRPM)/12.0, ArbFFUnits.kPercentOut);
-    sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0);
+    // sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0);
+
+    sparkMaxPID.setReference(rpmslew.calculate(targetRPM), ControlType.kVelocity, 0);
+
+
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
     SmartDashboard.putNumber("shooter/amps", shooterMotor.getOutputCurrent());

@@ -57,6 +57,8 @@ public class Vision extends SubsystemBase {
     ta = table.getEntry("ta");
     ts = table.getEntry("ts");
     tv = table.getEntry("tv");
+
+    driverPipeline();
   }
 
   @Override
@@ -103,13 +105,16 @@ public class Vision extends SubsystemBase {
 
   public void targetPipeline(){
     table.getEntry("pipeline").setNumber(0); //0 for NON_3D, 2 for 3D
+    lightsOn();
   }
   public void targetPipelineFancy(){
     table.getEntry("pipeline").setNumber(2); //0 for NON_3D, 2 for 3D
+    lightsOn();
   }
 
   public void driverPipeline(){
     table.getEntry("pipeline").setNumber(1);
+    lightsOff();
   }
 
   public boolean isTargetValid(){

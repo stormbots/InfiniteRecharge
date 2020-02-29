@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.Clamp;
+import com.stormbots.Lerp;
 import com.stormbots.closedloop.FB;
 import com.stormbots.closedloop.MiniPID;
 
@@ -42,7 +43,7 @@ public class Climber extends SubsystemBase {
   public double MAX_HEIGHT;
 
   double targetHeight;
-  private double hookTargetAngle;
+  private double hookTargetAngle=90;
 
   MiniPID spoolPID = new MiniPID(0.0, 0, 0);
   MiniPID climbPID = new MiniPID(0.0,0,0);
@@ -57,21 +58,24 @@ public class Climber extends SubsystemBase {
     switch(Constants.botName){
     case COMP:
       //Configure constants for the bot
-      ARM_LENGTH_1 = 32.75;
-      ARM_LENGTH_2 = 28;
+      ARM_LENGTH_1 = 31.0;
+      ARM_LENGTH_2 = 16.0;
     
       MAX_ARM_ANGLE = 89.0;
       MIN_ARM_ANGLE = 0.0;
     
       SPOOL_LENGTH = 25*2;
       CLIMBER_BASE_HEIGHT = 24.5;
-      MAX_HEIGHT=48+CLIMBER_BASE_HEIGHT+24;
+      MAX_HEIGHT=72;//48+CLIMBER_BASE_HEIGHT+24-14.5; //82 is max height total
+      MAX_HEIGHT=69;//safe empirical value
 
       //Configure motor setup
       armMotor.setInverted(true);
       armMotor.setIdleMode(IdleMode.kCoast);//Coast on bootup
       armMotor.setSmartCurrentLimit(80);
       armEncoder.setPositionConversionFactor(45/15.714277);
+      armEncoder.setPositionConversionFactor(45/18.2);
+      
       // armEncoder.setPositionConversionFactor(1);
 
 
@@ -82,16 +86,16 @@ public class Climber extends SubsystemBase {
       spoolEncoder.setPositionConversionFactor(32/539.0);
   
       hookMotor.setInverted(true);
-      hookMotor.setSmartCurrentLimit(2);
+      hookMotor.setSmartCurrentLimit(10);//TODO:Set high for testing, make smaller
       hookMotor.setIdleMode(IdleMode.kCoast);//NOTE: Intentionally coast
-      hookEncoder.setPositionConversionFactor(180/38.666);
+      hookEncoder.setPositionConversionFactor(180/38.666*10);
       
       armEncoder.setPosition(0.0);
       spoolEncoder.setPosition(0.0);
       hookEncoder.setPosition(0.0);
 
       spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
-      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setSetpointRange(12);
+      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setSetpoint(36);//May need higher P or I
     break;
     case PRACTICE:
     //fallthrough to default
@@ -103,7 +107,7 @@ public class Climber extends SubsystemBase {
       MAX_ARM_ANGLE = 89.0;
       MIN_ARM_ANGLE = 0.0;
     
-      SPOOL_LENGTH = 38.0;
+      SPOOL_LENGTH = 38.0; 
       CLIMBER_BASE_HEIGHT = 24.5;
       MAX_HEIGHT=SPOOL_LENGTH+CLIMBER_BASE_HEIGHT;
 
@@ -152,7 +156,7 @@ public class Climber extends SubsystemBase {
 
   public void setHookAngle(double angle){
     //Don't allow the hook to deploy if the climber's down
-    if(getArmHeight()<12+CLIMBER_BASE_HEIGHT)return;
+    // if(getArmHeight()<12+CLIMBER_BASE_HEIGHT)return;
     this.hookTargetAngle=angle;
   }
 
@@ -182,25 +186,34 @@ public class Climber extends SubsystemBase {
     targetHeight = Clamp.clamp(targetHeight, CLIMBER_BASE_HEIGHT, MAX_HEIGHT);
     /* Height stuff */
     double spoolTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, CLIMBER_BASE_HEIGHT + SPOOL_LENGTH);
+    spoolTargetHeight = MathUtil.clamp(spoolTargetHeight, getArmHeight()+6, getArmHeight()+12);
     double spoolOutput = spoolPID.getOutput(getSpoolHeight(),spoolTargetHeight);
-   
+    
+    //spoolOutput = Lerp.lerp(spoolOutput, 0.0, inMax, 0.0, MAX_HEIGHT);//??? why tho
+    //attempt to prevent over-despooling
+    // spoolTargetHeight = MathUtil.clamp(spoolTargetHeight, getArmHeight()-12,getArmHeight()+12);
+
     // setspoolheight()
     // climbheight(spool.getheight())
-    double armTargetHeight = getSpoolHeight();
-    armTargetHeight = targetHeight;
+    double armTargetHeight = getSpoolHeight()-6;
+    // armTargetHeight = targetHeight;
 
     // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
     double armOutput = 0;
     armOutput += climbPID.getOutput(getArmHeight(), targetHeight);
+    SmartDashboard.putNumber("armpid/outAfterPID", armOutput);
+    SmartDashboard.putNumber("armpid/error", targetHeight- getArmHeight());
     //FB based close loop
     // armOutput += FB.fb(armTargetHeight, getArmHeight(), 0.09);
-    armOutput += 0.2* Math.cos(Math.toRadians(armEncoder.getPosition()));
+    //armOutput += 0.2* Math.cos(Math.toRadians(armEncoder.getPosition()));
+    SmartDashboard.putNumber("armpid/outAfterFF", armOutput);
     // armOutput = climbSlew.calculate(armOutput);
     armOutput = MathUtil.clamp(armOutput, -0.05, 1.0);
+    SmartDashboard.putNumber("armpid/outputTotal", armOutput);
 
     double hookOutput = 0;
     hookOutput = FB.fb(hookTargetAngle,hookEncoder.getPosition(),0.04);
-    hookOutput = Clamp.clamp(hookOutput, -0.3,0.3); //Not safety: Low output power is desirable for hook
+    hookOutput = Clamp.clamp(hookOutput, -0.4,0.4); //Not safety: Low output power is desirable for hook
 
     //TODO Remove/adjust safety clamps to appropriate values
     //spoolOutput = MathUtil.clamp(spoolOutput, -0.3, 0.3);
@@ -213,6 +226,9 @@ public class Climber extends SubsystemBase {
       hookMotor.set(hookOutput);
     }
     else{
+      climbPID.reset();
+      spoolPID.reset();
+
       spoolMotor.set(0);
       armMotor.set(0);
       hookMotor.set(0);
