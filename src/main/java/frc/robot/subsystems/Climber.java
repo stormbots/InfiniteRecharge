@@ -43,7 +43,7 @@ public class Climber extends SubsystemBase {
   public double MAX_HEIGHT;
 
   double targetHeight;
-  private double hookTargetAngle=90;
+  private double hookTargetAngle;
 
   MiniPID spoolPID = new MiniPID(0.0, 0, 0);
   MiniPID climbPID = new MiniPID(0.0,0,0);
@@ -90,6 +90,8 @@ public class Climber extends SubsystemBase {
       hookMotor.setSmartCurrentLimit(10);//TODO:Set high for testing, make smaller
       hookMotor.setIdleMode(IdleMode.kCoast);//NOTE: Intentionally coast
       hookEncoder.setPositionConversionFactor(180/38.666*10);
+      hookEncoder.setPositionConversionFactor(180.0/5.0);
+
       
       armEncoder.setPosition(0.0);
       spoolEncoder.setPosition(0.0);
@@ -138,7 +140,8 @@ public class Climber extends SubsystemBase {
     since we don't want it doing much. It should deploy, and then 
     be allowed to be back-driven by the rest of the climber system
     */
-    hookTargetAngle = hookEncoder.getPosition();
+    //hookTargetAngle = hookEncoder.getPosition();
+    hookTargetAngle = 115;
     targetHeight = getSpoolHeight();
 
 
@@ -261,5 +264,6 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("climb/spooloutput", spoolMotor.get());
     SmartDashboard.putNumber("climb/armoutputRaw", armOutput);
     SmartDashboard.putNumber("climb/armoutput", armMotor.get());
+    SmartDashboard.putNumber("climb/hookTarget", hookTargetAngle);
    }
 }

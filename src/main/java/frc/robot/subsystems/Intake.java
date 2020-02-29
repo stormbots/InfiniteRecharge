@@ -66,7 +66,7 @@ public class Intake extends SubsystemBase {
         DOWN = ! UP;
     }
 
-    SIDEMOTORSPEED = 0.6;
+    SIDEMOTORSPEED = 1.0; //was 0.6
     CENTERMOTORSPEED = 1.0;
     intakeUp();
   }

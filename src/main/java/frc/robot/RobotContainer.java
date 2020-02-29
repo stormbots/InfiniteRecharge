@@ -158,9 +158,9 @@ public class RobotContainer {
     shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
 
     
-    lowGoalShoot.whenPressed(()->passthrough.prepareForShooting());
-    lowGoalShoot.whileHeld(new ShooterSetRPM(()->1000, shooter));
-    lowGoalShoot.whenReleased(()->passthrough.reset());
+    // lowGoalShoot.whenPressed(()->passthrough.prepareForShooting());
+    // lowGoalShoot.whileHeld(new ShooterSetRPM(()->3000, shooter));
+    // lowGoalShoot.whenReleased(()->passthrough.reset());
 
     // conditional
     // shoot.whileHeld(new RunCommand( ()->{
@@ -181,11 +181,11 @@ public class RobotContainer {
 
     climbHookRetract.whenPressed(()->{
       if(!climbEnable.get())return;
-      climber.setHookAngle(0);
+      climber.setHookAngle(100);
     });
     climbHookGrab.whenPressed(()->{
       if(!climbEnable.get())return;
-      climber.setHookAngle(250);//Hook angle thinks that this is 175 degrees i think, but it is about 180 (- some for safety)
+      climber.setHookAngle(240);//Hook angle thinks that this is 175 degrees i think, but it is about 180 (- some for safety)
       //Looks to be magnitutude of 10 off
     });
     //TODO: Not implemented in hardware yet
