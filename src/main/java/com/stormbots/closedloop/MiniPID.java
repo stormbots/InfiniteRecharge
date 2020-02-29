@@ -307,20 +307,20 @@ public class MiniPID{
 
 		this.setpoint=setpoint;
 
-		// Ramp the setpoint used for calculations if user has opted to do so
-		if(setpointRange!=0){
-			setpoint=constrain(setpoint,actual-setpointRange,actual+setpointRange);
-		}
-
 		// Do the simple parts of the calculations
 		double error=setpoint-actual;
 
 		// If we're in continous mode, wrap our error to better match the system
 		if(continuousMin != continuousMax){
-			continuousHalfRange = (continuousMax-continuousMin)/2;
+			continuousHalfRange = (continuousMax-continuousMin)/2.0;
 			error %= (continuousHalfRange*2);
 			if(error>continuousHalfRange) error-=2*continuousHalfRange;
 			if(error<-continuousHalfRange) error+=2*continuousHalfRange;
+		}
+		
+		// Apply the setpoint range, which effectively constrains our error within a smaller range
+		if (setpointRange != 0) {
+			error = constrain(error,-setpointRange,setpointRange);
 		}
 
 		// Calculate F output. Notice, this depends only on the setpoint, and not the error. 
