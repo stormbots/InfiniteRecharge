@@ -148,7 +148,7 @@ public class Shooter extends SubsystemBase {
   //}
 
 
-  SlewRateLimiter rpmslew = new SlewRateLimiter(6000/2.0);
+  SlewRateLimiter rpmslew = new SlewRateLimiter(6000/1.0);
   @Override
   public void periodic() {
 
