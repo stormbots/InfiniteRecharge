@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -340,8 +339,10 @@ public class RobotContainer {
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
     .andThen(new ChassisDriveToHeadingBasic(-4.67, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
     .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
     .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
-    .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
+    // .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
     // .andThen(autos.buildSpinupAndShoot())
     // .andThen(()->shooter.setRPM(0))
     ;

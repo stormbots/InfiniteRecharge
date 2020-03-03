@@ -191,7 +191,7 @@ public class Climber extends SubsystemBase {
     hookEncoder.setPosition(0);
   }
 
-  SlewRateLimiter targetSlew = new SlewRateLimiter(12);
+  SlewRateLimiter targetSlew = new SlewRateLimiter(10);
   /*********** Periodic Stuff ********* */
   @Override
   public void periodic() {
@@ -208,8 +208,8 @@ public class Climber extends SubsystemBase {
 
     // setspoolheight()
     // climbheight(spool.getheight())
-    double armTargetHeight = getSpoolHeight()-6;
-    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-3);
+    double armTargetHeight = getSpoolHeight()-7;
+    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-5);
     // armTargetHeight = targetHeight;
 
     // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
