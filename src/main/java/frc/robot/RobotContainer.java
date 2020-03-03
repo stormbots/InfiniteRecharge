@@ -146,11 +146,11 @@ public class RobotContainer {
     shooterSpinDefaultSpeed.whenReleased(()->passthrough.reset());
 
     shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
-    //shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
-      //if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
-      //else { return 1000;}
-    //}, shooter));
-    shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
+    shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
+      if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
+      else { return Constants.distanceToRPM.getOutputAt(20*12);}
+    }, shooter));
+    // shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
     shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
 
     
