@@ -53,7 +53,7 @@ public class Constants {
 
     public static PiecewiseLerp distanceToRPM;
 
-    public static double shotFudgeFactor = 1 + (7500.0/6000.0);
+    public static double shotFudgeFactor = 1;
       
     /** In case we need to manage robot differences, we can do so here.*/
     public static void Initialize(){
