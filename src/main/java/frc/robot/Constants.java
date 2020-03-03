@@ -60,8 +60,8 @@ public class Constants {
         /* COMPBOT */
         if(botName==BotName.COMP){
             distanceToRPM =  new PiecewiseLerp(  
-                new double[]{0,    9*12,  10*12,  11*12, 12*12, 15*12, 17*12, 19*12, 21*12, 30*12}, 
-                new double[]{6500, 6000,  5850,   5800,  5850,   5800, 5900,  6000,   6200, 6500}
+                new double[]{0,    10*12,  11*12,  12*12, 14*12, 16*12, 18*12, 20*12, 22*12}, 
+                new double[]{6000, 5400,   5450,   5475,  5475,  5475,  5475,  5475,  5525}
                 //NOTE: End values are just to constrain the system, and are not viable shot values
              );         
         /* PRACTICEBOT */

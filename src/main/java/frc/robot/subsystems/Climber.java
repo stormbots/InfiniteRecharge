@@ -98,7 +98,7 @@ public class Climber extends SubsystemBase {
       hookEncoder.setPosition(0.0);
 
       spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
-      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0);//.setSetpointRange(36);//May need higher P or I
+      climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setMaxIOutput(0.2);//.setSetpointRange(36);//May need higher P or I
       hookPID = new MiniPID(0.2/40.0, 0, 0);
 
     break;
@@ -191,7 +191,7 @@ public class Climber extends SubsystemBase {
     hookEncoder.setPosition(0);
   }
 
-  SlewRateLimiter targetSlew = new SlewRateLimiter(10);
+  SlewRateLimiter targetSlew = new SlewRateLimiter(3);//Suspect 5 will be a better value - 8 is too much!
   /*********** Periodic Stuff ********* */
   @Override
   public void periodic() {
@@ -208,8 +208,8 @@ public class Climber extends SubsystemBase {
 
     // setspoolheight()
     // climbheight(spool.getheight())
-    double armTargetHeight = getSpoolHeight()-7;
-    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-5);
+    double armTargetHeight = getSpoolHeight()-12;
+    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-7);
     // armTargetHeight = targetHeight;
 
     // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
@@ -219,7 +219,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("armpid/error", targetHeight- getArmHeight());
     //FB based close loop
     // armOutput += FB.fb(armTargetHeight, getArmHeight(), 0.09);
-    //armOutput += 0.2* Math.cos(Math.toRadians(armEncoder.getPosition()));
+    armOutput += 0.1* Math.cos(Math.toRadians(armEncoder.getPosition()));
     SmartDashboard.putNumber("armpid/outAfterFF", armOutput);
     // armOutput = climbSlew.calculate(armOutput);
     armOutput = MathUtil.clamp(armOutput, -0.05, 1.0);
