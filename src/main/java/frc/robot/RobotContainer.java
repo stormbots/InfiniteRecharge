@@ -125,7 +125,10 @@ public class RobotContainer {
     /* Driver Buttons */
     shiftButton.whenPressed(new InstantCommand(()->chassis.shift(Gear.HIGH)));
     shiftButton.whenReleased(new InstantCommand(()->chassis.shift(Gear.LOW)));
-    visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
+    // visionAimToTarget.whileHeld(new ChassisVisionTargeting(vision, navX, chassis));
+    visionAimToTarget.whileHeld( new ChassisVisionTargeting(
+      ()->-driver.getRawAxis(1)*Math.abs(driver.getRawAxis(1))*0.5 ,
+      vision, navX, chassis));
     visionAimToTargetFancy.whileHeld(new ChassisVisionTargetingFancy(vision, navX, chassis));
     ;
     //Zach wanted to have 75% output on forward
@@ -241,12 +244,22 @@ public class RobotContainer {
 
   public void configAutoSelector(){
     autoChooser.setDefaultOption("Basic", fireCenteredAndDriveForward);
+
     autoChooser.setDefaultOption("FarTrench", fullFarTrenchRunAuto);
-    autoChooser.addOption("NearTrench", fullTrenchRunAuto);
+    autoChooser.setDefaultOption("VisionFarTrench", fullFarTrenchRunAutoVision);
+
+    autoChooser.addOption("NearTrench", fullNearTrenchRunAuto);
+    autoChooser.addOption("VisionNearTrench", fullNearTrenchRunAutoVision);
+
     autoChooser.setDefaultOption("Rondezvous", fullRondeAuto);
+    autoChooser.setDefaultOption("VisionRondezvous", fullRondeAutoVision);
+
     autoChooser.addOption("Port", fullPortAuto);
+    autoChooser.addOption("VisionPort", fullPortAutoVision);
+
     SmartDashboard.putData("autos/position", autoChooser);
     
+
     limelightInAuto.setDefaultOption("No", false);
     limelightInAuto.addOption("Yes", true);
     SmartDashboard.putData("autos/limelight", limelightInAuto);    
@@ -257,10 +270,20 @@ public class RobotContainer {
 
 
   Command fireCenteredAndDriveForward;
+
   Command fullFarTrenchRunAuto;
-  Command fullTrenchRunAuto;
+  Command fullFarTrenchRunAutoVision;
+
+  Command fullNearTrenchRunAuto;
+  Command fullNearTrenchRunAutoVision;
+
   Command fullRondeAuto;
+  Command fullRondeAutoVision;
+
   Command fullPortAuto;
+  Command fullPortAutoVision;
+
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -280,16 +303,17 @@ public class RobotContainer {
     // .andThen(new ChassisDriveToHeadingBasic(1.5, ()->0, 3,0.05, navX, chassis))
     // ;
 
- 
+    // Basic
     fireCenteredAndDriveForward = 
     new ChassisDriveToHeadingBasic(0, ()->0, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(110))//Estimated Guess of distance
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(1.2, ()->0, 3, 0.05, navX, chassis))
     ;
+
     
-    
-    fullPortAuto = autos.buildSpinupAndShoot(103)
+    // Port
+    fullPortAuto = autos.buildSpinupAndShoot(120) // 103
     .andThen(()->shooter.setRPM(0))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
     .andThen(new ChassisDriveToHeadingBasic(-2.35, ()->0, 3, 0.05, navX, chassis))
@@ -298,10 +322,22 @@ public class RobotContainer {
     // .andThen(autos.buildSpinupAndShoot())
     // .andThen(()->shooter.setRPM(0))
     ;
+    
+    // Port with Limelight Vision
+    fullPortAutoVision = autos.buildSpinupAndShoot(120) // 103
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
+    .andThen(new ChassisDriveToHeadingBasic(-2.35, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    // .andThen(new ChassisDriveToHeadingBasic(1.5, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
+    .andThen(autos.buildSpinupAndShoot(220))
+    .andThen(()->shooter.setRPM(0))
+    ;
 
 
-
-
+    // Ronde
     fullRondeAuto = new ChassisDriveToHeadingBasic(0, ()->20, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(120))
     .andThen(()->shooter.setRPM(0))
@@ -316,9 +352,27 @@ public class RobotContainer {
     // .andThen(()->shooter.setRPM(0))
     ;
 
+    // Ronde with Limelight vision
+    fullRondeAutoVision = new ChassisDriveToHeadingBasic(0, ()->20, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(120))
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-1.65, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->37, 3, 0.05, navX, chassis))
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
+    .andThen(new ChassisDriveToHeadingBasic(-1.2, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    // .andThen(new ChassisDriveToHeadingBasic(0, ()->-21, 3, 0.05, navX, chassis))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
+    .andThen(autos.buildSpinupAndShoot(220))
+    .andThen(()->shooter.setRPM(0))
+    ;
+
+
     //Far
     fullFarTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->70, 3, 0.05, navX, chassis)
-    .andThen(autos.buildSpinupAndShoot(145))//Estimated Guess of distance
+    .andThen(autos.buildSpinupAndShoot(130))//Estimated Guess of distance
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
@@ -330,9 +384,25 @@ public class RobotContainer {
     // .andThen(()->shooter.setRPM(0))
     ;
 
+    //Far with Limelight Vision
+    fullFarTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->70, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(130))//Estimated Guess of distance
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-3.3, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
+    .andThen(new ChassisDriveToHeadingBasic(2.3, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
+    // .andThen(new ChassisDriveToHeadingBasic(0, ()->56, 3, 0.05, navX, chassis))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
+    .andThen(autos.buildSpinupAndShoot(235))
+    .andThen(()->shooter.setRPM(0))
+    ;
+
 
     //Near
-    fullTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-25.5, 3, 0.05, navX, chassis)
+    fullNearTrenchRunAuto = new ChassisDriveToHeadingBasic(0, ()->-25.5, 3, 0.05, navX, chassis)
     .andThen(autos.buildSpinupAndShoot(130))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
@@ -343,10 +413,27 @@ public class RobotContainer {
     .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
     // .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
     .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
-    // .andThen(autos.buildSpinupAndShoot())
+    // .andThen(autos.buildSpinupAndShoot(220))
     // .andThen(()->shooter.setRPM(0))
     ;
-    
+
+    //Near with Limelight vision
+    fullNearTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->-25.5, 3, 0.05, navX, chassis)
+    .andThen(autos.buildSpinupAndShoot(130))
+    .andThen(()->shooter.setRPM(0))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
+    .andThen(new IntakeEngage(intake).withTimeout(0.02))
+    .andThen(new ChassisDriveToHeadingBasic(-4.67, ()->0, 3, 0.05, navX, chassis)) //.alongWith(new IntakeEngage(intake))
+    .andThen(new IntakeDisengage(intake).withTimeout(0.02))
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
+    .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
+    // .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
+    .andThen(autos.buildSpinupAndShoot(220))
+    .andThen(()->shooter.setRPM(0))
+    ;
+
+
   }
 
 

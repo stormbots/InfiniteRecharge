@@ -7,11 +7,10 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Chassis;
@@ -25,6 +24,7 @@ public class ChassisVisionTargeting extends CommandBase {
   Chassis chassis;
   Vision vision; 
   private AHRS gyro;
+  private DoubleSupplier forward;
 
   public ChassisVisionTargeting(Vision vision, AHRS navX, Chassis chassis) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -32,6 +32,16 @@ public class ChassisVisionTargeting extends CommandBase {
     this.vision = vision;
     this.gyro = navX;
     this.chassis = chassis;
+    this.forward = ()->0;
+  }
+
+  public ChassisVisionTargeting(DoubleSupplier forward, Vision vision, AHRS navX, Chassis chassis) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(chassis);
+    this.vision = vision;
+    this.gyro = navX;
+    this.chassis = chassis;
+    this.forward = forward;
   }
 
   // Called when the command is initially scheduled.
@@ -65,7 +75,7 @@ public class ChassisVisionTargeting extends CommandBase {
     double outputTurn = vision.pidTurn.getOutput(gyro.getAngle(), vision.getTargetHeading());
 
     //Add a static feed-forward which makes things much more robust
-    chassis.drive.arcadeDrive(0, outputTurn,false);
+    chassis.drive.arcadeDrive(forward.getAsDouble(), outputTurn, false);
 
     //TODO Chassis inversion thing! Arcade drive backwards! 
     //keep an eye out for when it's fixed or not working - may need a "-"
