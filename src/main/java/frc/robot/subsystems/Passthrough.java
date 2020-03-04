@@ -147,6 +147,8 @@ public class Passthrough extends SubsystemBase {
     }
 
     switch(passthroughState){
+      // Attempt to avoid jamming by actually using the shootSensor
+      // if(shootSensorReading == BLOCKED) numberOfBalls = 4;
       case IDLE: 
         if(readySensorLastReading != readySensorReading && DriverStation.getInstance().isEnabled()){
           loadBall();

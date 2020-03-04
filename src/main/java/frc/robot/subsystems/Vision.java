@@ -165,4 +165,11 @@ public class Vision extends SubsystemBase {
   public double getDistanceToRPMEmpirical(double distance){
     return Constants.distanceToRPM.getOutputAt(distance);
   }
+
+  public boolean isOnTarget(double degrees) {
+    if(isTargetValid() && Math.abs(getTargetOffset()) <= degrees) {
+      return true;
+    }
+    return false;
+  }
 }

@@ -153,6 +153,12 @@ public class RobotContainer {
       if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
       else { return Constants.distanceToRPM.getOutputAt(20*12);}
     }, shooter));
+    shooterSpinCalculatedSpeed.whenReleased( 
+      new ShooterSetRPM(()->{
+        if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
+        else { return Constants.distanceToRPM.getOutputAt(20*12);}
+      }, shooter).withTimeout(1.5)
+    );
     // shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
     shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
 
@@ -425,7 +431,11 @@ public class RobotContainer {
     .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
     .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
     // .andThen(new ChassisDriveToHeadingBasic(0, ()->-27, 3, 0.05, navX, chassis))
-    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis).withTimeout(2))
+    .andThen(new ChassisVisionTargetingFancy(vision, navX, chassis)
+      .withInterrupt(()->vision.isOnTarget(5))
+      .withTimeout(2)
+      .alongWith(new ShooterSetRPM(()->Constants.distanceToRPM.getOutputAt(220),false,shooter))
+    )
     .andThen(autos.buildSpinupAndShoot(220))
     .andThen(()->shooter.setRPM(0))
     ;

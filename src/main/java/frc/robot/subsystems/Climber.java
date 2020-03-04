@@ -97,7 +97,7 @@ public class Climber extends SubsystemBase {
       spoolEncoder.setPosition(0.0);
       hookEncoder.setPosition(0.0);
 
-      spoolPID = new MiniPID(1/12.0, 0, 0).setSetpointRange(12);
+      spoolPID = new MiniPID(1/9.0, 0, 0).setSetpointRange(12);
       climbPID = new MiniPID(1/12.0, 0.05/50.0, 0).setMaxIOutput(0.2);//.setSetpointRange(36);//May need higher P or I
       hookPID = new MiniPID(0.2/40.0, 0, 0);
 
@@ -191,7 +191,10 @@ public class Climber extends SubsystemBase {
     hookEncoder.setPosition(0);
   }
 
-  SlewRateLimiter targetSlew = new SlewRateLimiter(3);//Suspect 5 will be a better value - 8 is too much!
+  // SlewRateLimiter targetSlew = new SlewRateLimiter(3); //Works, no sketchy spots. Verified after practice session
+  SlewRateLimiter targetSlew = new SlewRateLimiter(5); //Works, tiny one sketchy spot, but should be ok
+  // !!!!! SlewRateLimiter targetSlew = new SlewRateLimiter(8);//DON'T USE TOO FAST PROBABLY
+  
   /*********** Periodic Stuff ********* */
   @Override
   public void periodic() {

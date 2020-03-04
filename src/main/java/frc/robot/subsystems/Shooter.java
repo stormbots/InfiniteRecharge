@@ -84,6 +84,7 @@ public class Shooter extends SubsystemBase {
     // sparkMaxPID.setOutputRange(0, 1, 0);
 
     shooterMotor.setSmartCurrentLimit(45);
+    // shooterMotor.setSmartCurrentLimit(80);
     
 
 
@@ -157,7 +158,7 @@ public class Shooter extends SubsystemBase {
     // sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0);
 
     sparkMaxPID.setReference(rpmslew.calculate(targetRPM), ControlType.kVelocity, 0);
-    // shooterMotor.set(.5);
+    // shooterMotor.set(-1);
 
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
