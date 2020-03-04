@@ -196,7 +196,7 @@ public class Passthrough extends SubsystemBase {
     }
     //run feeder
     if(passthroughState==PassthroughState.SHOOTING){
-      feederMotor.set(1);
+      feederMotor.set(0.5);
     }else if(passthroughState==PassthroughState.EJECTING){
       feederMotor.set(-0.25);
     }else{

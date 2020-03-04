@@ -69,11 +69,11 @@ public class Shooter extends SubsystemBase {
     //gross test values for compression shooting
     // sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8, 0); //runs at 10k rpm (over max)
     //sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2); //tested pre comp
-    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2 * 0.75 );
+    sparkMaxPID.setP(0.8*0.8*(1/5700.0*2)*1.2);
     sparkMaxPID.setD(0.8*(1/5700.0*7) * 0.390243902439 /10.0);
 
     //weird comp retuning
-    sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8 *.5,0); //Correct for 7.5k rpm
+    sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8,0); //Correct for 7.5k rpm
 
     //temp
     // sparkMaxPID.setP(0);

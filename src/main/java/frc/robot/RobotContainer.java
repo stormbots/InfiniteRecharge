@@ -139,24 +139,21 @@ public class RobotContainer {
     intakeButton.whenReleased(new IntakeDisengage(intake).withTimeout(0.1));
 
     shooterSpinDefaultSpeed.whenPressed(()->passthrough.prepareForShooting());
-    // shooterSpinDefaultSpeed.whileHeld( 
-      // new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), false, shooter) 
-      // );
-      shooterSpinDefaultSpeed.whenPressed( 
-        new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), false, shooter) 
-      );
-      shooterSpinDefaultSpeed.whenReleased( 
-        new ShooterSetRPM( ()->0, shooter).withTimeout(1.5)
-        );
-      // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 1000), shooter));
+    shooterSpinDefaultSpeed.whenPressed( 
+      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), false, shooter) 
+    );
+    shooterSpinDefaultSpeed.whenReleased( 
+      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(20*12), shooter).withTimeout(1.5)
+    );
+    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 4000), shooter));
     shooterSpinDefaultSpeed.whenReleased(()->passthrough.reset());
 
     shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
-    //shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
-      //if( vision.isTargetValid() ){ return vision.getRPMForDistance(vision.getDistance()); } 
-      //else { return 1000;}
-    //}, shooter));
-    shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
+    shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
+      if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
+      else { return Constants.distanceToRPM.getOutputAt(20*12);}
+    }, shooter));
+    // shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
     shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
 
     
