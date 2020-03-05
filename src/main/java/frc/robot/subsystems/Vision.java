@@ -74,6 +74,8 @@ public class Vision extends SubsystemBase {
 
     SmartDashboard.putNumber("vision/xOffset", tx.getDouble(0.0));
 
+    SmartDashboard.putNumber("limelight/getDistance", getDistance());
+
     // SmartDashboard.putNumber("vision/rpm(13)", getRPMForDistance(12*13));
     // SmartDashboard.putNumber("vision/rpm(15)", getRPMForDistance(12*15));
     // SmartDashboard.putNumber("vision/rpm(17)", getRPMForDistance(12*17));
@@ -131,6 +133,11 @@ public class Vision extends SubsystemBase {
 
   /** Returns distance, in Inches */
   public double getDistance(){
+    if(table.getEntry("pipeline").getDouble(0)==2){
+      //return distances for fancy 
+    }
+
+    //normal stuff
     double y = ty.getDouble(20.0 * 12);
     double distance = (VISION_TARGET_HEIGHT - CAMERA_MOUNT_HEIGHT) / Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE + y));
     distance += 5;//5 is a MAGIC! just our weird error, accept it.

@@ -53,9 +53,7 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
     this.distanceTolerance = distanceTolerance;
 
 
-    speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);
-
-    
+    speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);    
   }
 
   // Called when the command is initially scheduled.
@@ -75,6 +73,7 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
     initialBearing = gyro.getAngle();
     chassis.getPID().setSetpoint(initialBearing + targetBearing);
 
+    speedslew = new SlewRateLimiter(chassis.ACCEL_DISTANCE, 0);
 
   }
 
@@ -97,6 +96,10 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
 
     double forwardSpeed = FB.fb(targetDistance, distance, 0.5); // TABI 0.4 || PRACTICE 0.4
 
+    SmartDashboard.putNumber("autodrive/travelled",distance);
+    SmartDashboard.putNumber("autodrive/target",targetDistance);
+    SmartDashboard.putNumber("autodrive/speed",forwardSpeed);
+    SmartDashboard.putNumber("autodrive/accel_slew",chassis.ACCEL_DISTANCE);
 
     // if(Math.abs(targetBearing - currentAngle) > 20) {
     //   forwardSpeed = 0;
@@ -113,7 +116,6 @@ public class ChassisDriveToHeadingBasic extends CommandBase {
         turn,
         false
       );
-
 
   }
 
