@@ -141,6 +141,7 @@ public class Vision extends SubsystemBase {
     double y = ty.getDouble(20.0 * 12);
     double distance = (VISION_TARGET_HEIGHT - CAMERA_MOUNT_HEIGHT) / Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE + y));
     distance += 5;//5 is a MAGIC! just our weird error, accept it.
+    //distance -= 13; //sage debug (Doesn't work?)
     return distance;
   }
 

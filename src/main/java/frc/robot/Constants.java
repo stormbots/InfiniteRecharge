@@ -29,8 +29,8 @@ public class Constants {
     /** Initial compass bearing of the robot on boot. Potentially useful. Set in  */
     public static double INITIAL_COMPASS_HEADING = 0;
 
-
-    public static double VISION_TARGET_HEIGHT = 92;
+    //Measured at Practice Field - 99 is correct
+    public static double VISION_TARGET_HEIGHT = 99;//92;
     // public static double VISION_DESK_CLERK_TARGET_HEIGHT = 46.5;
 
     /** Height of the camera, in inches */
@@ -38,7 +38,7 @@ public class Constants {
 
     /**Mount tilt back, in degrees*/
     //what? public static double CAMERA_MOUNT_ANGLE = 27.69; //13.64 prev
-    public static double CAMERA_MOUNT_ANGLE = 27.69;
+    public static double CAMERA_MOUNT_ANGLE = 6.58; //(untested)
     
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;
@@ -60,8 +60,8 @@ public class Constants {
         /* COMPBOT */
         if(botName==BotName.COMP){
             distanceToRPM =  new PiecewiseLerp(  
-                new double[]{0,    10*12,  11*12,  12*12, 14*12, 16*12, 18*12, 20*12, 22*12}, 
-                new double[]{6000, 5400,   5450,   5475,  5475,  5475,  5475,  5475,  5525}
+                new double[]{0,    8.75*12, 10*12,  11*12,  12*12, 14*12, 16*12, 18*12, 20*12, 22*12}, 
+                new double[]{6000, 6225,    5400,   5450,   5475,  5475,  5475,  5475,  5475,  5525} //8.7512 (105) was 6050
                 //NOTE: End values are just to constrain the system, and are not viable shot values
              );         
         /* PRACTICEBOT */

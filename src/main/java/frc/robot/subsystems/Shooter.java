@@ -12,6 +12,7 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANPIDController.ArbFFUnits;
+import com.revrobotics.CANSparkMax.FaultID;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.stormbots.Clamp;
@@ -75,11 +76,12 @@ public class Shooter extends SubsystemBase {
     //weird comp retuning
     sparkMaxPID.setFF(1/(5700.0*1.2)*.8*.8*1.2*.8,0); //Correct for 7.5k rpm
 
+    sparkMaxPID.setOutputRange(0, 1);
     //temp
     // sparkMaxPID.setP(0);
     // sparkMaxPID.setD(0);
 
-    shooterMotor.setClosedLoopRampRate(0.5);
+    shooterMotor.setClosedLoopRampRate(0.1);
 
     // sparkMaxPID.setOutputRange(0, 1, 0);
 
@@ -88,7 +90,7 @@ public class Shooter extends SubsystemBase {
     
 
 
-    shooterMotor.setIdleMode(IdleMode.kBrake);
+    shooterMotor.setIdleMode(IdleMode.kCoast);
     shooterMotor.setOpenLoopRampRate(0.1);
 
 
@@ -104,7 +106,8 @@ public class Shooter extends SubsystemBase {
   public void reset() {
     // feedForwardPID.reset();
     // errorPID.reset();
-    shooterMotor.clearFaults();
+    // shooterMotor.clearFaults();
+    // We never use this???? 
   }
 
   public void setRPM(double rpm){
@@ -156,9 +159,13 @@ public class Shooter extends SubsystemBase {
     //runClosedLoop();
     //sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0, feedForward.calculate(targetRPM)/12.0, ArbFFUnits.kPercentOut);
     // sparkMaxPID.setReference(targetRPM, ControlType.kVelocity, 0);
-
-    sparkMaxPID.setReference(rpmslew.calculate(targetRPM), ControlType.kVelocity, 0);
-    // shooterMotor.set(-1);
+    if (targetRPM == 0) { //Dan's fix
+      shooterMotor.set(0);
+    }
+    else {
+      sparkMaxPID.setReference(rpmslew.calculate(targetRPM), ControlType.kVelocity, 0);
+    }
+    // shooterMotor.set(0.5);
 
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("shooter/RPM", encoder.getVelocity());
@@ -167,6 +174,18 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("shooter/appliedOutput", shooterMotor.getAppliedOutput());
     SmartDashboard.putNumber("shooter/outputCurrent", shooterMotor.getOutputCurrent());
     SmartDashboard.putNumber("shooter/targetRPM", targetRPM);
+
+    //Some debug values (all of them returned false always)
+    SmartDashboard.putNumber("shooter/BUSVoltage", shooterMotor.getBusVoltage());
+    SmartDashboard.putNumber("shooter/NeoHeat", shooterMotor.getMotorTemperature());
+
+    SmartDashboard.putBoolean("fault/brownout", shooterMotor.getFault(FaultID.kBrownout));
+    SmartDashboard.putBoolean("fault/motor", shooterMotor.getFault(FaultID.kMotorFault));
+    SmartDashboard.putBoolean("fault/over current", shooterMotor.getFault(FaultID.kOvercurrent));
+    SmartDashboard.putBoolean("fault/other", shooterMotor.getFault(FaultID.kOtherFault));
+    SmartDashboard.putBoolean("fault/sensor", shooterMotor.getFault(FaultID.kSensorFault));
+    SmartDashboard.putBoolean("fault/driver", shooterMotor.getFault(FaultID.kDRVFault));
+
     
   }
 }

@@ -147,21 +147,35 @@ public class RobotContainer {
     );
     // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 4000), shooter));
     shooterSpinDefaultSpeed.whenReleased(()->passthrough.reset());
-
+    // shooterSpinDefaultSpeed.whenReleased(()->shooter.reset());
+    
+    //Right now 3 is init line shoot and 2 is everywhere else
+    
+    // A working quick fix
     shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
-    shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
-      if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
-      else { return Constants.distanceToRPM.getOutputAt(20*12);}
-    }, shooter));
-    shooterSpinCalculatedSpeed.whenReleased( 
-      new ShooterSetRPM(()->{
-        if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
-        else { return Constants.distanceToRPM.getOutputAt(20*12);}
-      }, shooter).withTimeout(1.5)
+    shooterSpinCalculatedSpeed.whenPressed( 
+      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(8.75*12), false, shooter) 
     );
-    // shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
+    shooterSpinCalculatedSpeed.whenReleased( 
+      new ShooterSetRPM( ()->Constants.distanceToRPM.getOutputAt(8.75*12), shooter).withTimeout(1.5)
+    );
+    // shooterSpinDefaultSpeed.whileHeld(new ShooterSetRPM(()->SmartDashboard.getNumber("shooter/RMPDebugSet", 4000), shooter));
     shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
 
+    // vision.getDistance() is not functional, this does not work
+    // shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
+    // shooterSpinCalculatedSpeed.whileHeld(new ShooterSetRPM(()->{
+    //   if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
+    //   else { return Constants.distanceToRPM.getOutputAt(20*12);}
+    // }, shooter));
+    // shooterSpinCalculatedSpeed.whenReleased( 
+    //   new ShooterSetRPM(()->{
+    //     if( vision.isTargetValid() ){ return Constants.distanceToRPM.getOutputAt(vision.getDistance()); } 
+    //     else { return Constants.distanceToRPM.getOutputAt(20*12);}
+    //   }, shooter).withTimeout(1.5)
+    // );
+    // // shooterSpinCalculatedSpeed.whileHeld( new ShooterSetRPM( ()->7500, shooter) );
+    // shooterSpinCalculatedSpeed.whenReleased(()->passthrough.reset());
     
     // lowGoalShoot.whenPressed(()->passthrough.prepareForShooting());
     // lowGoalShoot.whileHeld(new ShooterSetRPM(()->3000, shooter));
@@ -309,7 +323,7 @@ public class RobotContainer {
     // Basic
     fireCenteredAndDriveForward = 
     new ChassisDriveToHeadingBasic(0, ()->0, 3, 0.05, navX, chassis)
-    .andThen(autos.buildSpinupAndShoot(110))//Estimated Guess of distance
+    .andThen(autos.buildSpinupAndShoot(105))//Estimated Guess of distance
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(1.2, ()->0, 3, 0.05, navX, chassis))
     ;
@@ -332,7 +346,7 @@ public class RobotContainer {
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
-    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
+    .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision))
     .andThen(new InstantCommand(()->chassis.ACCEL_DISTANCE = 7))
     .andThen(new ChassisDriveToHeadingBasic(-2.35+0.5, ()->0, 3, 0.05, navX, chassis))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->25, 3, 0.05, navX, chassis))
@@ -433,7 +447,7 @@ public class RobotContainer {
     ;
 
     //Near with Limelight vision
-    fullNearTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->-25.5, 3, 0.05, navX, chassis)
+    fullNearTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->-26.5, 3, 0.05, navX, chassis) //-25.5 was slightly off
     .andThen(autos.buildSpinupAndShoot(130))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
