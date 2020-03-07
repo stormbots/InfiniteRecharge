@@ -30,7 +30,7 @@ public class Constants {
     public static double INITIAL_COMPASS_HEADING = 0;
 
     //Measured at Practice Field - 99 is correct
-    public static double VISION_TARGET_HEIGHT = 99;//92;
+    public static double VISION_TARGET_HEIGHT = 89.75;//92;
     // public static double VISION_DESK_CLERK_TARGET_HEIGHT = 46.5;
 
     /** Height of the camera, in inches */
@@ -38,7 +38,7 @@ public class Constants {
 
     /**Mount tilt back, in degrees*/
     //what? public static double CAMERA_MOUNT_ANGLE = 27.69; //13.64 prev
-    public static double CAMERA_MOUNT_ANGLE = 6.58; //(untested)
+    public static double CAMERA_MOUNT_ANGLE = 6.58; //(untested) --> TODO: re-solve and practice field
     
     /** Diameter of the shooter wheel, in inches*/
     public static double SHOOTER_WHEEL_DIAMETER=4;

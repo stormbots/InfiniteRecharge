@@ -216,6 +216,13 @@ public class Chassis extends SubsystemBase {
         rightB.setInverted(true);
         left.getEncoder().setPositionConversionFactor(5.423 / 173.04);
         right.getEncoder().setPositionConversionFactor(5.423 / 173.04);
+        
+        left.setOpenLoopRampRate(0.15);
+        leftA.setOpenLoopRampRate(0.15);
+        leftB.setOpenLoopRampRate(0.15);
+        right.setOpenLoopRampRate(0.15);
+        rightA.setOpenLoopRampRate(0.15);
+        rightB.setOpenLoopRampRate(0.15);
 
         turningPID = new MiniPID(0.2/30, 0, 0.0) // need to actually find these values for the actual robot
         .setI(0.05/200.0)

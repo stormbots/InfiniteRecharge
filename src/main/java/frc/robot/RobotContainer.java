@@ -150,7 +150,7 @@ public class RobotContainer {
     // shooterSpinDefaultSpeed.whenReleased(()->shooter.reset());
     
     //Right now 3 is init line shoot and 2 is everywhere else
-    
+
     // A working quick fix
     shooterSpinCalculatedSpeed.whenPressed(()->passthrough.prepareForShooting());
     shooterSpinCalculatedSpeed.whenPressed( 
@@ -447,7 +447,7 @@ public class RobotContainer {
     ;
 
     //Near with Limelight vision
-    fullNearTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->-26.5, 3, 0.05, navX, chassis) //-25.5 was slightly off
+    fullNearTrenchRunAutoVision = new ChassisDriveToHeadingBasic(0, ()->-27.25, 3, 0.05, navX, chassis)//so was -26.5 //-25.5 was slightly off
     .andThen(autos.buildSpinupAndShoot(130))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
@@ -461,7 +461,7 @@ public class RobotContainer {
     // .andThen(new InstantCommand(()->vision.targetPipeline(), vision) )
     .andThen(new InstantCommand(()->shooter.setRPM(4000)))
     .andThen(new ChassisDriveToHeadingBasic(3.5, ()->0, 3, 0.05, navX, chassis)) //.alongWith(()->intake.disengage())
-    .andThen(new ChassisDriveToHeadingBasic(0, ()->-24+3+2, 3, 0.05, navX, chassis))
+    .andThen(new ChassisDriveToHeadingBasic(0, ()->-24+3+2 -2, 3, 0.05, navX, chassis))//this works!
     // .andThen(new ChassisVisionTargeting(vision, navX, chassis)
       // .withInterrupt(()->vision.isOnTarget(2))
       // .withTimeout(1)

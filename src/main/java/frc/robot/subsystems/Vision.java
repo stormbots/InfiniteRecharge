@@ -16,6 +16,7 @@ import static frc.robot.Constants.VISION_TARGET_HEIGHT;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.stormbots.closedloop.MiniPID;
+import com.stormbots.filter.SimpleMovingAverage;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -130,7 +131,7 @@ public class Vision extends SubsystemBase {
     //good target!
     return true;
   }
-
+  SimpleMovingAverage distanceFilter = new SimpleMovingAverage(10);
   /** Returns distance, in Inches */
   public double getDistance(){
     if(table.getEntry("pipeline").getDouble(0)==2){
@@ -140,8 +141,10 @@ public class Vision extends SubsystemBase {
     //normal stuff
     double y = ty.getDouble(20.0 * 12);
     double distance = (VISION_TARGET_HEIGHT - CAMERA_MOUNT_HEIGHT) / Math.tan(Math.toRadians(CAMERA_MOUNT_ANGLE + y));
-    distance += 5;//5 is a MAGIC! just our weird error, accept it.
+    //distance += 5;//5 is a MAGIC! just our weird error, accept it.
     //distance -= 13; //sage debug (Doesn't work?)
+    distanceFilter.put(distance);
+    distance = distanceFilter.get(); // STILL UNTESTED! :(
     return distance;
   }
 
