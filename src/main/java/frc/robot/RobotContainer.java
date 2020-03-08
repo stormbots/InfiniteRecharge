@@ -377,14 +377,14 @@ public class RobotContainer {
     // .andThen(()->shooter.setRPM(0))
     ;
 
-    // Ronde with Limelight vision
-    fullRondeAutoVision = new ChassisDriveToHeadingBasic(0, ()->16, 3, 0.05, navX, chassis)
+    // Ronde with Limelight vision - (untested)
+    fullRondeAutoVision = new ChassisDriveToHeadingBasic(0, ()->17.5, 3, 0.05, navX, chassis) //16
     .andThen(autos.buildSpinupAndShoot(120))
     .andThen(()->shooter.setRPM(0))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->-navX.getAngle(), 3, 0.05, navX, chassis))
     .andThen(new IntakeEngage(intake).withTimeout(0.02))
     .andThen(new InstantCommand(()->chassis.ACCEL_DISTANCE = 7))
-    .andThen(new ChassisDriveToHeadingBasic(-1.75-.2, ()->0, 3, 0.05, navX, chassis))
+    .andThen(new ChassisDriveToHeadingBasic(-1.75-.75, ()->0, 3, 0.05, navX, chassis))
     .andThen(new ChassisDriveToHeadingBasic(0, ()->37, 3, 0.05, navX, chassis))
     .andThen(new InstantCommand(()->vision.targetPipelineFancy(), vision) )
     .andThen(new InstantCommand(()->chassis.ACCEL_DISTANCE = 1))

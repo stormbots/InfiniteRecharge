@@ -192,7 +192,7 @@ public class Climber extends SubsystemBase {
   }
 
   // SlewRateLimiter targetSlew = new SlewRateLimiter(3); //Works, no sketchy spots. Verified after practice session
-  SlewRateLimiter targetSlew = new SlewRateLimiter(6); //Works, tiny one sketchy spot, but should be ok
+  SlewRateLimiter targetSlew = new SlewRateLimiter(6.25); //Works, tiny one sketchy spot, but should be ok
   // !!!!! SlewRateLimiter targetSlew = new SlewRateLimiter(8);//DON'T USE TOO FAST PROBABLY
   // Sped up climber from 5, might go up to 7?
 
@@ -213,7 +213,7 @@ public class Climber extends SubsystemBase {
     // setspoolheight()
     // climbheight(spool.getheight())
     double armTargetHeight = getSpoolHeight()-12;
-    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-8); // -7
+    armTargetHeight = MathUtil.clamp(targetHeight, CLIMBER_BASE_HEIGHT, getSpoolHeight()-8.5);// -8 // -7
     // armTargetHeight = targetHeight;
 
     // double armOutput = climbPID.getOutput(getArmHeight(), armTargetHeight);
