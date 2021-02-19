@@ -240,9 +240,9 @@ public class Climber extends SubsystemBase {
 
     if(enable){
       //TODO : Enable and test climber
-      spoolMotor.set(spoolOutput);
-      armMotor.set(armOutput);
-      hookMotor.set(hookOutput);
+      // spoolMotor.set(spoolOutput);
+      // armMotor.set(armOutput);
+      // hookMotor.set(hookOutput);
     }
     else{
       climbPID.reset();

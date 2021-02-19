@@ -293,6 +293,8 @@ public class Chassis extends SubsystemBase {
     SmartDashboard.putNumber("Chassis/average velocity", getAverageVelocity());
     SmartDashboard.putNumber("Chassis/velocityLeft", left.getEncoder().getVelocity());
     SmartDashboard.putNumber("Chassis/velocityRight", right.getEncoder().getVelocity());
+    SmartDashboard.putNumber("Chassis/positionLeft", left.getEncoder().getPosition());
+    SmartDashboard.putNumber("Chassis/positionRight", right.getEncoder().getPosition());
     SmartDashboard.putNumber("Chassis/inital compass heading", Constants.INITIAL_COMPASS_HEADING);
 
 

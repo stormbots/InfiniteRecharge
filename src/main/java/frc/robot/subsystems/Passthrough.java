@@ -119,44 +119,77 @@ public class Passthrough extends SubsystemBase {
     if(positionOfFirstBall > (encoder.getPosition() + PASSTHROUGHLENGTH)){
       positionOfFirstBall = positionOfFirstBall - BALLLENGTH;
       numberOfBalls -= numberOfBalls>0 ? 1 : 0;
+
+ 
+      //So, if the position of the ball is further than the length of the passthrough,
+      //then we subtract the length of one ball to the positionOfFirstBall which is the saved position of the front end of the first ball
+      //this process moves the passthrough by one ball length essentially pushing one ball out of the passthrough to the shooter
+      //also we subtract one ball from the internal ball count of the robot unless the internal ball count is 0 then it stays 0
     };
     
-    if(encoder.getVelocity() < 0){ //Balls moving toward shooter
+    if(encoder.getVelocity() < 0){ 
+
+      //This means the passthrough is moving toward the direction of the shooter
+
+      
       // if(shootSensorLastReading == NOTBLOCKED &&  shootSensorReading == BLOCKED ){
       //   double oldfirstball = positionOfFirstBall;
       //   positionOfFirstBall = encoder.getDistance() + PASSTHROUGHLENGTH;
       //   if(setpoint == oldfirstball) setpoint = positionOfFirstBall;
       // } 
+
+
       if(intakeSensorLastReading == BLOCKED && intakeSensorReading == NOTBLOCKED) {
         double oldlastball = positionOfLastBall;
         positionOfLastBall = encoder.getPosition();
         if(setpoint == oldlastball) setpoint = positionOfLastBall;
       }
-    }else{ // balls moving away from shooter
+        //IF
+        // the intake sensors reading was previously blocked (so object is covering the sensor) 
+        //and it is now not (object is not covering the sensor)
+
+        //THEN
+        //we account for the error of the physical system and set the positionOfLastBall to what the sensor says it is 
+        //not what the system thinks it is at. 
+
+    }else{ 
+      // This means the passthrough is moving towards the direction of the intake
+
       // if(shootSensorLastReading == BLOCKED && shootSensorReading == NOTBLOCKED) {
       //   double oldfirstball = positionOfFirstBall;
       //   positionOfFirstBall = encoder.getDistance() + PASSTHROUGHLENGTH;
       //   if(setpoint == oldfirstball) setpoint = positionOfFirstBall;
       // }
+
       if(intakeSensorLastReading == NOTBLOCKED && intakeSensorReading == BLOCKED) {
-        //don't need to go
+        //don't need to go   ?
         double oldlastball = positionOfLastBall;
         positionOfLastBall = encoder.getPosition();
         if(setpoint == oldlastball) setpoint = positionOfLastBall;
+
+        //IF
+        //the intake sensor reading was previsouly not blocked (so object is not covering the sensor)
+        //and it is now blocked (object is covering the sensor)
+
+        //THEN
+        //we account for the error the the physical system and set the positionOfLastBall to what the sensor says it is
+        //not what the systme thinks it is at. 
       }
     }
 
     switch(passthroughState){
       // Attempt to avoid jamming by actually using the shootSensor
-      // if(shootSensorReading == BLOCKED) numberOfBalls = 4;
-      case IDLE: 
+      // if(shootSensorReading == BLOCKED) numberOfBalls = 4; //this is the line sam (dont deelete i found it)
+      
+      case IDLE: //the idle state of the robot 
         if(readySensorLastReading != readySensorReading && DriverStation.getInstance().isEnabled()){
-          loadBall();
+          loadBall();      //TODO: I don't know why there is DriverStation.getInstance().isEnabled() is there, probably just ask Dan
         }
       break;
       case LOADING:
         if(isOnTarget(1)){
           passthroughState = PassthroughState.IDLE; 
+
         }
         if(intakeSensorLastReading == BLOCKED && intakeSensorReading == NOTBLOCKED) {
           positionOfLastBall = setpoint;
@@ -207,7 +240,7 @@ public class Passthrough extends SubsystemBase {
 
 
     // Save our edge states
-    shootSensorLastReading = shootSensorReading;
+    shootSensorLastReading = shootSensorReading;       
     intakeSensorLastReading = intakeSensorReading;
     readySensorLastReading = readySensorReading;
 
@@ -233,11 +266,12 @@ public class Passthrough extends SubsystemBase {
 
 
   public void loadBall() {
-    if(numberOfBalls >= 4) return;
-    if(passthroughState == PassthroughState.LOADING)return;
+    if(numberOfBalls >= 4) return;   //to prevent overloading balls 
+    if(passthroughState == PassthroughState.LOADING)return;  //to prevent runing passthroughstate.loading while running loading 
     passthroughState = PassthroughState.LOADING;
 
-    setpoint = encoder.getPosition() - BALLLENGTH;
+    setpoint = encoder.getPosition() - BALLLENGTH; 
+
     //moved to state machine.
     // positionOfLastBall = setpoint;
     // if(numberOfBalls == 0){
@@ -259,6 +293,10 @@ public class Passthrough extends SubsystemBase {
     if(passthroughState == PassthroughState.SHOOTING)return;
     passthroughState = PassthroughState.SHOOTING;
     setpoint = encoder.getPosition() - PASSTHROUGHLENGTH - 2*BALLLENGTH;
+  }
+
+  public void shootOne(){
+    // if
   }
 
   /** Dump all balls out the intake */
